@@ -13,26 +13,22 @@ Multi-tenant manufacturing ERP / MIS. Steel is the first industry template.
 ## Quick start
 
 ```bash
-# API
-cd backend
-cp .env.example .env   # set DATABASE_URL + DIRECT_URL
-npm install
-npx prisma generate
-npx prisma migrate deploy   # or: npm run db:migrate
-npm run dev
+# Terminal 1 — API
+npm run dev:backend
 
-# Web (second terminal)
-cd frontend
-cp .env.example .env.local
-npm install
-npm run dev
+# Terminal 2 — Web
+npm run dev:frontend
 ```
 
+Or from each folder: `backend` → `npm run dev` (:5001), `frontend` → `npm run dev` (:3000).
+
 - Health: http://localhost:5001/api/v1/health  
+- Ready: http://localhost:5001/api/v1/ready  
 - App: http://localhost:3000  
 
 ## Docs & plan
 
 - Build sequence: [`plan.md`](./plan.md)
 - Specs: [`documents/`](./documents/)
+- Section as-built: [`documents/sections/`](./documents/sections/) (Section 1 Foundation)
 - Deploy: [`documents/DEPLOY.md`](./documents/DEPLOY.md)

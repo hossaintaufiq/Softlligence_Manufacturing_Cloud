@@ -9,10 +9,12 @@ cd backend
 cp .env.example .env   # set DATABASE_URL + DIRECT_URL from Supabase
 npm install
 npx prisma generate
-npx prisma migrate dev --name foundation
+npx prisma migrate deploy
 npm run db:seed        # optional
 npm run dev            # http://localhost:5001
 ```
+
+Production start (Render): `npm run build` then `npm start` → `node dist/index.js`.
 
 ## Endpoints (Section 1)
 

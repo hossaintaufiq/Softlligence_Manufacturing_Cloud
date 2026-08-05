@@ -22,6 +22,9 @@ export async function fetchHealth(): Promise<HealthResponse> {
 
 export async function fetchReady(): Promise<ReadyResponse> {
   const res = await fetch('/api/v1/ready', { cache: 'no-store' });
-  // 503 is a valid "not ready" payload
-  return res.json();
+  const data = (await res.json()) as ReadyResponse;
+  if (!data?.status || !data?.checks?.database) {
+    throw new Error(`ready ${res.status}`);
+  }
+  return data;
 }

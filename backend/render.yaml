@@ -1,4 +1,5 @@
 # Softlligence Manufacturing Cloud — API (Render)
+# PORT is injected by Render — do not hardcode it.
 
 services:
   - type: web
@@ -11,8 +12,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5001
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
@@ -27,3 +26,9 @@ services:
         value: "true"
       - key: COOKIE_SAME_SITE
         value: none
+      - key: APP_NAME
+        value: Softlligence Manufacturing Cloud
+      - key: APP_SLUG
+        value: smc
+      - key: APP_VERSION
+        value: 0.1.0

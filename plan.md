@@ -69,6 +69,7 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 - Env templates, Prisma from Document 02 (P0: tenant, user_account, auth_session)
 - `GET /api/v1/health`, `GET /api/v1/ready`
 - Run locally: web `:3000`, api `:5001`
+- **As-built:** [`documents/sections/SECTION_01_Foundation.md`](./documents/sections/SECTION_01_Foundation.md)
 
 ### Section 2 — Identity & Auth
 - Password login, JWT + cookies, refresh, logout
@@ -144,7 +145,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 | Section | Status |
 |---------|--------|
-| 1 Foundation | Done — structure + health; configure Supabase for /ready green |
+| 1 Foundation | Done — local web :3000 + api :5001, Prisma P0, health/ready green |
 | 2 Auth | Not started |
 | 3 Tenancy | Not started |
 | 4 Organization | Not started |
@@ -171,6 +172,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 05 Playbook | How we code & ship |
 | **plan.md** | **This file — build order** |
 | DEPLOY.md | Vercel + Render steps |
+| sections/ | As-built records per section |
 
 ---
 

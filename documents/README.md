@@ -42,6 +42,17 @@ Architecture wins on conflict.
 
 ---
 
+## Implementation series (as-built)
+
+What was **actually shipped** per plan section (complements specs 01–05):
+
+| Section | File | Status |
+|---------|------|--------|
+| Series index | [`sections/README.md`](./sections/README.md) | Active |
+| 1 Foundation | [`sections/SECTION_01_Foundation.md`](./sections/SECTION_01_Foundation.md) | Done |
+
+---
+
 ## Clean design summary
 
 | Topic | Decision |

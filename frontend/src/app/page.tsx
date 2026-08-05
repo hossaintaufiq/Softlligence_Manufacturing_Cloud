@@ -2,11 +2,15 @@ import { StatusPanel } from '@/components/foundation/StatusPanel';
 
 export default function HomePage() {
   return (
-    <main className="shell">
-      <header className="hero">
-        <p className="eyebrow">Softlligence Technologies</p>
-        <h1>Softlligence Manufacturing Cloud</h1>
-        <p className="lede">
+    <main className="mx-auto max-w-shell px-6 pb-16 pt-20 sm:pt-24">
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          Softlligence Technologies
+        </p>
+        <h1 className="font-display text-[clamp(1.85rem,4vw,2.5rem)] font-semibold leading-tight tracking-tight text-ink">
+          Softlligence Manufacturing Cloud
+        </h1>
+        <p className="max-w-lg text-[0.95rem] leading-relaxed text-mute">
           Multi-tenant manufacturing platform foundation — Section 1 is live locally.
         </p>
       </header>
