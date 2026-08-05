@@ -8,6 +8,7 @@ import { customFieldsRouter, modulesRouter } from '../modules/modules/modules.ro
 import { inventoryRouter } from '../modules/inventory/inventory.routes.js';
 import { manufacturingRouter } from '../modules/manufacturing/manufacturing.routes.js';
 import { commercialRouter } from '../modules/commercial/commercial.routes.js';
+import { steelRouter } from '../modules/steel/steel.routes.js';
 
 export const apiRouter = Router();
 
@@ -21,3 +22,4 @@ apiRouter.use('/custom-fields', customFieldsRouter);
 apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/manufacturing', manufacturingRouter);
 apiRouter.use('/commercial', commercialRouter);
+apiRouter.use('/steel', steelRouter);

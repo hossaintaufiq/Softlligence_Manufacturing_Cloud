@@ -448,6 +448,56 @@ async function main() {
     },
   });
 
+  // ==========================================
+  // SECTION 10: Steel Manufacturing Vertical Seeding
+  // ==========================================
+  await prisma.steelScrapReceipt.create({
+    data: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      warehouseId: whRm.id,
+      partyId: suppParty.id,
+      gradeCategory: 'Heavy Melting Scrap (HMS 1/2)',
+      vehicleNo: 'TRK-9901',
+      receivedKg: 100000.0,
+      expenses: 450.0,
+      remarks: 'Seeded initial scrap yard receipt',
+    },
+  }).catch(() => {});
+
+  await prisma.steelHeatLog.upsert({
+    where: { tenantId_factoryId_heatNo: { tenantId: tenant.id, factoryId: factory.id, heatNo: 'HEAT-2026-001' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      factoryId: factory.id,
+      heatNo: 'HEAT-2026-001',
+      furnaceNo: 'Furnace-1',
+      scrapInputKg: 50000.0,
+      billetOutputKg: 46200.0,
+      billetSize: '150x150',
+      powerKwh: 31500.0,
+      shift: 'Shift-A',
+      remarks: 'Seeded initial furnace heat log',
+    },
+  });
+
+  await prisma.steelRollingLog.create({
+    data: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      factoryId: factory.id,
+      heatRef: 'HEAT-2026-001',
+      billetInputKg: 46200.0,
+      rodOutputKg: 44800.0,
+      rodSizeSpec: '12mm Deformed Rebar Grade 60',
+      burningLossKg: 1400.0,
+      shift: 'Shift-A',
+      remarks: 'Seeded initial rolling mill log',
+    },
+  }).catch(() => {});
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
@@ -457,6 +507,7 @@ async function main() {
     inventory: 'Warehouses (WH-RM, WH-FG), Items (RM-BILLET-150, FG-REBAR-12MM)',
     manufacturing: 'BOM (v1.0), Work Order (WO-2026-001 in_progress)',
     commercial: 'Parties (SUPP-STEEL-01, CUST-BUILD-01), PO-2026-001, GRN-2026-001, SO-2026-001, CHAL-2026-001',
+    steel: 'Scrap (100t HMS), Furnace Heat (HEAT-2026-001), Rolling Mill (12mm Rebar)',
   });
 
   await prisma.$disconnect();

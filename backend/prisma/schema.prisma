@@ -43,6 +43,9 @@ model Tenant {
   grns             Grn[]
   salesOrders      SalesOrder[]
   dispatches       Dispatch[]
+  steelScrapReceipts SteelScrapReceipt[]
+  steelHeatLogs    SteelHeatLog[]
+  steelRollingLogs SteelRollingLog[]
 
   @@map("tenant")
 }
@@ -113,6 +116,9 @@ model Company {
   grns      Grn[]
   salesOrders SalesOrder[]
   dispatches Dispatch[]
+  steelScrapReceipts SteelScrapReceipt[]
+  steelHeatLogs    SteelHeatLog[]
+  steelRollingLogs SteelRollingLog[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -135,6 +141,8 @@ model Factory {
   tenant     Tenant      @relation(fields: [tenantId], references: [id])
   company    Company     @relation(fields: [companyId], references: [id])
   warehouses Warehouse[]
+  steelHeatLogs SteelHeatLog[]
+  steelRollingLogs SteelRollingLog[]
 
   @@unique([tenantId, companyId, code])
   @@index([tenantId, companyId])
@@ -302,6 +310,7 @@ model Warehouse {
   adjustments   StockAdjustment[]
   grns          Grn[]
   dispatches    Dispatch[]
+  steelScrapReceipts SteelScrapReceipt[]
 
   @@unique([tenantId, companyId, code])
   @@index([tenantId, companyId])
@@ -726,6 +735,7 @@ model Party {
   grns           Grn[]
   salesOrders    SalesOrder[]
   dispatches     Dispatch[]
+  steelScrapReceipts SteelScrapReceipt[]
 
   @@unique([tenantId, code])
   @@index([tenantId, status])
@@ -907,6 +917,84 @@ model DispatchLine {
   uom      UnitOfMeasure @relation(fields: [uomId], references: [id])
 
   @@map("dispatch_line")
+}
+
+// ==========================================
+// SECTION 10: STEEL MANUFACTURING VERTICAL (Document 01 §16.5 & Doc 02 §33)
+// ==========================================
+
+/// FRM-STL-01 Scrap Receiving Log
+model SteelScrapReceipt {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  companyId     String   @map("company_id")
+  warehouseId   String   @map("warehouse_id")
+  partyId       String   @map("party_id") // Supplier
+  gradeCategory String   @map("grade_category") @db.VarChar(64) // Heavy Melting Scrap, Shredded, Turning
+  vehicleNo     String?  @map("vehicle_no")
+  receivedKg    Float    @map("received_kg")
+  expenses      Float    @default(0.0)
+  remarks       String?
+  attrs         Json?
+  receivedAt    DateTime @default(now()) @map("received_at")
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  company   Company   @relation(fields: [companyId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  party     Party     @relation(fields: [partyId], references: [id])
+
+  @@index([tenantId, warehouseId])
+  @@map("steel_scrap_receipt")
+}
+
+/// FRM-STL-02 Steel Heat Log (Furnace / Induction Melting)
+model SteelHeatLog {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  companyId     String   @map("company_id")
+  factoryId     String   @map("factory_id")
+  heatNo        String   @map("heat_no") @db.VarChar(64)
+  furnaceNo     String   @default("Furnace-1") @map("furnace_no") @db.VarChar(32)
+  scrapInputKg  Float    @map("scrap_input_kg")
+  billetOutputKg Float   @map("billet_output_kg")
+  billetSize    String   @default("150x150") @map("billet_size") @db.VarChar(32)
+  powerKwh      Float    @default(0.0) @map("power_kwh")
+  gasNm3        Float    @default(0.0) @map("gas_nm3")
+  runtimeMin    Int      @default(0) @map("runtime_min")
+  downtimeMin   Int      @default(0) @map("downtime_min")
+  shift         String   @default("Shift-A") @db.VarChar(16)
+  remarks       String?
+  loggedAt      DateTime @default(now()) @map("logged_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+  factory Factory @relation(fields: [factoryId], references: [id])
+
+  @@unique([tenantId, factoryId, heatNo])
+  @@map("steel_heat_log")
+}
+
+/// FRM-STL-04 Steel Rolling Mill Log (Billet to Rod / Rebar)
+model SteelRollingLog {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  companyId     String   @map("company_id")
+  factoryId     String   @map("factory_id")
+  heatRef       String?  @map("heat_ref") @db.VarChar(64)
+  billetInputKg Float    @map("billet_input_kg")
+  rodOutputKg   Float    @map("rod_output_kg")
+  rodSizeSpec   String   @default("12mm Grade 60") @map("rod_size_spec") @db.VarChar(64)
+  burningLossKg Float    @default(0.0) @map("burning_loss_kg")
+  downtimeMin   Int      @default(0) @map("downtime_min")
+  shift         String   @default("Shift-A") @db.VarChar(16)
+  remarks       String?
+  loggedAt      DateTime @default(now()) @map("logged_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+  factory Factory @relation(fields: [factoryId], references: [id])
+
+  @@map("steel_rolling_log")
 }
 
 

@@ -136,6 +136,12 @@ export function SessionPanel() {
             Commercial Ops
           </Link>
           <Link
+            href="/steel"
+            className="inline-flex rounded-lg border border-rose-200 bg-rose-50/50 px-4 py-2 text-sm font-semibold text-rose-800 hover:bg-rose-100"
+          >
+            Steel Vertical
+          </Link>
+          <Link
             href="/org"
             className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
           >
