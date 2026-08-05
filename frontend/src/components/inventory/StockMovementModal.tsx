@@ -8,7 +8,7 @@ import {
   postStockTransferApi,
   type Item,
   type Warehouse,
-} from '../../lib/api/inventory.js';
+} from '@/lib/api/inventory';
 
 interface StockMovementModalProps {
   mode: 'transfer' | 'adjustment';

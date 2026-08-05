@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchTenantModules, toggleTenantModuleApi, type TenantModuleItem } from '../../lib/api/modules.js';
+import { fetchTenantModules, toggleTenantModuleApi, type TenantModuleItem } from '@/lib/api/modules';
 
 export function ModuleCatalogPanel() {
   const [modules, setModules] = useState<TenantModuleItem[]>([]);

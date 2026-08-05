@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { SessionPanel } from '../../components/auth/SessionPanel.js';
-import { ItemCatalogPanel } from '../../components/inventory/ItemCatalogPanel.js';
-import { WarehousePanel } from '../../components/inventory/WarehousePanel.js';
-import { StockBalancePanel } from '../../components/inventory/StockBalancePanel.js';
-import { StockLedgerPanel } from '../../components/inventory/StockLedgerPanel.js';
-import { StockMovementModal } from '../../components/inventory/StockMovementModal.js';
+import { SessionPanel } from '@/components/auth/SessionPanel';
+import { ItemCatalogPanel } from '@/components/inventory/ItemCatalogPanel';
+import { WarehousePanel } from '@/components/inventory/WarehousePanel';
+import { StockBalancePanel } from '@/components/inventory/StockBalancePanel';
+import { StockLedgerPanel } from '@/components/inventory/StockLedgerPanel';
+import { StockMovementModal } from '@/components/inventory/StockMovementModal';
 
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<'catalog' | 'warehouses' | 'balances' | 'ledger'>('balances');

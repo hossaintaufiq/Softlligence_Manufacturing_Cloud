@@ -8,8 +8,8 @@ import {
   fetchWarehouses,
   type UnitOfMeasure,
   type Warehouse,
-} from '../../lib/api/inventory.js';
-import { listCompanies, type Company } from '../../lib/api/org.js';
+} from '@/lib/api/inventory';
+import { listCompanies, type Company } from '@/lib/api/org';
 
 export function WarehousePanel() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);

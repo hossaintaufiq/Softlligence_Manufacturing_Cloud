@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createItemApi, fetchItems, fetchUoms, type Item, type UnitOfMeasure } from '../../lib/api/inventory.js';
+import { createItemApi, fetchItems, fetchUoms, type Item, type UnitOfMeasure } from '@/lib/api/inventory';
 
 export function ItemCatalogPanel() {
   const [items, setItems] = useState<Item[]>([]);

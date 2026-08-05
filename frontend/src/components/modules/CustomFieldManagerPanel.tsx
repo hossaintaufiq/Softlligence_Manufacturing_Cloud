@@ -6,7 +6,7 @@ import {
   deleteCustomFieldApi,
   fetchCustomFields,
   type CustomFieldItem,
-} from '../../lib/api/customFields.js';
+} from '@/lib/api/customFields';
 
 export function CustomFieldManagerPanel() {
   const [fields, setFields] = useState<CustomFieldItem[]>([]);

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { SessionPanel } from '../../components/auth/SessionPanel.js';
-import { ModuleCatalogPanel } from '../../components/modules/ModuleCatalogPanel.js';
-import { CustomFieldManagerPanel } from '../../components/modules/CustomFieldManagerPanel.js';
+import { SessionPanel } from '@/components/auth/SessionPanel';
+import { ModuleCatalogPanel } from '@/components/modules/ModuleCatalogPanel';
+import { CustomFieldManagerPanel } from '@/components/modules/CustomFieldManagerPanel';
 
 export default function ModulesPage() {
   const [activeTab, setActiveTab] = useState<'entitlements' | 'customFields'>('entitlements');

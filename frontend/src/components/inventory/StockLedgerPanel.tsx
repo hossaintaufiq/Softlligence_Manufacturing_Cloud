@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchStockLedger, fetchWarehouses, type StockLedgerEntry, type Warehouse } from '../../lib/api/inventory.js';
+import { fetchStockLedger, fetchWarehouses, type StockLedgerEntry, type Warehouse } from '@/lib/api/inventory';
 
 export function StockLedgerPanel() {
   const [ledger, setLedger] = useState<StockLedgerEntry[]>([]);

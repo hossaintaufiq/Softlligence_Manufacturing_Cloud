@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchStockBalances, fetchWarehouses, type StockBalance, type Warehouse } from '../../lib/api/inventory.js';
+import { fetchStockBalances, fetchWarehouses, type StockBalance, type Warehouse } from '@/lib/api/inventory';
 
 export function StockBalancePanel() {
   const [balances, setBalances] = useState<StockBalance[]>([]);
