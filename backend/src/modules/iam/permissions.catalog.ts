@@ -14,6 +14,13 @@ export const PERMISSIONS = [
   { code: 'modules.read', moduleCode: 'modules', description: 'View tenant enabled modules and entitlements' },
   { code: 'modules.manage', moduleCode: 'modules', description: 'Enable or disable modules for tenant' },
   { code: 'custom_fields.manage', moduleCode: 'modules', description: 'Manage tenant-scoped custom field definitions' },
+  { code: 'inventory.items.read', moduleCode: 'inventory', description: 'View item master catalog and UOMs' },
+  { code: 'inventory.items.manage', moduleCode: 'inventory', description: 'Create and edit items and UOMs' },
+  { code: 'inventory.warehouses.read', moduleCode: 'inventory', description: 'View warehouses' },
+  { code: 'inventory.warehouses.manage', moduleCode: 'inventory', description: 'Create and edit warehouses' },
+  { code: 'inventory.stock.read', moduleCode: 'inventory', description: 'View stock balances and ledger audit trail' },
+  { code: 'inventory.stock.transfer', moduleCode: 'inventory', description: 'Execute stock transfers between warehouses' },
+  { code: 'inventory.stock.adjust', moduleCode: 'inventory', description: 'Execute stock adjustments and counts' },
 ] as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[number]['code'];
@@ -23,4 +30,7 @@ export const TENANT_ADMIN_PERMISSIONS: PermissionCode[] = PERMISSIONS.map((p) =>
 export const TENANT_VIEWER_PERMISSIONS: PermissionCode[] = [
   'iam.user.read',
   'iam.role.read',
+  'inventory.items.read',
+  'inventory.warehouses.read',
+  'inventory.stock.read',
 ];

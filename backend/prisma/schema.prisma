@@ -27,6 +27,14 @@ model Tenant {
   userScopes    UserScope[]
   tenantModules TenantModule[]
   customFields  CustomFieldDefinition[]
+  warehouses       Warehouse[]
+  uoms             UnitOfMeasure[]
+  items            Item[]
+  lots             Lot[]
+  stockBalances    StockBalance[]
+  stockLedgers     StockLedgerEntry[]
+  stockTransfers   StockTransfer[]
+  stockAdjustments StockAdjustment[]
 
   @@map("tenant")
 }
@@ -88,8 +96,10 @@ model Company {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  tenant    Tenant      @relation(fields: [tenantId], references: [id])
   factories Factory[]
+  warehouses Warehouse[]
+  items     Item[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -109,8 +119,9 @@ model Factory {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
-  company Company @relation(fields: [companyId], references: [id])
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  company    Company     @relation(fields: [companyId], references: [id])
+  warehouses Warehouse[]
 
   @@unique([tenantId, companyId, code])
   @@index([tenantId, companyId])
@@ -248,4 +259,243 @@ model CustomFieldDefinition {
   @@index([tenantId, entityType])
   @@map("custom_field_definition")
 }
+
+// -----------------------------------------------------------------------------
+// Section 7 — Inventory Core Models
+// -----------------------------------------------------------------------------
+
+/// Warehouse storage location (Document 02 §23)
+model Warehouse {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  companyId   String    @map("company_id")
+  factoryId   String?   @map("factory_id")
+  code        String    @db.VarChar(64)
+  name        String
+  type        String    @default("RM") @db.VarChar(32) // RM, WIP, FG, SPARE, SCRAP
+  status      String    @default("active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant        Tenant             @relation(fields: [tenantId], references: [id])
+  company       Company            @relation(fields: [companyId], references: [id])
+  factory       Factory?           @relation(fields: [factoryId], references: [id])
+  stockBalances StockBalance[]
+  stockLedgers  StockLedgerEntry[]
+
+  fromTransfers StockTransfer[] @relation("FromWarehouse")
+  toTransfers   StockTransfer[] @relation("ToWarehouse")
+  adjustments   StockAdjustment[]
+
+  @@unique([tenantId, companyId, code])
+  @@index([tenantId, companyId])
+  @@map("warehouse")
+}
+
+/// Unit of Measure catalog (Document 02 §23.1)
+model UnitOfMeasure {
+  id        String    @id @default(uuid())
+  tenantId  String    @map("tenant_id")
+  code      String    @db.VarChar(32)
+  name      String
+  symbol    String?   @db.VarChar(16)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  items         Item[]
+  stockLedgers  StockLedgerEntry[]
+  transferLines StockTransferLine[]
+  adjLines      StockAdjustmentLine[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("uom")
+}
+
+/// Item Master Catalog (Document 02 §23.2)
+model Item {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  companyId       String?   @map("company_id")
+  code            String    @db.VarChar(64)
+  name            String
+  itemType        String    @default("RM") @map("item_type") @db.VarChar(32) // RM, WIP, FG, SPARE, CONSUMABLE
+  uomId           String    @map("uom_id")
+  trackingType    String    @default("none") @map("tracking_type") @db.VarChar(32) // none, lot, serial
+  valuationMethod String    @default("average") @map("valuation_method") @db.VarChar(32) // standard, average, fifo
+  status          String    @default("active")
+  attrsJson       Json?     @map("attrs_json")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  tenant   Tenant         @relation(fields: [tenantId], references: [id])
+  company  Company?       @relation(fields: [companyId], references: [id])
+  uom      UnitOfMeasure  @relation(fields: [uomId], references: [id])
+
+  lots          Lot[]
+  stockBalances StockBalance[]
+  stockLedgers  StockLedgerEntry[]
+  transferLines StockTransferLine[]
+  adjLines      StockAdjustmentLine[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, itemType, status])
+  @@map("item")
+}
+
+/// Lot / Batch Tracking (Document 02 §23.4)
+model Lot {
+  id               String    @id @default(uuid())
+  tenantId         String    @map("tenant_id")
+  itemId           String    @map("item_id")
+  lotCode          String    @map("lot_code") @db.VarChar(64)
+  manufacturedDate DateTime? @map("manufactured_date")
+  expiryDate       DateTime? @map("expiry_date")
+  attrsJson        Json?     @map("attrs_json")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  item   Item   @relation(fields: [itemId], references: [id])
+
+  stockBalances StockBalance[]
+  stockLedgers  StockLedgerEntry[]
+
+  @@unique([tenantId, itemId, lotCode])
+  @@index([tenantId, itemId])
+  @@map("lot")
+}
+
+/// Materialized Stock Balance (Document 02 §23.3)
+model StockBalance {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  warehouseId String   @map("warehouse_id")
+  itemId      String   @map("item_id")
+  lotId       String?  @map("lot_id")
+  qtyOnHand   Float    @default(0) @map("qty_on_hand")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  item      Item      @relation(fields: [itemId], references: [id])
+  lot       Lot?      @relation(fields: [lotId], references: [id])
+
+  @@unique([warehouseId, itemId])
+  @@index([tenantId, warehouseId])
+  @@map("stock_balance")
+}
+
+/// Append-Only Stock Ledger Entry (Document 02 §23.5)
+model StockLedgerEntry {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  companyId    String   @map("company_id")
+  factoryId    String?  @map("factory_id")
+  warehouseId  String   @map("warehouse_id")
+  itemId       String   @map("item_id")
+  lotId        String?  @map("lot_id")
+  qtyIn        Float    @default(0) @map("qty_in")
+  qtyOut       Float    @default(0) @map("qty_out")
+  uomId        String   @map("uom_id")
+  unitCost     Float?   @map("unit_cost")
+  movementType String   @map("movement_type") @db.VarChar(32) // GRN, ISSUE, OUTPUT, TRANSFER_IN, TRANSFER_OUT, ADJUST
+  refDocType   String?  @map("ref_doc_type") @db.VarChar(32)
+  refDocId     String?  @map("ref_doc_id")
+  refLineId    String?  @map("ref_line_id")
+  occurredAt   DateTime @default(now()) @map("occurred_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  createdBy    String?  @map("created_by")
+
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
+  warehouse Warehouse     @relation(fields: [warehouseId], references: [id])
+  item      Item          @relation(fields: [itemId], references: [id])
+  lot       Lot?          @relation(fields: [lotId], references: [id])
+  uom       UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@index([tenantId, warehouseId, itemId, createdAt])
+  @@map("stock_ledger_entry")
+}
+
+/// Stock Transfer Header (Document 02 §23.6)
+model StockTransfer {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  transferNumber  String    @map("transfer_number") @db.VarChar(64)
+  fromWarehouseId String    @map("from_warehouse_id")
+  toWarehouseId   String    @map("to_warehouse_id")
+  status          String    @default("draft") @db.VarChar(32) // draft, posted, cancelled
+  notes           String?
+  postedAt        DateTime? @map("posted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  tenant        Tenant              @relation(fields: [tenantId], references: [id])
+  fromWarehouse Warehouse           @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse           @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
+  lines         StockTransferLine[]
+
+  @@unique([tenantId, transferNumber])
+  @@index([tenantId])
+  @@map("stock_transfer")
+}
+
+/// Stock Transfer Line Items
+model StockTransferLine {
+  id         String @id @default(uuid())
+  transferId String @map("transfer_id")
+  itemId     String @map("item_id")
+  uomId      String @map("uom_id")
+  qty        Float
+
+  transfer StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  item     Item          @relation(fields: [itemId], references: [id])
+  uom      UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("stock_transfer_line")
+}
+
+/// Stock Adjustment Header (Document 02 §23.7)
+model StockAdjustment {
+  id               String    @id @default(uuid())
+  tenantId         String    @map("tenant_id")
+  adjustmentNumber String    @map("adjustment_number") @db.VarChar(64)
+  warehouseId      String    @map("warehouse_id")
+  reasonCode       String    @map("reason_code") @db.VarChar(64) // e.g. AUDIT_DISCREPANCY, DAMAGE, EXPIRATION
+  status           String    @default("draft") @db.VarChar(32) // draft, posted
+  notes            String?
+  postedAt         DateTime? @map("posted_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  tenant    Tenant                @relation(fields: [tenantId], references: [id])
+  warehouse Warehouse             @relation(fields: [warehouseId], references: [id])
+  lines     StockAdjustmentLine[]
+
+  @@unique([tenantId, adjustmentNumber])
+  @@index([tenantId])
+  @@map("stock_adjustment")
+}
+
+/// Stock Adjustment Line Items
+model StockAdjustmentLine {
+  id           String @id @default(uuid())
+  adjustmentId String @map("adjustment_id")
+  itemId       String @map("item_id")
+  uomId        String @map("uom_id")
+  qty          Float  // positive = add stock, negative = remove stock
+
+  adjustment StockAdjustment @relation(fields: [adjustmentId], references: [id], onDelete: Cascade)
+  item       Item            @relation(fields: [itemId], references: [id])
+  uom        UnitOfMeasure   @relation(fields: [uomId], references: [id])
+
+  @@map("stock_adjustment_line")
+}
+
 

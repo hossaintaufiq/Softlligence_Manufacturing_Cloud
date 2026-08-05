@@ -1,14 +1,17 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import process from 'node:process';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { ensureTenantIamDefaults } from '../src/modules/iam/iam.permissions.js';
 
-const prisma = new PrismaClient();
-
 /**
- * Sections 1–5 seed — platform admin, demo tenant, org, IAM defaults.
+ * Sections 1–7 seed — platform admin, demo tenant, org, IAM, modules, inventory.
  */
 async function main() {
+  const prisma = new PrismaClient();
+
   const demoPassword = process.env.SEED_DEMO_PASSWORD || 'password123';
   const platformPassword = process.env.SEED_PLATFORM_PASSWORD || 'platform123';
   const demoHash = await bcrypt.hash(demoPassword, 12);
@@ -98,7 +101,7 @@ async function main() {
     },
   });
 
-  await prisma.factory.upsert({
+  const factory = await prisma.factory.upsert({
     where: {
       tenantId_companyId_code: {
         tenantId: tenant.id,
@@ -141,21 +144,103 @@ async function main() {
     },
   });
 
+  // --- Inventory Core Seed (Section 7) ---
+  const uomMt = await prisma.unitOfMeasure.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'MT' } },
+    update: { name: 'Metric Ton', symbol: 'MT' },
+    create: { tenantId: tenant.id, code: 'MT', name: 'Metric Ton', symbol: 'MT' },
+  });
+
+  await prisma.unitOfMeasure.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'PCS' } },
+    update: { name: 'Pieces', symbol: 'pcs' },
+    create: { tenantId: tenant.id, code: 'PCS', name: 'Pieces', symbol: 'pcs' },
+  });
+
+  const whRm = await prisma.warehouse.upsert({
+    where: { tenantId_companyId_code: { tenantId: tenant.id, companyId: company.id, code: 'WH-RM' } },
+    update: { name: 'Raw Materials Storage Yard', type: 'RM' },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      factoryId: factory.id,
+      code: 'WH-RM',
+      name: 'Raw Materials Storage Yard',
+      type: 'RM',
+    },
+  });
+
+  await prisma.warehouse.upsert({
+    where: { tenantId_companyId_code: { tenantId: tenant.id, companyId: company.id, code: 'WH-FG' } },
+    update: { name: 'Finished Goods Warehouse', type: 'FG' },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      factoryId: factory.id,
+      code: 'WH-FG',
+      name: 'Finished Goods Warehouse',
+      type: 'FG',
+    },
+  });
+
+  const itemBillet = await prisma.item.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'RM-BILLET-150' } },
+    update: { name: 'Steel Billet 150x150mm (3SP/5SP)' },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      code: 'RM-BILLET-150',
+      name: 'Steel Billet 150x150mm (3SP/5SP)',
+      itemType: 'RM',
+      uomId: uomMt.id,
+      valuationMethod: 'average',
+    },
+  });
+
+  await prisma.item.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'FG-REBAR-12MM' } },
+    update: { name: 'Deformed Bar 12mm 500W (Grade 60)' },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      code: 'FG-REBAR-12MM',
+      name: 'Deformed Bar 12mm 500W (Grade 60)',
+      itemType: 'FG',
+      uomId: uomMt.id,
+      valuationMethod: 'average',
+    },
+  });
+
+  // Seed initial stock balance in WH-RM
+  await prisma.stockBalance.upsert({
+    where: {
+      warehouseId_itemId: {
+        warehouseId: whRm.id,
+        itemId: itemBillet.id,
+      },
+    },
+    update: { qtyOnHand: 450.0 },
+    create: {
+      tenantId: tenant.id,
+      warehouseId: whRm.id,
+      itemId: itemBillet.id,
+      qtyOnHand: 450.0,
+    },
+  });
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
     platformAdmin: platformEmail,
     company: company.code,
     factory: 'MAIN',
-    role: 'tenant_admin',
+    inventory: 'Warehouses (WH-RM, WH-FG), Items (RM-BILLET-150, FG-REBAR-12MM)',
   });
+
+  await prisma.$disconnect();
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

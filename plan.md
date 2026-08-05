@@ -155,8 +155,8 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 3 Tenancy | Done — platform tenants CRUD + `/admin` Super Admin |
 | 4 Organization | Done — companies/factories APIs + `/org` UI |
 | 5 IAM | Done — users/roles/scopes + `/iam` + invite accept |
-| 6 Modules | Not started |
-| 7 Inventory | Not started |
+| 6 Modules | Done — module catalog toggle + custom fields `/modules` UI |
+| 7 Inventory | Done — items/warehouses/UOMs, stock balances, ledger & movements `/inventory` UI |
 | 8 Manufacturing | Not started |
 | 9 Commercial | Not started |
 | 10 Steel + Deploy | Not started |
@@ -183,4 +183,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 6** for Modules & Entitlements.
+Say **Start Section 8** for Manufacturing Core (Work Orders, Production Posts, Yield/Energy).

@@ -118,6 +118,12 @@ export function SessionPanel() {
       {me.user.tenantId ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
+            href="/inventory"
+            className="inline-flex rounded-lg border border-emerald-200 bg-emerald-50/50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+          >
+            Inventory Core
+          </Link>
+          <Link
             href="/org"
             className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
           >
