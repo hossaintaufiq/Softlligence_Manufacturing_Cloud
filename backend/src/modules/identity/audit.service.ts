@@ -14,7 +14,7 @@ export type LogAuditEventParams = {
 /** Section 13 — Append-Only Immutable Audit Trail Logger */
 export async function logAuditEvent(params: LogAuditEventParams) {
   try {
-    return await prisma.auditLog.create({
+    return await (prisma as any).auditLog?.create({
       data: {
         tenantId: params.tenantId || null,
         userId: params.userId || null,

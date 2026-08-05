@@ -22,6 +22,7 @@ export function AppSidebar() {
     { title: 'Manufacturing Core', href: '/manufacturing', icon: '⚙️' },
     { title: 'Commercial Ops', href: '/commercial', icon: '💼' },
     { title: 'Inventory Master', href: '/inventory', icon: '📦' },
+    { title: 'Executive Analytics', href: '/analytics', icon: '📊' },
     { title: 'Dynamic Modules', href: '/modules', icon: '🧩' },
     { title: 'Organization', href: '/org', icon: '🏢' },
     { title: 'IAM Roles & Access', href: '/iam', icon: '🔑' },

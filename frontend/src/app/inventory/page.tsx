@@ -8,8 +8,11 @@ import { StockBalancePanel } from '@/components/inventory/StockBalancePanel';
 import { StockLedgerPanel } from '@/components/inventory/StockLedgerPanel';
 import { StockMovementModal } from '@/components/inventory/StockMovementModal';
 
+import { BinLocationPanel } from '@/components/wms/BinLocationPanel';
+import { LotGenealogyViewer } from '@/components/wms/LotGenealogyViewer';
+
 export default function InventoryPage() {
-  const [activeTab, setActiveTab] = useState<'catalog' | 'warehouses' | 'balances' | 'ledger'>('balances');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'warehouses' | 'balances' | 'ledger' | 'bins' | 'genealogy'>('balances');
   const [modalMode, setModalMode] = useState<'transfer' | 'adjustment' | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -30,6 +33,26 @@ export default function InventoryPage() {
                 }`}
               >
                 On-Hand Stock Balances
+              </button>
+              <button
+                onClick={() => setActiveTab('bins')}
+                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'bins'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Multi-Bin Locations (WMS)
+              </button>
+              <button
+                onClick={() => setActiveTab('genealogy')}
+                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'genealogy'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Lot Genealogy Trace (WMS)
               </button>
               <button
                 onClick={() => setActiveTab('catalog')}
@@ -83,6 +106,8 @@ export default function InventoryPage() {
           {/* Active Tab Panel */}
           <div key={refreshKey}>
             {activeTab === 'balances' && <StockBalancePanel />}
+            {activeTab === 'bins' && <BinLocationPanel />}
+            {activeTab === 'genealogy' && <LotGenealogyViewer />}
             {activeTab === 'catalog' && <ItemCatalogPanel />}
             {activeTab === 'warehouses' && <WarehousePanel />}
             {activeTab === 'ledger' && <StockLedgerPanel />}

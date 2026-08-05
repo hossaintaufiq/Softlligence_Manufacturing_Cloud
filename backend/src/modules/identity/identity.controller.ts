@@ -130,7 +130,7 @@ export async function handleMfaVerify(req: Request, res: Response, next: NextFun
       data: {
         twoFactorSecret: String(secret),
         twoFactorEnabled: true,
-      },
+      } as any,
     });
 
     res.json({ ok: true, message: 'Multi-Factor Authentication enabled successfully.' });

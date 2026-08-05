@@ -207,39 +207,39 @@ export default function SteelPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 p-6">
+    <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <SessionPanel />
 
         {/* Steel KPI Summary Cards */}
         {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Furnace Melting Yield</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">{kpis.meltYieldPct}%</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-indigo-600">{kpis.meltYieldPct}%</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalHeatsCount} Heats logged ({kpis.totalBilletProducedKg.toLocaleString()} kg Billets)</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rolling Mill Yield</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">{kpis.rollingYieldPct}%</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600">{kpis.rollingYieldPct}%</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalRodProducedKg.toLocaleString()} kg Rods ({kpis.totalBurningLossKg.toLocaleString()} kg loss)</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Energy Specific Cost</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{kpis.kwhPerBilletTon} kWh</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-amber-600">{kpis.kwhPerBilletTon} kWh</p>
               <p className="mt-1 text-xs text-slate-500">Per Metric Ton Billet Melted</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Scrap Inventory Inflow</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{(kpis.totalScrapReceivedKg / 1000).toLocaleString()} MT</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900">{(kpis.totalScrapReceivedKg / 1000).toLocaleString()} MT</p>
               <p className="mt-1 text-xs text-slate-500">Total Raw Scrap Received</p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 dark:border-slate-800 gap-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
+            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 gap-2">
               <button
                 onClick={() => setActiveTab('heats')}
                 className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${

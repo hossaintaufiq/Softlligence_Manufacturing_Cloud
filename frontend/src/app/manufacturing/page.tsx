@@ -20,9 +20,11 @@ import { fetchItems, fetchWarehouses, type Item, type Warehouse } from '@/lib/ap
 import { KanbanBoard, type WorkOrderKanbanItem } from '@/components/enterprise/KanbanBoard';
 import { BomTreeViewer } from '@/components/enterprise/BomTreeViewer';
 import { VirtualDataTable, type ColumnDef } from '@/components/enterprise/VirtualDataTable';
+import { GanttScheduler } from '@/components/mes/GanttScheduler';
+import { MachineStateTracker } from '@/components/mes/MachineStateTracker';
 
 export default function ManufacturingPage() {
-  const [activeTab, setActiveTab] = useState<'kpis' | 'workOrders' | 'boms'>('workOrders');
+  const [activeTab, setActiveTab] = useState<'kpis' | 'workOrders' | 'gantt' | 'machines' | 'boms'>('workOrders');
   const [woViewMode, setWoViewMode] = useState<'kanban' | 'table'>('kanban');
   const [workOrders, setWorkOrders] = useState<WorkOrderItem[]>([]);
   const [boms, setBoms] = useState<BomItem[]>([]);
@@ -113,6 +115,32 @@ export default function ManufacturingPage() {
     }
   };
 
+  const handleExecutionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedWo || !executionMode) return;
+    try {
+      if (executionMode === 'issue') {
+        await postMaterialIssueApi({
+          warehouseId: postForm.warehouseId || warehouses[0]?.id,
+          workOrderId: selectedWo.id,
+          lines: [{ itemId: postForm.itemId || items[0]?.id, uomId: items[0]?.uomId || 'PCS', qtyIssued: Number(postForm.qty) }],
+        });
+      } else if (executionMode === 'output') {
+        await postProductionOutputApi({
+          warehouseId: postForm.warehouseId || warehouses[0]?.id,
+          workOrderId: selectedWo.id,
+          qtyProduced: Number(postForm.qty),
+          uomId: (selectedWo as any).uomId || 'PCS',
+        });
+      }
+      setExecutionMode(null);
+      setSelectedWo(null);
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || 'Execution posting failed');
+    }
+  };
+
   const kanbanItems: WorkOrderKanbanItem[] = workOrders.map((wo, idx) => ({
     id: wo.id,
     docNo: wo.docNo,
@@ -183,56 +211,76 @@ export default function ManufacturingPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 p-6">
+    <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <SessionPanel />
 
         {/* Manufacturing KPI Summary Cards */}
         {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Work Orders</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{kpis.totalOrders}</p>
-              <p className="mt-1 text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{kpis.activeOrders} active / in-progress</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900">{kpis.totalOrders}</p>
+              <p className="mt-1 text-xs text-indigo-600 font-semibold">{kpis.activeOrders} active / in-progress</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Overall Yield %</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">{kpis.overallYield}%</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600">{kpis.overallYield}%</p>
               <p className="mt-1 text-xs text-slate-500">Planned vs Output Ratio</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Produced (FG)</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{kpis.totalProduced} MT</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900">{kpis.totalProduced} MT</p>
               <p className="mt-1 text-xs text-slate-500">From {kpis.completedOrders} completed WOs</p>
             </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Energy & Scrap</p>
-              <p className="mt-1 text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{kpis.totalEnergyKwh} kWh</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-amber-600">{kpis.totalEnergyKwh} kWh</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalScrap} MT scrap logged</p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex border-b sm:border-b-0 border-slate-200 dark:border-slate-800 gap-2">
+              <div className="flex border-b sm:border-b-0 border-slate-200 gap-2">
                 <button
                   onClick={() => setActiveTab('workOrders')}
                   className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                     activeTab === 'workOrders'
-                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   Work Orders Board
                 </button>
                 <button
+                  onClick={() => setActiveTab('gantt')}
+                  className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
+                    activeTab === 'gantt'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Gantt Capacity Scheduler (MES)
+                </button>
+                <button
+                  onClick={() => setActiveTab('machines')}
+                  className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
+                    activeTab === 'machines'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Machine States & OEE (MES)
+                </button>
+                <button
                   onClick={() => setActiveTab('boms')}
                   className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                     activeTab === 'boms'
-                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   BOM Hierarchy Explosion
@@ -241,11 +289,11 @@ export default function ManufacturingPage() {
 
               {/* View Mode Toggle for Work Orders */}
               {activeTab === 'workOrders' && (
-                <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5">
+                <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
                   <button
                     onClick={() => setWoViewMode('kanban')}
                     className={`px-2.5 py-1 text-xs font-semibold rounded ${
-                      woViewMode === 'kanban' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500'
+                      woViewMode === 'kanban' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
                     }`}
                   >
                     📊 Kanban Scheduling
@@ -253,7 +301,7 @@ export default function ManufacturingPage() {
                   <button
                     onClick={() => setWoViewMode('table')}
                     className={`px-2.5 py-1 text-xs font-semibold rounded ${
-                      woViewMode === 'table' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500'
+                      woViewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
                     }`}
                   >
                     ≡ Virtual Table
@@ -269,6 +317,10 @@ export default function ManufacturingPage() {
               + Create Work Order
             </button>
           </div>
+
+          {activeTab === 'gantt' && <GanttScheduler />}
+
+          {activeTab === 'machines' && <MachineStateTracker />}
 
           {loading && <p className="text-xs text-slate-500">Loading manufacturing records...</p>}
           {error && <p className="text-xs text-red-600">{error}</p>}
@@ -310,7 +362,7 @@ export default function ManufacturingPage() {
                       qty: l.qty,
                       uom: l.uomSymbol,
                       scrapPercent: idx % 2 === 0 ? 2.5 : 0,
-                      sequence: l.sequence,
+                      sequence: l.sequence ?? 1,
                     })),
                   }}
                 />

@@ -114,11 +114,11 @@ export function StockBalancePanel() {
       header: 'Status',
       accessor: (b) =>
         b.qtyOnHand > 0 ? (
-          <span className="rounded bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
             In Stock
           </span>
         ) : (
-          <span className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+          <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
             Zero Stock
           </span>
         ),
@@ -130,17 +130,17 @@ export function StockBalancePanel() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">Live On-Hand Stock Balances</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Section 12 high-density virtualized inventory levels across locations.</p>
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Live On-Hand Stock Balances</h2>
+          <p className="text-xs text-slate-500">Section 12 high-density virtualized inventory levels across locations.</p>
         </div>
 
         {/* Warehouse Filter */}
         <div className="flex items-center space-x-2">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Warehouse Scope:</label>
+          <label className="text-xs font-semibold text-slate-700">Warehouse Scope:</label>
           <select
             value={selectedWh}
             onChange={(e) => setSelectedWh(e.target.value)}
-            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none shadow-xs font-medium"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none shadow-xs font-medium"
           >
             <option value="all">All Warehouses</option>
             {warehouses.map((wh) => (
@@ -151,30 +151,30 @@ export function StockBalancePanel() {
           </select>
           <button
             onClick={load}
-            className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
           >
             Refresh
           </button>
         </div>
       </div>
 
-      {error && <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-xs text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">{error}</div>}
+      {error && <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700 border border-red-200">{error}</div>}
 
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Warehouses</span>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 font-mono">{warehouses.length}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1 font-mono">{warehouses.length}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">SKUs with Positive Stock</span>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{totalItemsWithStock}</p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1 font-mono">{totalItemsWithStock}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tracked Balances</span>
-          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1 font-mono">{balances.length}</p>
+          <p className="text-2xl font-bold text-indigo-600 mt-1 font-mono">{balances.length}</p>
         </div>
       </div>
 

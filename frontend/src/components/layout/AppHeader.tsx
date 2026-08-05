@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { AiAssistantModal } from '@/components/ai/AiAssistantModal';
 
 export function AppHeader() {
   const { setIsCmdPaletteOpen, isOperatorMode, toggleOperatorMode, user, tenant, isPlatformAdmin } = useWorkspace();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
   const [tenantScope, setTenantScope] = useState('active');
 
   const tenantDisplayName = tenant ? `${tenant.name} (${tenant.slug})` : 'Active Tenant Scope';
@@ -46,6 +48,15 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center space-x-3">
+        {/* AI Assistant Button */}
+        <button
+          onClick={() => setShowAiModal(true)}
+          className="flex items-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-200 text-xs font-bold transition-colors shadow-2xs"
+        >
+          <span>🤖</span>
+          <span>Ask ERP AI</span>
+        </button>
+
         {/* Global Search Button */}
         <button
           onClick={() => setIsCmdPaletteOpen(true)}
@@ -103,6 +114,8 @@ export function AppHeader() {
           )}
         </div>
       </div>
+
+      <AiAssistantModal isOpen={showAiModal} onClose={() => setShowAiModal(false)} />
     </header>
   );
 }

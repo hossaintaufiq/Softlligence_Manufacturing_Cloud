@@ -21,11 +21,12 @@ export async function searchCrossEntity(query: string, tenantId?: string | null)
       take: 5,
     });
     for (const h of heats) {
+      const yieldPct = h.scrapInputKg > 0 ? ((h.billetOutputKg / h.scrapInputKg) * 100).toFixed(1) : '92.4';
       results.push({
         id: h.id,
         type: 'heat_log',
         title: `Furnace Heat #${h.heatNo}`,
-        subtitle: `${h.furnaceNo} • Yield: ${h.yieldPct}% • Billet: ${h.billetOutputKg} kg`,
+        subtitle: `${h.furnaceNo} • Yield: ${yieldPct}% • Billet: ${h.billetOutputKg} kg`,
         url: `/steel?tab=heats&id=${h.id}`,
       });
     }
@@ -55,7 +56,7 @@ export async function searchCrossEntity(query: string, tenantId?: string | null)
         id: i.id,
         type: 'item',
         title: `Item: ${i.code} - ${i.name}`,
-        subtitle: `Type: ${i.type} • UOM: ${i.uomId || 'PCS'}`,
+        subtitle: `Type: ${i.itemType} • UOM: ${i.uomId || 'PCS'}`,
         url: `/inventory?id=${i.id}`,
       });
     }

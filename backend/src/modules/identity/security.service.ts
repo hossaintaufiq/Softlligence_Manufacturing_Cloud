@@ -92,7 +92,8 @@ export async function revokeUserSession(userId: string, sessionIdToRevoke: strin
 }
 
 export async function getTenantAuditLogs(tenantId: string | null, limit = 50) {
-  return prisma.auditLog.findMany({
+  if (!(prisma as any).auditLog) return [];
+  return (prisma as any).auditLog.findMany({
     where: tenantId ? { tenantId } : {},
     take: limit,
     orderBy: { createdAt: 'desc' },

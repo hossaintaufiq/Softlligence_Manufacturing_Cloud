@@ -1,10 +1,4 @@
-import { EventEmitter } from freshNodeEventEmitter();
-
-// Helper to instantiate EventEmitter in ES module format
-function freshNodeEventEmitter() {
-  const { EventEmitter } = require('node:events');
-  return EventEmitter;
-}
+import { EventEmitter } from 'node:events';
 
 export type PlatformEventType =
   | 'work_order.completed'
@@ -22,7 +16,7 @@ export type PlatformEventPayload = {
 };
 
 class DecoupledEventBus {
-  private emitter = new (freshNodeEventEmitter())();
+  private emitter = new EventEmitter();
 
   public publish(event: PlatformEventType, data: Omit<PlatformEventPayload, 'eventId' | 'timestamp'>) {
     const eventPayload: PlatformEventPayload = {

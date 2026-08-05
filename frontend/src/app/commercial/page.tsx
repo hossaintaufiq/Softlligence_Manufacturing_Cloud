@@ -23,8 +23,10 @@ import {
 } from '@/lib/api/commercial';
 import { fetchItems, fetchWarehouses, type Item, type Warehouse } from '@/lib/api/inventory';
 
+import { VehicleGateTracker } from '@/components/logistics/VehicleGateTracker';
+
 export default function CommercialPage() {
-  const [activeTab, setActiveTab] = useState<'parties' | 'procurement' | 'sales'>('procurement');
+  const [activeTab, setActiveTab] = useState<'parties' | 'procurement' | 'sales' | 'logistics'>('procurement');
   const [parties, setParties] = useState<PartyItem[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
   const [grns, setGrns] = useState<GrnItem[]>([]);
@@ -259,6 +261,16 @@ export default function CommercialPage() {
                 Sales & Dispatches (Challans)
               </button>
               <button
+                onClick={() => setActiveTab('logistics')}
+                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'logistics'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Freight & Gate Passes (Logistics)
+              </button>
+              <button
                 onClick={() => setActiveTab('parties')}
                 className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
                   activeTab === 'parties'
@@ -316,6 +328,8 @@ export default function CommercialPage() {
 
           {loading && <p className="text-sm text-slate-500">Loading commercial records...</p>}
           {error && <p className="text-sm text-red-600">{error}</p>}
+
+          {!loading && activeTab === 'logistics' && <VehicleGateTracker />}
 
           {!loading && activeTab === 'parties' && (
             <div className="overflow-x-auto">

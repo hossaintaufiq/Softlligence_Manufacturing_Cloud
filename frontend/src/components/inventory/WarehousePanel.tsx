@@ -274,7 +274,7 @@ export function WarehousePanel() {
               <button
                 type="submit"
                 disabled={creatingUom}
-                className="w-full rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 disabled:opacity-50"
+                className="w-full rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-500 transition-colors shadow-xs disabled:opacity-50"
               >
                 {creatingUom ? 'Adding...' : 'Add UOM'}
               </button>
