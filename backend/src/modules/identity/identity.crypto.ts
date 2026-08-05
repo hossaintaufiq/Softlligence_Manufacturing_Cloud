@@ -5,7 +5,7 @@ import type { CookieOptions, Response } from 'express';
 import { COOKIE, env } from '../../config/env.js';
 import type { AccessTokenPayload } from '../../types/express.js';
 
-const BCRYPT_ROUNDS = 12;
+const BCRYPT_ROUNDS = env.nodeEnv === 'development' ? 8 : 10;
 
 export function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_ROUNDS);

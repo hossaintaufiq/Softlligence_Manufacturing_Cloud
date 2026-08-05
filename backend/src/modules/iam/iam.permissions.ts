@@ -86,11 +86,13 @@ export async function ensureTenantIamDefaults(tenantId: string) {
 
 export async function getUserPermissionCodes(userId: string): Promise<string[]> {
   const rows = await prisma.userRole.findMany({
-    where: { userId },
-    include: {
+    where: { userId, role: { deletedAt: null } },
+    select: {
       role: {
-        include: {
-          permissions: { include: { permission: true } },
+        select: {
+          permissions: {
+            select: { permission: { select: { code: true } } },
+          },
         },
       },
     },
@@ -98,9 +100,11 @@ export async function getUserPermissionCodes(userId: string): Promise<string[]> 
 
   const set = new Set<string>();
   for (const ur of rows) {
-    if (ur.role.deletedAt) continue;
+    if (!ur.role) continue;
     for (const rp of ur.role.permissions) {
-      set.add(rp.permission.code);
+      if (rp.permission?.code) {
+        set.add(rp.permission.code);
+      }
     }
   }
   return [...set].sort();

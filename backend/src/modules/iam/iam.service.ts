@@ -235,11 +235,10 @@ export async function assignRoles(tenantId: string, userId: string, roleIds: str
     throw new AppError(400, 'One or more roles are invalid', 'VALIDATION_ERROR');
   }
 
-  for (const role of roles) {
-    await prisma.userRole.upsert({
-      where: { userId_roleId: { userId, roleId: role.id } },
-      update: {},
-      create: { tenantId, userId, roleId: role.id },
+  if (roles.length > 0) {
+    await prisma.userRole.createMany({
+      data: roles.map((role) => ({ tenantId, userId, roleId: role.id })),
+      skipDuplicates: true,
     });
   }
   return getUser(tenantId, userId);
@@ -264,9 +263,10 @@ export async function setUserScopes(tenantId: string, userId: string, factoryIds
   }
 
   await prisma.userScope.deleteMany({ where: { userId, scopeType: 'factory' } });
-  for (const scopeId of factoryIds) {
-    await prisma.userScope.create({
-      data: { tenantId, userId, scopeType: 'factory', scopeId },
+  if (factoryIds.length > 0) {
+    await prisma.userScope.createMany({
+      data: factoryIds.map((scopeId) => ({ tenantId, userId, scopeType: 'factory', scopeId })),
+      skipDuplicates: true,
     });
   }
   return getUser(tenantId, userId);
@@ -364,9 +364,10 @@ export async function setRolePermissions(tenantId: string, roleId: string, permi
   }
 
   await prisma.rolePermission.deleteMany({ where: { roleId } });
-  for (const perm of perms) {
-    await prisma.rolePermission.create({
-      data: { roleId, permissionId: perm.id },
+  if (perms.length > 0) {
+    await prisma.rolePermission.createMany({
+      data: perms.map((perm) => ({ roleId, permissionId: perm.id })),
+      skipDuplicates: true,
     });
   }
   return getRole(tenantId, roleId);
