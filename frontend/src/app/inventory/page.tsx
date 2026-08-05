@@ -20,63 +20,63 @@ export default function InventoryPage() {
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
-            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 gap-2">
+            <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl w-fit space-x-1 border border-slate-200">
               <button
                 onClick={() => setActiveTab('balances')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'balances'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 On-Hand Stock Balances
               </button>
               <button
                 onClick={() => setActiveTab('bins')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'bins'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 Multi-Bin Locations (WMS)
               </button>
               <button
                 onClick={() => setActiveTab('genealogy')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'genealogy'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 Lot Genealogy Trace (WMS)
               </button>
               <button
                 onClick={() => setActiveTab('catalog')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'catalog'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 Item Master Catalog
               </button>
               <button
                 onClick={() => setActiveTab('warehouses')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'warehouses'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 Warehouses & UOMs
               </button>
               <button
                 onClick={() => setActiveTab('ledger')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'ledger'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
                 }`}
               >
                 Stock Ledger Audit Trail

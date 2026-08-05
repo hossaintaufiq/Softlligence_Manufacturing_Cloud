@@ -3,6 +3,20 @@ import { COOKIE } from '../../config/env.js';
 import { AppError } from '../../common/errors/AppError.js';
 import { prisma } from '../../config/prisma.js';
 import { verifyAccessToken } from './identity.crypto.js';
+import type { AccessTokenPayload, AuthTenant, AuthUser } from '../../types/express.js';
+
+type CachedSession = {
+  auth: {
+    user: AuthUser;
+    tenant: AuthTenant | null;
+    sessionId: string;
+    payload: AccessTokenPayload;
+  };
+  expiresAt: number;
+};
+
+// Global in-memory cache to prevent redundant database checks for active user sessions
+const sessionCache = new Map<string, CachedSession>();
 
 export async function requireAuth(req: Request, _res: Response, next: NextFunction) {
   try {
@@ -14,13 +28,22 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       throw new AppError(401, 'Authentication required', 'UNAUTHORIZED');
     }
 
-    let payload;
+    let payload: AccessTokenPayload;
     try {
       payload = verifyAccessToken(token);
     } catch {
       throw new AppError(401, 'Invalid or expired access token', 'UNAUTHORIZED');
     }
 
+    // Check memory cache first to resolve immediately
+    const cached = sessionCache.get(payload.sid);
+    if (cached && cached.expiresAt > Date.now()) {
+      req.auth = cached.auth;
+      next();
+      return;
+    }
+
+    // Resolve from database if cache missed or expired
     const session = await prisma.authSession.findUnique({
       where: { id: payload.sid },
       include: {
@@ -40,7 +63,7 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       throw new AppError(403, 'Tenant is suspended', 'TENANT_SUSPENDED');
     }
 
-    req.auth = {
+    const authData = {
       user: {
         id: session.user.id,
         email: session.user.email,
@@ -58,10 +81,17 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
             planCode: session.user.tenant.planCode,
           }
         : null,
-      sessionId: session.id,
-      payload,
+      sessionId: payload.sid,
+      payload: payload,
     };
 
+    // Cache the resolved session
+    sessionCache.set(payload.sid, {
+      auth: authData,
+      expiresAt: session.expiresAt.getTime(),
+    });
+
+    req.auth = authData;
     next();
   } catch (err) {
     next(err);

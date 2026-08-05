@@ -139,30 +139,36 @@ export function SecuritySettingsPanel() {
           </p>
         </div>
 
-        <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5 text-xs font-semibold">
+        <div className="flex bg-slate-100 p-1 rounded-xl w-fit space-x-1 border border-slate-200">
           <button
             onClick={() => setActiveTab('mfa')}
-            className={`px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === 'mfa' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === 'mfa'
+                ? 'bg-white text-indigo-700 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
             }`}
           >
-            🔑 MFA 2FA Setup
+            MFA 2FA Setup
           </button>
           <button
             onClick={() => setActiveTab('sessions')}
-            className={`px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === 'sessions' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === 'sessions'
+                ? 'bg-white text-indigo-700 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
             }`}
           >
-            💻 Active Sessions
+            Active Sessions
           </button>
           <button
             onClick={() => setActiveTab('audit')}
-            className={`px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === 'audit' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeTab === 'audit'
+                ? 'bg-white text-indigo-700 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50'
             }`}
           >
-            📜 Audit Trail
+            Audit Trail
           </button>
         </div>
       </div>

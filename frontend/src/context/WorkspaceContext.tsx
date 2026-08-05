@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { fetchMe, refreshSession, type AuthUser, type AuthTenant } from '@/lib/api/auth';
+import { listFactories, type Factory } from '@/lib/api/org';
 
 type WorkspaceContextType = {
   user: AuthUser | null;
@@ -17,10 +18,15 @@ type WorkspaceContextType = {
   addRecent: (path: string) => void;
   isCmdPaletteOpen: boolean;
   setIsCmdPaletteOpen: (open: boolean) => void;
+  isAiOpen: boolean;
+  setIsAiOpen: (open: boolean) => void;
   permissions: string[];
   scopes: { factories: string[] | null } | null;
   entitlements: { modules: string[] } | null;
   refreshUser: () => Promise<void>;
+  factories: Factory[];
+  activeFactory: Factory | null;
+  setActiveFactory: (factory: Factory | null) => void;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -35,10 +41,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [scopes, setScopes] = useState<{ factories: string[] | null } | null>(null);
   const [entitlements, setEntitlements] = useState<{ modules: string[] } | null>(null);
 
+  // Factory State
+  const [factories, setFactories] = useState<Factory[]>([]);
+  const [activeFactory, setActiveFactoryState] = useState<Factory | null>(null);
+
   const [isOperatorMode, setIsOperatorMode] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(['/steel', '/manufacturing', '/inventory']);
   const [recents, setRecents] = useState<string[]>([]);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
+  const [isAiOpen, setIsAiOpen] = useState(false);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -59,6 +70,23 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setPermissions(meData.permissions || []);
         setScopes(meData.scopes || null);
         setEntitlements(meData.entitlements || null);
+
+        // Fetch factories list if tenant exists
+        if (meData.user.tenantId) {
+          try {
+            const list = await listFactories();
+            setFactories(list);
+            const savedFactoryId = localStorage.getItem('smc_active_factory_id');
+            const found = list.find((f) => f.id === savedFactoryId);
+            setActiveFactoryState(found || list[0] || null);
+          } catch {
+            setFactories([]);
+            setActiveFactoryState(null);
+          }
+        } else {
+          setFactories([]);
+          setActiveFactoryState(null);
+        }
       } else {
         setUser(null);
         setTenant(null);
@@ -66,6 +94,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setPermissions([]);
         setScopes(null);
         setEntitlements(null);
+        setFactories([]);
+        setActiveFactoryState(null);
       }
     } catch {
       setUser(null);
@@ -74,6 +104,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       setPermissions([]);
       setScopes(null);
       setEntitlements(null);
+      setFactories([]);
+      setActiveFactoryState(null);
     } finally {
       setIsLoadingUser(false);
     }
@@ -82,6 +114,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     resolveUserSession();
   }, []);
+
+  const setActiveFactory = (factory: Factory | null) => {
+    setActiveFactoryState(factory);
+    if (factory) {
+      localStorage.setItem('smc_active_factory_id', factory.id);
+    } else {
+      localStorage.removeItem('smc_active_factory_id');
+    }
+  };
 
   // Global Routing Middleware Protection
   useEffect(() => {
@@ -159,10 +200,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         addRecent,
         isCmdPaletteOpen,
         setIsCmdPaletteOpen,
+        isAiOpen,
+        setIsAiOpen,
         permissions,
         scopes,
         entitlements,
         refreshUser: resolveUserSession,
+        factories,
+        activeFactory,
+        setActiveFactory,
       }}
     >
       <div className={`${isOperatorMode ? 'operator-mode' : ''}`}>{children}</div>

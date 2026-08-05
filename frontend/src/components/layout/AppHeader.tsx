@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWorkspace } from '@/context/WorkspaceContext';
-import { AiAssistantModal } from '@/components/ai/AiAssistantModal';
 
 export function AppHeader() {
   const {
@@ -14,10 +13,14 @@ export function AppHeader() {
     user,
     tenant,
     isPlatformAdmin,
+    factories,
+    activeFactory,
+    setActiveFactory,
+    isAiOpen,
+    setIsAiOpen,
   } = useWorkspace();
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showAiModal, setShowAiModal] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -61,6 +64,27 @@ export function AppHeader() {
           </span>
         </div>
 
+        {/* Factory Switcher */}
+        {!isPlatformAdmin && factories.length > 0 && (
+          <div className="flex items-center space-x-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-xs">
+            <span className="text-slate-400 font-bold">Plant:</span>
+            <select
+              value={activeFactory?.id || ''}
+              onChange={(e) => {
+                const found = factories.find((f) => f.id === e.target.value);
+                setActiveFactory(found || null);
+              }}
+              className="bg-transparent font-bold text-slate-700 focus:outline-none cursor-pointer"
+            >
+              {factories.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name} ({f.code})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <span className="text-slate-300 text-xs hidden sm:inline">/</span>
         <span className="text-xs font-semibold text-slate-500 hidden sm:inline font-mono">
           {breadcrumbText}
@@ -71,7 +95,7 @@ export function AppHeader() {
       <div className="flex items-center space-x-3">
         {/* Ask ERP AI Button */}
         <button
-          onClick={() => setShowAiModal(true)}
+          onClick={() => setIsAiOpen(true)}
           className="flex items-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-200 text-xs font-bold transition-colors shadow-2xs"
         >
           <span>🤖</span>
@@ -196,8 +220,6 @@ export function AppHeader() {
           </div>
         )}
       </div>
-
-      <AiAssistantModal isOpen={showAiModal} onClose={() => setShowAiModal(false)} />
     </header>
   );
 }

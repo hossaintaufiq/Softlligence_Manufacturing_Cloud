@@ -5,10 +5,11 @@ import { useWorkspace } from '@/context/WorkspaceContext';
 import { AppSidebar } from './AppSidebar';
 import { AppHeader } from './AppHeader';
 import { CommandPalette } from './CommandPalette';
+import { AiAssistantModal } from '../ai/AiAssistantModal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user } = useWorkspace();
+  const { user, isAiOpen, setIsAiOpen } = useWorkspace();
 
   const isAuthRoute = pathname === '/login' || pathname === '/register' || pathname === '/invite';
   const isPublicLanding = pathname === '/' && !user;
@@ -33,6 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <CommandPalette />
+      <AiAssistantModal isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
     </div>
   );
 }
