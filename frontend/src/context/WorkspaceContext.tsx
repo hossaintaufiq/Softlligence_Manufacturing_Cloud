@@ -10,8 +10,6 @@ type WorkspaceContextType = {
   isLoadingUser: boolean;
   isOperatorMode: boolean;
   toggleOperatorMode: () => void;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
   favorites: string[];
   toggleFavorite: (path: string) => void;
   recents: string[];
@@ -29,7 +27,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   const [isOperatorMode, setIsOperatorMode] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(['/steel', '/manufacturing', '/inventory']);
   const [recents, setRecents] = useState<string[]>([]);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
@@ -77,18 +74,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     setIsOperatorMode((prev) => !prev);
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return next;
-    });
-  };
-
   const toggleFavorite = (path: string) => {
     setFavorites((prev) => {
       const next = prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path];
@@ -115,8 +100,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         isLoadingUser,
         isOperatorMode,
         toggleOperatorMode,
-        isDarkMode,
-        toggleDarkMode,
         favorites,
         toggleFavorite,
         recents,

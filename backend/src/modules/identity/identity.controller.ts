@@ -99,3 +99,80 @@ export async function acceptInvite(req: Request, res: Response, next: NextFuncti
     next(err);
   }
 }
+
+/** Section 13 — Security Controllers */
+
+export async function handleMfaSetup(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { generateTotpSecret } = await import('./security.service.js');
+    const email = req.auth!.user.email;
+    const result = generateTotpSecret(email);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleMfaVerify(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { token, secret } = req.body ?? {};
+    const { verifyTotpToken } = await import('./security.service.js');
+    const { prisma } = await import('../../config/prisma.js');
+
+    const isValid = verifyTotpToken(String(secret ?? ''), String(token ?? ''));
+    if (!isValid) {
+      res.status(400).json({ ok: false, message: 'Invalid 2FA code provided.' });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: req.auth!.user.id },
+      data: {
+        twoFactorSecret: String(secret),
+        twoFactorEnabled: true,
+      },
+    });
+
+    res.json({ ok: true, message: 'Multi-Factor Authentication enabled successfully.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleListSessions(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { getUserSessions } = await import('./security.service.js');
+    const sessions = await getUserSessions(req.auth!.user.id);
+    res.json({ sessions, activeSessionId: req.auth!.sessionId });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleRevokeSession(req: Request, res: Response, next: NextFunction) {
+  try {
+    const sessionIdToRevoke = String(req.params.id);
+    const { revokeUserSession } = await import('./security.service.js');
+    const result = await revokeUserSession(
+      req.auth!.user.id,
+      sessionIdToRevoke,
+      req.ip,
+      req.get('user-agent') ?? undefined
+    );
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleGetAuditLogs(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { getTenantAuditLogs } = await import('./security.service.js');
+    const tenantId = req.auth?.user.isPlatformAdmin ? null : req.auth?.user.tenantId || null;
+    const logs = await getTenantAuditLogs(tenantId, 100);
+    res.json({ auditLogs: logs });
+  } catch (err) {
+    next(err);
+  }
+}
+

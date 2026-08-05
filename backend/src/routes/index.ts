@@ -9,6 +9,7 @@ import { inventoryRouter } from '../modules/inventory/inventory.routes.js';
 import { manufacturingRouter } from '../modules/manufacturing/manufacturing.routes.js';
 import { commercialRouter } from '../modules/commercial/commercial.routes.js';
 import { steelRouter } from '../modules/steel/steel.routes.js';
+import { platformServicesRouter } from '../modules/platformServices/platformServices.routes.js';
 
 export const apiRouter = Router();
 
@@ -23,3 +24,5 @@ apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/manufacturing', manufacturingRouter);
 apiRouter.use('/commercial', commercialRouter);
 apiRouter.use('/steel', steelRouter);
+apiRouter.use('/', platformServicesRouter);
+

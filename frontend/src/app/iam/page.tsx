@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchMe, logout, refreshSession, type MeResponse } from '@/lib/api/auth';
 import { IamPanel } from '@/components/iam/IamPanel';
+import { SecuritySettingsPanel } from '@/components/auth/SecuritySettingsPanel';
 
 export default function IamPage() {
   const router = useRouter();
@@ -49,27 +50,27 @@ export default function IamPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-6 pb-16 pt-12">
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
+    <main className="mx-auto max-w-5xl px-6 pb-16 pt-12 space-y-8">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400">
             {me.tenant?.name ?? 'Workspace'}
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">IAM</h1>
-          <p className="mt-1 text-sm text-mute">
-            Users, roles, permissions, factory scopes — enforced on the API.
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Identity & Access Management (IAM)</h1>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Users, roles, permissions, factory scopes, MFA authentication, and audit trails.
           </p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/org"
-            className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:bg-canvas"
+            className="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             Organization
           </Link>
           <Link
             href="/"
-            className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:bg-canvas"
+            className="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             Home
           </Link>
@@ -79,14 +80,16 @@ export default function IamPage() {
               await logout();
               router.push('/login');
             }}
-            className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:bg-canvas"
+            className="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             Sign out
           </button>
         </div>
       </header>
-      <div className="mt-8">
+
+      <div className="space-y-8">
         <IamPanel />
+        <SecuritySettingsPanel />
       </div>
     </main>
   );

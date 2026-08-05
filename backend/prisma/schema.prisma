@@ -9,14 +9,15 @@ datasource db {
 }
 
 model Tenant {
-  id        String    @id @default(uuid())
-  slug      String    @unique @db.VarChar(64)
-  name      String
-  status    String    @default("active")
-  planCode  String?   @map("plan_code")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  id               String    @id @default(uuid())
+  slug             String    @unique @db.VarChar(64)
+  name             String
+  status           String    @default("active")
+  planCode         String?   @map("plan_code")
+  allowedCidrsJson Json?     @map("allowed_cidrs_json")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
 
   users         User[]
   sessions      AuthSession[]
@@ -27,6 +28,7 @@ model Tenant {
   userScopes    UserScope[]
   tenantModules TenantModule[]
   customFields  CustomFieldDefinition[]
+  auditLogs     AuditLog[]
   warehouses       Warehouse[]
   uoms             UnitOfMeasure[]
   items            Item[]
@@ -58,6 +60,8 @@ model User {
   passwordHash     String?   @map("password_hash")
   status           String    @default("active")
   isPlatformAdmin  Boolean   @default(false) @map("is_platform_admin")
+  twoFactorSecret  String?   @map("two_factor_secret")
+  twoFactorEnabled Boolean   @default(false) @map("two_factor_enabled")
   inviteTokenHash  String?   @unique @map("invite_token_hash")
   inviteExpiresAt  DateTime? @map("invite_expires_at")
   createdAt        DateTime  @default(now()) @map("created_at")
@@ -68,6 +72,7 @@ model User {
   sessions   AuthSession[]
   userRoles  UserRole[]
   userScopes UserScope[]
+  auditLogs  AuditLog[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -996,6 +1001,28 @@ model SteelRollingLog {
 
   @@map("steel_rolling_log")
 }
+
+/// Section 13 — Immutable Append-Only Audit Log
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String?  @map("tenant_id")
+  userId      String?  @map("user_id")
+  action      String   @db.VarChar(128)
+  entityType  String   @map("entity_type") @db.VarChar(64)
+  entityId    String?  @map("entity_id") @db.VarChar(64)
+  ipAddress   String?  @map("ip_address") @db.VarChar(64)
+  userAgent   String?  @map("user_agent")
+  payloadJson Json?    @map("payload_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([userId, action])
+  @@map("audit_log")
+}
+
 
 
 

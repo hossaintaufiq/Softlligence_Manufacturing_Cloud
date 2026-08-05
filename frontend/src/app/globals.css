@@ -7,7 +7,7 @@
 @layer base {
   html,
   body {
-    @apply min-h-full font-sans antialiased text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-950;
+    @apply min-h-full font-sans antialiased text-slate-900 bg-slate-50;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
@@ -48,7 +48,7 @@
   font-size: 0.95rem !important;
 }
 
-/* Custom Scrollbar for Virtual Tables */
+/* Custom Scrollbar for High-Density Tables */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
