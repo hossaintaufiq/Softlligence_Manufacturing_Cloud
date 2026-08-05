@@ -38,6 +38,11 @@ model Tenant {
   bomHeaders       BomHeader[]
   workOrders       WorkOrder[]
   energyLogs       EnergyLog[]
+  parties          Party[]
+  purchaseOrders   PurchaseOrder[]
+  grns             Grn[]
+  salesOrders      SalesOrder[]
+  dispatches       Dispatch[]
 
   @@map("tenant")
 }
@@ -103,6 +108,11 @@ model Company {
   factories Factory[]
   warehouses Warehouse[]
   items     Item[]
+  parties   Party[]
+  purchaseOrders PurchaseOrder[]
+  grns      Grn[]
+  salesOrders SalesOrder[]
+  dispatches Dispatch[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -290,6 +300,8 @@ model Warehouse {
   fromTransfers StockTransfer[] @relation("FromWarehouse")
   toTransfers   StockTransfer[] @relation("ToWarehouse")
   adjustments   StockAdjustment[]
+  grns          Grn[]
+  dispatches    Dispatch[]
 
   @@unique([tenantId, companyId, code])
   @@index([tenantId, companyId])
@@ -317,6 +329,10 @@ model UnitOfMeasure {
   materialIssueLines WorkOrderMaterialIssueLine[]
   outputs       WorkOrderOutput[]
   scraps        WorkOrderScrap[]
+  poLines       PurchaseOrderLine[]
+  grnLines      GrnLine[]
+  soLines       SalesOrderLine[]
+  dispatchLines DispatchLine[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -353,6 +369,10 @@ model Item {
   bomComponentLines BomLine[] @relation("ComponentItem")
   workOrderOutputs WorkOrder[] @relation("OutputItem")
   materialIssueLines WorkOrderMaterialIssueLine[]
+  poLines       PurchaseOrderLine[]
+  grnLines      GrnLine[]
+  soLines       SalesOrderLine[]
+  dispatchLines DispatchLine[]
 
   @@unique([tenantId, code])
   @@index([tenantId, itemType, status])
@@ -676,6 +696,219 @@ model EnergyLog {
   @@index([tenantId, factoryId, loggedAt])
   @@map("energy_log")
 }
+
+// ==========================================
+// SECTION 9: COMMERCIAL OPS (Document 02 §25)
+// ==========================================
+
+/// Unified Customer & Supplier Entity (Document 02 §25.1)
+model Party {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  companyId    String?   @map("company_id")
+  code         String    @db.VarChar(64)
+  name         String
+  isCustomer   Boolean   @default(false) @map("is_customer")
+  isSupplier   Boolean   @default(false) @map("is_supplier")
+  creditLimit  Float?    @map("credit_limit")
+  paymentTerms String?   @map("payment_terms")
+  contactsJson Json?     @map("contacts_json")
+  attrs        Json?
+  status       String    @default("active") @db.VarChar(32)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
+
+  purchaseOrders PurchaseOrder[]
+  grns           Grn[]
+  salesOrders    SalesOrder[]
+  dispatches     Dispatch[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, status])
+  @@map("party")
+}
+
+/// Purchase Order Header (Document 02 §25.2)
+model PurchaseOrder {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  companyId    String    @map("company_id")
+  partyId      String    @map("party_id") // Supplier
+  docNo        String    @map("doc_no") @db.VarChar(64)
+  docDate      DateTime  @default(now()) @map("doc_date")
+  status       String    @default("draft") @db.VarChar(32) // draft, approved, completed, cancelled
+  currency     String    @default("USD") @db.VarChar(8)
+  totalAmount  Float     @default(0.0) @map("total_amount")
+  attrs        Json?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  tenant  Tenant              @relation(fields: [tenantId], references: [id])
+  company Company             @relation(fields: [companyId], references: [id])
+  party   Party               @relation(fields: [partyId], references: [id])
+  lines   PurchaseOrderLine[]
+  grns    Grn[]
+
+  @@unique([tenantId, companyId, docNo])
+  @@map("purchase_order")
+}
+
+/// Purchase Order Line
+model PurchaseOrderLine {
+  id              String @id @default(uuid())
+  purchaseOrderId String @map("purchase_order_id")
+  itemId          String @map("item_id")
+  uomId           String @map("uom_id")
+  qty             Float
+  unitPrice       Float  @default(0.0) @map("unit_price")
+  amount          Float  @default(0.0)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  item          Item          @relation(fields: [itemId], references: [id])
+  uom           UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("purchase_order_line")
+}
+
+/// Goods Receipt Note (GRN) (Document 02 §25.3)
+model Grn {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  companyId       String    @map("company_id")
+  factoryId       String?   @map("factory_id")
+  warehouseId     String    @map("warehouse_id")
+  partyId         String    @map("party_id") // Supplier
+  purchaseOrderId String?   @map("purchase_order_id")
+  docNo           String    @map("doc_no") @db.VarChar(64)
+  docDate         DateTime  @default(now()) @map("doc_date")
+  status          String    @default("draft") @db.VarChar(32) // draft, confirmed, cancelled
+  vehicleNo       String?   @map("vehicle_no")
+  attrs           Json?
+  receivedAt      DateTime? @map("received_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id])
+  warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
+  party         Party          @relation(fields: [partyId], references: [id])
+  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  lines         GrnLine[]
+
+  @@unique([tenantId, companyId, docNo])
+  @@map("grn")
+}
+
+/// GRN Line
+model GrnLine {
+  id          String @id @default(uuid())
+  grnId       String @map("grn_id")
+  itemId      String @map("item_id")
+  uomId       String @map("uom_id")
+  qtyReceived Float  @map("qty_received")
+  unitCost    Float  @default(0.0) @map("unit_cost")
+
+  grn  Grn           @relation(fields: [grnId], references: [id], onDelete: Cascade)
+  item Item          @relation(fields: [itemId], references: [id])
+  uom  UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("grn_line")
+}
+
+/// Sales Order Header (Document 02 §25.4)
+model SalesOrder {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  companyId   String    @map("company_id")
+  partyId     String    @map("party_id") // Customer
+  docNo       String    @map("doc_no") @db.VarChar(64)
+  docDate     DateTime  @default(now()) @map("doc_date")
+  status      String    @default("draft") @db.VarChar(32) // draft, confirmed, completed, cancelled
+  currency    String    @default("USD") @db.VarChar(8)
+  totalAmount Float     @default(0.0) @map("total_amount")
+  attrs       Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
+  company    Company          @relation(fields: [companyId], references: [id])
+  party      Party            @relation(fields: [partyId], references: [id])
+  lines      SalesOrderLine[]
+  dispatches Dispatch[]
+
+  @@unique([tenantId, companyId, docNo])
+  @@map("sales_order")
+}
+
+/// Sales Order Line
+model SalesOrderLine {
+  id           String @id @default(uuid())
+  salesOrderId String @map("sales_order_id")
+  itemId       String @map("item_id")
+  uomId        String @map("uom_id")
+  qty          Float
+  unitPrice    Float  @default(0.0) @map("unit_price")
+  amount       Float  @default(0.0)
+
+  salesOrder SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  item       Item          @relation(fields: [itemId], references: [id])
+  uom        UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("sales_order_line")
+}
+
+/// Dispatch / Challan Header (Document 02 §25.5)
+model Dispatch {
+  id            String    @id @default(uuid())
+  tenantId      String    @map("tenant_id")
+  companyId     String    @map("company_id")
+  factoryId     String?   @map("factory_id")
+  warehouseId   String    @map("warehouse_id")
+  partyId       String    @map("party_id") // Customer
+  salesOrderId  String?   @map("sales_order_id")
+  docNo         String    @map("doc_no") @db.VarChar(64)
+  docDate       DateTime  @default(now()) @map("doc_date")
+  status        String    @default("draft") @db.VarChar(32) // draft, confirmed, cancelled
+  vehicleNo     String?   @map("vehicle_no")
+  freightAmount Float     @default(0.0) @map("freight_amount")
+  currency      String    @default("USD") @db.VarChar(8)
+  attrs         Json?
+  confirmedAt   DateTime? @map("confirmed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id])
+  company    Company       @relation(fields: [companyId], references: [id])
+  warehouse  Warehouse     @relation(fields: [warehouseId], references: [id])
+  party      Party         @relation(fields: [partyId], references: [id])
+  salesOrder SalesOrder?   @relation(fields: [salesOrderId], references: [id])
+  lines      DispatchLine[]
+
+  @@unique([tenantId, companyId, docNo])
+  @@map("dispatch")
+}
+
+/// Dispatch Line
+model DispatchLine {
+  id         String @id @default(uuid())
+  dispatchId String @map("dispatch_id")
+  itemId     String @map("item_id")
+  uomId      String @map("uom_id")
+  qty        Float
+  unitPrice  Float  @default(0.0) @map("unit_price")
+  amount     Float  @default(0.0)
+
+  dispatch Dispatch      @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  item     Item          @relation(fields: [itemId], references: [id])
+  uom      UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("dispatch_line")
+}
+
 
 
 

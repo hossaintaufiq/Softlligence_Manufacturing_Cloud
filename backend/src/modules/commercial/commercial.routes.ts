@@ -1,9 +1,27 @@
-﻿import { Router } from 'express';
-import { AppError } from '../../common/errors/AppError.js';
+import { Router } from 'express';
+import { requireAuth } from '../identity/identity.middleware.js';
+import { requireTenantUser } from '../organization/organization.middleware.js';
+import * as commercialCtrl from './commercial.controller.js';
 
-/** Section 9 — Commercial (stub) */
 export const commercialRouter = Router();
 
-commercialRouter.use((_req, _res, next) => {
-  next(new AppError(501, 'Commercial module not implemented yet (Section 9)', 'NOT_IMPLEMENTED'));
-});
+commercialRouter.use(requireAuth, requireTenantUser);
+
+// Parties (Customers & Suppliers)
+commercialRouter.get('/parties', commercialCtrl.listPartiesHandler);
+commercialRouter.post('/parties', commercialCtrl.createPartyHandler);
+
+// Procurement (POs & GRNs)
+commercialRouter.get('/purchase-orders', commercialCtrl.listPurchaseOrdersHandler);
+commercialRouter.post('/purchase-orders', commercialCtrl.createPurchaseOrderHandler);
+commercialRouter.get('/grns', commercialCtrl.listGrnsHandler);
+commercialRouter.post('/grns', commercialCtrl.postGrnHandler);
+
+// Sales & Dispatches
+commercialRouter.get('/sales-orders', commercialCtrl.listSalesOrdersHandler);
+commercialRouter.post('/sales-orders', commercialCtrl.createSalesOrderHandler);
+commercialRouter.get('/dispatches', commercialCtrl.listDispatchesHandler);
+commercialRouter.post('/dispatches', commercialCtrl.postDispatchHandler);
+
+// Commercial Analytics & KPIs
+commercialRouter.get('/kpis', commercialCtrl.getCommercialKpisHandler);

@@ -130,6 +130,12 @@ export function SessionPanel() {
             Manufacturing Core
           </Link>
           <Link
+            href="/commercial"
+            className="inline-flex rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-100"
+          >
+            Commercial Ops
+          </Link>
+          <Link
             href="/org"
             className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
           >

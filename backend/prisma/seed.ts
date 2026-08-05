@@ -164,7 +164,12 @@ async function main() {
     },
   });
 
-  // --- Inventory Core Seed (Section 7) ---
+  const uomKg = await prisma.unitOfMeasure.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'KG' } },
+    update: { name: 'Kilogram', symbol: 'kg' },
+    create: { tenantId: tenant.id, code: 'KG', name: 'Kilogram', symbol: 'kg' },
+  });
+
   const uomMt = await prisma.unitOfMeasure.upsert({
     where: { tenantId_code: { tenantId: tenant.id, code: 'MT' } },
     update: { name: 'Metric Ton', symbol: 'MT' },
@@ -190,7 +195,7 @@ async function main() {
     },
   });
 
-  await prisma.warehouse.upsert({
+  const whFg = await prisma.warehouse.upsert({
     where: { tenantId_companyId_code: { tenantId: tenant.id, companyId: company.id, code: 'WH-FG' } },
     update: { name: 'Finished Goods Warehouse', type: 'FG' },
     create: {
@@ -303,6 +308,146 @@ async function main() {
     },
   }).catch(() => {});
 
+  // ==========================================
+  // SECTION 9: Commercial Ops Seeding
+  // ==========================================
+  const suppParty = await prisma.party.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'SUPP-STEEL-01' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      code: 'SUPP-STEEL-01',
+      name: 'Apex Scrap & Metals Ltd',
+      isSupplier: true,
+      isCustomer: false,
+      paymentTerms: 'NET30',
+      status: 'active',
+    },
+  });
+
+  const custParty = await prisma.party.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: 'CUST-BUILD-01' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      code: 'CUST-BUILD-01',
+      name: 'National Builders Corp',
+      isCustomer: true,
+      isSupplier: false,
+      creditLimit: 500000,
+      paymentTerms: 'NET45',
+      status: 'active',
+    },
+  });
+
+  // Seed Purchase Order
+  const po = await prisma.purchaseOrder.upsert({
+    where: { tenantId_companyId_docNo: { tenantId: tenant.id, companyId: company.id, docNo: 'PO-2026-001' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      partyId: suppParty.id,
+      docNo: 'PO-2026-001',
+      status: 'completed',
+      totalAmount: 45000.0,
+      lines: {
+        create: [
+          {
+            itemId: itemBillet.id,
+            uomId: uomKg.id,
+            qty: 100000,
+            unitPrice: 0.45,
+            amount: 45000.0,
+          },
+        ],
+      },
+    },
+  });
+
+  // Seed Goods Receipt (GRN)
+  await prisma.grn.upsert({
+    where: { tenantId_companyId_docNo: { tenantId: tenant.id, companyId: company.id, docNo: 'GRN-2026-001' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      warehouseId: whRm.id,
+      partyId: suppParty.id,
+      purchaseOrderId: po.id,
+      docNo: 'GRN-2026-001',
+      status: 'confirmed',
+      vehicleNo: 'TRK-9901',
+      receivedAt: new Date(),
+      lines: {
+        create: [
+          {
+            itemId: itemBillet.id,
+            uomId: uomKg.id,
+            qtyReceived: 100000,
+            unitCost: 0.45,
+          },
+        ],
+      },
+    },
+  });
+
+  // Seed Sales Order
+  const so = await prisma.salesOrder.upsert({
+    where: { tenantId_companyId_docNo: { tenantId: tenant.id, companyId: company.id, docNo: 'SO-2026-001' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      partyId: custParty.id,
+      docNo: 'SO-2026-001',
+      status: 'completed',
+      totalAmount: 37500.0,
+      lines: {
+        create: [
+          {
+            itemId: itemRebar.id,
+            uomId: uomMt.id,
+            qty: 50,
+            unitPrice: 750.0,
+            amount: 37500.0,
+          },
+        ],
+      },
+    },
+  });
+
+  // Seed Dispatch / Challan
+  await prisma.dispatch.upsert({
+    where: { tenantId_companyId_docNo: { tenantId: tenant.id, companyId: company.id, docNo: 'CHAL-2026-001' } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      warehouseId: whFg.id,
+      partyId: custParty.id,
+      salesOrderId: so.id,
+      docNo: 'CHAL-2026-001',
+      status: 'confirmed',
+      vehicleNo: 'TRK-4420',
+      freightAmount: 800.0,
+      confirmedAt: new Date(),
+      lines: {
+        create: [
+          {
+            itemId: itemRebar.id,
+            uomId: uomMt.id,
+            qty: 50,
+            unitPrice: 750.0,
+            amount: 37500.0,
+          },
+        ],
+      },
+    },
+  });
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
@@ -311,6 +456,7 @@ async function main() {
     factory: 'MAIN',
     inventory: 'Warehouses (WH-RM, WH-FG), Items (RM-BILLET-150, FG-REBAR-12MM)',
     manufacturing: 'BOM (v1.0), Work Order (WO-2026-001 in_progress)',
+    commercial: 'Parties (SUPP-STEEL-01, CUST-BUILD-01), PO-2026-001, GRN-2026-001, SO-2026-001, CHAL-2026-001',
   });
 
   await prisma.$disconnect();

@@ -158,7 +158,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 6 Modules | Done — module catalog toggle + custom fields `/modules` UI |
 | 7 Inventory | Done — items/warehouses/UOMs, stock balances, ledger & movements `/inventory` UI |
 | 8 Manufacturing | Done — BOMs, Work Orders, Raw Material Issues, FG Receipts, Scrap/Energy & Yield KPIs `/manufacturing` UI |
-| 9 Commercial | Not started |
+| 9 Commercial | Done — Customers/Suppliers, POs, Goods Receipts (GRN), Sales Orders, Dispatches (Challans), Commercial KPIs `/commercial` UI |
 | 10 Steel + Deploy | Not started |
 
 ---
