@@ -11,9 +11,16 @@ export default function ModulesPage() {
   const [activeTab, setActiveTab] = useState<'entitlements' | 'customFields' | 'garments' | 'developer'>('entitlements');
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+    <div className="space-y-6 font-sans text-slate-800">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-900">Dynamic Modules & Extensions</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Toggle system features, customize metadata fields, and integrate webhooks.</p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
           <div className="flex bg-slate-100 p-1 rounded-xl w-fit space-x-1 border border-slate-200">
             <button
               onClick={() => setActiveTab('entitlements')}
@@ -61,8 +68,7 @@ export default function ModulesPage() {
           {activeTab === 'developer' && <DeveloperPlatformPanel />}
           {activeTab === 'garments' && <GarmentsStylePanel />}
           {activeTab === 'customFields' && <CustomFieldManagerPanel />}
-        </div>
       </div>
-    </main>
+    </div>
   );
 }

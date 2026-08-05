@@ -162,19 +162,19 @@ export function StockBalancePanel() {
 
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 border-l-4 border-l-indigo-600 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Warehouses</span>
           <p className="text-2xl font-bold text-slate-900 mt-1 font-mono">{warehouses.length}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 border-l-4 border-l-emerald-600 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">SKUs with Positive Stock</span>
           <p className="text-2xl font-bold text-emerald-600 mt-1 font-mono">{totalItemsWithStock}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200 border-l-4 border-l-amber-600 bg-white p-4 shadow-xs">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tracked Balances</span>
-          <p className="text-2xl font-bold text-indigo-600 mt-1 font-mono">{balances.length}</p>
+          <p className="text-2xl font-bold text-amber-600 mt-1 font-mono">{balances.length}</p>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ export function StockBalancePanel() {
 
       {/* Virtualized Data Table Component */}
       <VirtualDataTable
-        title="Materialized Stock Ledger Balances"
+        title="Physical Inventory Ledger Balances"
         subtitle={`Showing ${filteredBalances.length} records (${activeFilters.conditions.length} active filter rules)`}
         data={filteredBalances}
         columns={tableColumns}

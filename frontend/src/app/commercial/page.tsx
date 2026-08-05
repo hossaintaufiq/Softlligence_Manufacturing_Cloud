@@ -206,10 +206,17 @@ export default function CommercialPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-6xl space-y-6">
-        {/* Commercial KPI Cards */}
-        {kpis && (
+    <div className="space-y-6 font-sans text-slate-800">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-900">Commercial & Financial Ops</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Manage customers and suppliers master, purchase orders, sales billing, and logistics dispatches.</p>
+        </div>
+      </div>
+
+      {/* Commercial KPI Cards */}
+      {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Trading Parties</p>
@@ -509,7 +516,6 @@ export default function CommercialPage() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Modal Add Party */}
       {showCreateParty && (
@@ -726,6 +732,6 @@ export default function CommercialPage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
