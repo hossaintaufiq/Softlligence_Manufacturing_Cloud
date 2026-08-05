@@ -27,6 +27,7 @@
 | [ADR-0010](./ADR-0010-async-workers-queues.md) | Async workers/queues for heavy work | Accepted |
 | [ADR-0011](./ADR-0011-tenant-scoped-custom-fields.md) | Tenant-scoped custom fields (no global CF) | Accepted |
 | [ADR-0012](./ADR-0012-rbac-server-enforced.md) | Server-enforced RBAC; UI never elevates | Accepted |
+| [ADR-0013](./ADR-0013-vercel-render-supabase.md) | Initial hosting: Vercel + Render + Supabase | Accepted |
 
 ## Related documents
 

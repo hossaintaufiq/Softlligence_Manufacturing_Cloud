@@ -12,6 +12,8 @@
 | **Owner** | Softlligence Technologies — Product Management |
 | **Audience** | Product, Engineering (50+), QA, DevOps, Security, UX, AI, PMs, BAs, POs |
 | **Architecture Authority** | Review 1 + Review 2 (**FINAL**) |
+| **Delivery plan** | [`../plan.md`](../plan.md) · Phase 1: [`PHASE_1_SCOPE.md`](./PHASE_1_SCOPE.md) |
+| **Near-term deploy** | Vercel + Render + Supabase — [`DEPLOY.md`](./DEPLOY.md) |
 
 ---
 

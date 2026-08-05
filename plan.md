@@ -65,9 +65,9 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 ## Section details
 
 ### Section 1 — Foundation
-- Create monorepo: `apps/web`, `apps/api` (admin can wait)
-- Env templates, Prisma from Document 02 (P0 tables only)
-- `GET /health`, `GET /ready`
+- Create monorepo: `frontend/` + `backend/` (maps to web + api; admin can wait)
+- Env templates, Prisma from Document 02 (P0: tenant, user_account, auth_session)
+- `GET /api/v1/health`, `GET /api/v1/ready`
 - Run locally: web `:3000`, api `:5001`
 
 ### Section 2 — Identity & Auth
@@ -144,7 +144,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 | Section | Status |
 |---------|--------|
-| 1 Foundation | Not started |
+| 1 Foundation | Done — structure + health; configure Supabase for /ready green |
 | 2 Auth | Not started |
 | 3 Tenancy | Not started |
 | 4 Organization | Not started |
@@ -176,4 +176,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 1** to begin Foundation (fresh monorepo, local run, ready for Vercel/Render later).
+Say **Start Section 2** for Identity & Auth (login, sessions, `/auth/me`).

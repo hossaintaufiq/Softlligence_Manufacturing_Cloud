@@ -12,6 +12,8 @@
 | **Owner** | Softlligence Technologies — Product Design / UX |
 | **Upstream Authority** | Document 01 SRS + Document 03 API + Review 2 |
 | **Downstream Consumers** | Frontend engineers, UI designers, QA, accessibility reviewers |
+| **Delivery plan** | [`../plan.md`](../plan.md) |
+| **Near-term deploy** | Next.js on **Vercel** — [`DEPLOY.md`](./DEPLOY.md) |
 
 ---
 

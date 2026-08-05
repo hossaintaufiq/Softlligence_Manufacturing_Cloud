@@ -633,15 +633,29 @@ softlligence-manufacturing-cloud/
 
 # SECTION 23 — Deployment
 
+### 23.1 Near-term hosting profile (current build)
+
+| Concern | Choice |
+|---------|--------|
+| Web | **Vercel** (Next.js) |
+| API | **Render** (Node web service) |
+| Database | **Supabase** PostgreSQL |
+| Redis / Worker | Render add-ons when needed |
+| CI/CD | GitHub → Vercel + Render auto-deploy |
+| Goal | Local first, then simple public deploy — **not AWS/K8s yet** |
+
+See ADR-0013, `documents/DEPLOY.md`, and root `plan.md`.
+
+### 23.2 Long-term scale (when needed)
+
 | Concern | Design |
 |---------|--------|
 | Containers | Docker for api, worker, web |
-| Orchestration | Kubernetes (EKS/GKE) when scale demands; start with ECS/Render/Fly if needed |
-| CI/CD | PR checks → staging → prod; migrate DB forward-only |
+| Orchestration | Kubernetes (EKS/GKE) when scale demands |
 | Edge | Cloudflare TLS, WAF, caching static |
 | Data | Postgres HA, PITR backups, encrypted S3 |
-| Scaling | HPA on api/worker; Redis cluster; read replicas for reporting |
-| Environments | dev / staging / prod; separate secrets |
+| Scaling | HPA on api/worker; Redis cluster; read replicas |
+| Environments | local / staging / prod; separate secrets |
 | Multi-region | Later — active-passive first |
 
 ---

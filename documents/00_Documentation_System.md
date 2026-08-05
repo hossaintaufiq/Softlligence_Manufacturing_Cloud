@@ -127,6 +127,7 @@ Root `README.md` remains the **project quick-start** entry point and links here.
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 1.0.0 | 2026-08-04 | Softlligence Documentation Team | Initial documentation system; Reviews 1–2 filed as FINAL |
+| 1.1.0 | 2026-08-05 | Softlligence Documentation Team | ADRs + plan.md; Vercel/Render/Supabase near-term deploy profile |
 
 ---
 

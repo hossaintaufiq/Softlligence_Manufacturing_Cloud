@@ -13,6 +13,8 @@
 | **Owner** | Softlligence Technologies — API Architecture |
 | **Upstream Authority** | Document 02 Database Design + Document 01 SRS + Review 2 |
 | **Downstream Consumers** | Backend, Frontend, Mobile, Integrators, QA |
+| **Delivery plan** | [`../plan.md`](../plan.md) |
+| **Near-term deploy** | API on **Render**; web on **Vercel** — [`DEPLOY.md`](./DEPLOY.md) |
 
 ---
 
@@ -172,7 +174,10 @@ This document defines the **enterprise REST API** for Softlligence Manufacturing
 | Environment | Example base |
 |-------------|--------------|
 | Local | `http://localhost:5001/api/v1` |
-| Production | `https://api.{domain}/api/v1` |
+| Staging / Production (now) | `https://<service>.onrender.com/api/v1` (Render) |
+| Custom domain (optional) | `https://api.yourdomain.com/api/v1` |
+
+Frontend (Vercel) calls API via `NEXT_PUBLIC_API_URL`. See [`DEPLOY.md`](./DEPLOY.md) and ADR-0013.
 
 **Versioning rules**
 

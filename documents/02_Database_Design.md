@@ -13,6 +13,8 @@
 | **Audience** | Database engineers, backend engineers, security, QA, DevOps, BAs |
 | **Upstream Authority** | Document 01 SRS + Review 2 (**FINAL**) |
 | **Downstream Consumers** | Prisma schema, migrations, Document 03 API |
+| **Delivery plan** | [`../plan.md`](../plan.md) |
+| **Near-term deploy** | Vercel + Render + Supabase — [`DEPLOY.md`](./DEPLOY.md) |
 
 ---
 

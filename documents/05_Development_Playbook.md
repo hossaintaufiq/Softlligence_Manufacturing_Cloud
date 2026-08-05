@@ -12,6 +12,8 @@
 | **Owner** | Softlligence Technologies — Engineering Leadership |
 | **Upstream Authority** | Docs 01–04 + Review 1 + Review 2 (**FINAL**) |
 | **Audience** | All engineers, QA, DevOps, Security, Tech Leads, EMs |
+| **Delivery plan** | [`../plan.md`](../plan.md) |
+| **Near-term deploy** | Vercel + Render + Supabase — [`DEPLOY.md`](./DEPLOY.md) · ADR-0013 |
 
 ---
 
@@ -588,52 +590,62 @@ OWASP Top 10 awareness required for all backend/FE engineers (Review 2 §24).
 
 # 21. Environment & Configuration
 
-| Env | Purpose |
-|-----|---------|
-| local | Developer machines |
-| dev | Shared integration |
-| staging | Pre-prod, prod-like |
-| prod | Customers |
+| Env | Purpose | Typical host |
+|-----|---------|--------------|
+| local | Developer machines | localhost |
+| staging | Shared test | Vercel preview + Render |
+| prod | Customers / demos | Vercel + Render + Supabase |
 
 ### 21.1 Required config (illustrative)
 
-`DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `REDIS_URL`, `CORS_ORIGINS`, `COOKIE_*`, `S3_*`, `FRONTEND_URL` — exact list in env examples; **no secrets in git**.
+`DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `CORS_ORIGINS`, `FRONTEND_URL`, `COOKIE_SECURE`, `COOKIE_SAME_SITE`, `NEXT_PUBLIC_API_URL`  
+Optional later: `REDIS_URL`, `S3_*`  
+**No secrets in git.**
 
 ### 21.2 Rules
 
-- Staging/prod: `COOKIE_SECURE=true` as appropriate  
-- Redis required staging/prod  
+- Local: `COOKIE_SECURE=false`, `COOKIE_SAME_SITE=lax`  
+- Vercel↔Render (cross-site): `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=none`  
+- Redis required when multi-instance sessions/jobs need it; optional for earliest MVP  
 - Separate JWT secrets per env  
+
+See [`DEPLOY.md`](./DEPLOY.md).
 
 ---
 
 # 22. Deployment
 
-### 22.1 Target (Review 2 §23)
+### 22.1 Near-term hosting (Accepted — ADR-0013)
 
-| Component | Deployable |
-|-----------|------------|
-| `apps/api` | Container |
-| `apps/worker` | Container |
-| `apps/web` | Container or Next host |
-| `apps/admin` | Container or Next host |
+| Component | Host |
+|-----------|------|
+| `apps/web` (Next.js) | **Vercel** |
+| `apps/api` (Node) | **Render** Web Service |
+| PostgreSQL | **Supabase** |
+| Worker / Redis | Render add-ons when needed |
+
+**Not required for first releases:** AWS, Kubernetes, multi-region.
+
+Long-term scale path remains Review 2 §23.
 
 ### 22.2 Procedure
 
-1. Freeze/migrate  
-2. Deploy workers  
-3. Deploy API  
-4. Deploy web/admin  
-5. Smoke: health, login, one write path  
-6. Watch error budget  
+1. Local feature complete for the section  
+2. Migrate Supabase (`prisma migrate deploy`)  
+3. Deploy API on Render  
+4. Deploy web on Vercel (`NEXT_PUBLIC_API_URL` → Render)  
+5. Align CORS / cookie env; redeploy API if frontend URL changed  
+6. Smoke: health, login, one write path  
 
-### 22.3 Kubernetes / simpler hosts
+Detail: [`DEPLOY.md`](./DEPLOY.md) · delivery order: [`../plan.md`](../plan.md)
 
-Start with managed containers if needed; K8s when scale demands. Infra as code under `infra/`.
+### 22.3 Later (scale)
+
+Containers / Kubernetes / Cloudflare when traffic and team size justify it (Review 2 §23).
 
 ### 22.4 Database
 
-- Backups/PITR verified quarterly  
+- Supabase PITR/backups per project plan  
 - Migrate before API that requires new columns (expand/contract)  
 
 ---
@@ -907,4 +919,9 @@ Node 20+ · pnpm or npm workspaces · Docker · Postgres 15+ · Redis · Playwri
 | 04 | UI/UX Design System | Complete v1.0.0 |
 | 05 | Development Playbook | Complete v1.0.0 |
 
-**Pre-development documentation pack is complete.** Development should start only after Appendix E phase gate approval.
+**Pre-development documentation pack is complete.**  
+**Delivery sequence:** [`../plan.md`](../plan.md)  
+**First hosting profile:** Vercel + Render + Supabase ([`DEPLOY.md`](./DEPLOY.md), ADR-0013)  
+**Phase 1 freeze:** [`PHASE_1_SCOPE.md`](./PHASE_1_SCOPE.md)  
+
+Start coding with **Section 1** in `plan.md` after Product/Eng acknowledge the Phase 1 freeze.

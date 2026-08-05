@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// SaaS workspace boundary (Document 02 §19.1)
+model Tenant {
+  id        String    @id @default(uuid())
+  slug      String    @unique @db.VarChar(64)
+  name      String
+  status    String    @default("active") // active | trial | suspended | pending_delete
+  planCode  String?   @map("plan_code")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users    User[]
+  sessions AuthSession[]
+
+  @@map("tenant")
+}
+
+/// Login identity (Document 02 §19.3) — auth filled in Section 2
+model User {
+  id           String    @id @default(uuid())
+  tenantId     String?   @map("tenant_id")
+  email        String
+  name         String
+  passwordHash String?   @map("password_hash")
+  status       String    @default("active") // active | invited | deactivated
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deactivatedAt DateTime? @map("deactivated_at")
+
+  tenant   Tenant?       @relation(fields: [tenantId], references: [id])
+  sessions AuthSession[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("user_account")
+}
+
+/// Server session registry (Document 02 §19.4) — used from Section 2
+model AuthSession {
+  id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  tenantId         String?   @map("tenant_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  clientSignature  String?   @map("client_signature")
+  ipAddress        String?   @map("ip_address")
+  userAgent        String?   @map("user_agent")
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([userId])
+  @@map("auth_session")
+}
