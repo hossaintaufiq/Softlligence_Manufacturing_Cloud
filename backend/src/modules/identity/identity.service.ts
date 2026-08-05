@@ -231,9 +231,16 @@ export async function getMe(userId: string) {
     throw new AppError(401, 'Unauthorized', 'UNAUTHORIZED');
   }
 
+  const { getUserPermissionCodes, getUserFactoryScopeIds } = await import('../iam/iam.permissions.js');
+  const permissions = user.isPlatformAdmin ? ['*'] : await getUserPermissionCodes(user.id);
+  const factoryScopeIds = user.isPlatformAdmin ? null : await getUserFactoryScopeIds(user.id);
+
   return {
     user: mapUser(user),
     tenant: mapTenant(user.tenant),
-    permissions: [] as string[], // Section 5 IAM
+    permissions,
+    scopes: {
+      factories: factoryScopeIds,
+    },
   };
 }

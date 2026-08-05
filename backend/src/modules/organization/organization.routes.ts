@@ -1,5 +1,5 @@
 ﻿import { Router } from 'express';
-import { requireTenantUser } from './organization.middleware.js';
+import { requirePermission } from '../iam/iam.middleware.js';
 import {
   createCompany,
   createFactory,
@@ -13,19 +13,17 @@ import {
   updateFactory,
 } from './organization.controller.js';
 
-/** Section 4 — Organization (Company + Factory) */
+/** Section 4 — Organization (Company + Factory) — permission-gated in Section 5 */
 export const organizationRouter = Router();
 
-organizationRouter.use(requireTenantUser);
+organizationRouter.get('/companies', requirePermission('org.company.manage'), listCompanies);
+organizationRouter.post('/companies', requirePermission('org.company.manage'), createCompany);
+organizationRouter.get('/companies/:id', requirePermission('org.company.manage'), getCompany);
+organizationRouter.patch('/companies/:id', requirePermission('org.company.manage'), updateCompany);
+organizationRouter.delete('/companies/:id', requirePermission('org.company.manage'), deleteCompany);
 
-organizationRouter.get('/companies', listCompanies);
-organizationRouter.post('/companies', createCompany);
-organizationRouter.get('/companies/:id', getCompany);
-organizationRouter.patch('/companies/:id', updateCompany);
-organizationRouter.delete('/companies/:id', deleteCompany);
-
-organizationRouter.get('/factories', listFactories);
-organizationRouter.post('/factories', createFactory);
-organizationRouter.get('/factories/:id', getFactory);
-organizationRouter.patch('/factories/:id', updateFactory);
-organizationRouter.delete('/factories/:id', deleteFactory);
+organizationRouter.get('/factories', requirePermission('org.factory.manage'), listFactories);
+organizationRouter.post('/factories', requirePermission('org.factory.manage'), createFactory);
+organizationRouter.get('/factories/:id', requirePermission('org.factory.manage'), getFactory);
+organizationRouter.patch('/factories/:id', requirePermission('org.factory.manage'), updateFactory);
+organizationRouter.delete('/factories/:id', requirePermission('org.factory.manage'), deleteFactory);

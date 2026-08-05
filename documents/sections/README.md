@@ -14,7 +14,7 @@ These documents sit **beside** the master specs (01–05). Specs define the targ
 | 2 Identity & Auth | [`SECTION_02_Identity_Auth.md`](./SECTION_02_Identity_Auth.md) | Done (MFA → 2b) |
 | 3 Tenancy & Super Admin | [`SECTION_03_Tenancy_Super_Admin.md`](./SECTION_03_Tenancy_Super_Admin.md) | Done |
 | 4 Organization | [`SECTION_04_Organization.md`](./SECTION_04_Organization.md) | Done |
-| 5 IAM | — | Not started |
+| 5 IAM | [`SECTION_05_IAM.md`](./SECTION_05_IAM.md) | Done |
 | 6 Modules & Entitlements | — | Not started |
 | 7 Inventory Core | — | Not started |
 | 8 Manufacturing Core | — | Not started |

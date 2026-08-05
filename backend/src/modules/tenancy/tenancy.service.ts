@@ -106,6 +106,10 @@ export async function createTenant(input: {
       planCode: input.planCode?.trim() || 'trial',
     },
   });
+
+  const { ensureTenantIamDefaults } = await import('../iam/iam.permissions.js');
+  await ensureTenantIamDefaults(created.id);
+
   return mapTenant(created);
 }
 

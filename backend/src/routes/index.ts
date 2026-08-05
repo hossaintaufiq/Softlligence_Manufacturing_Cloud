@@ -15,7 +15,7 @@ apiRouter.use(healthRouter);
 apiRouter.use('/auth', identityRouter);
 apiRouter.use('/platform', platformTenancyRouter);
 apiRouter.use(organizationRouter);
-apiRouter.use('/iam', iamRouter);
+apiRouter.use(iamRouter);
 apiRouter.use('/modules', modulesRouter);
 apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/manufacturing', manufacturingRouter);

@@ -1,3 +1,5 @@
+import { parseJson } from './client';
+
 export type Company = {
   id: string;
   tenantId: string;
@@ -23,19 +25,6 @@ export type Factory = {
   createdAt: string;
   updatedAt: string;
 };
-
-type ApiErrorBody = {
-  error?: { code?: string; message?: string };
-};
-
-async function parseJson<T>(res: Response): Promise<T> {
-  if (res.status === 204) return undefined as T;
-  const data = (await res.json()) as T & ApiErrorBody;
-  if (!res.ok) {
-    throw new Error(data?.error?.message || `Request failed (${res.status})`);
-  }
-  return data;
-}
 
 export async function listCompanies(): Promise<Company[]> {
   const res = await fetch('/api/v1/companies', { credentials: 'include', cache: 'no-store' });

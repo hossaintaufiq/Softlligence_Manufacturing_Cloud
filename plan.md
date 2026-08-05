@@ -93,6 +93,8 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 - Invite users, roles, permissions
 - Factory scope
 - Server-enforced RBAC (ADR-0012)
+- **As-built:** [`documents/sections/SECTION_05_IAM.md`](./documents/sections/SECTION_05_IAM.md)
+- **Matrix:** [`documents/seeds/permission_matrix.md`](./documents/seeds/permission_matrix.md)
 
 ### Section 6 — Modules & Entitlements
 - Module catalog + `tenant_module`
@@ -152,7 +154,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 2 Auth | Done — login/refresh/logout/me + `/login` UI (MFA → 2b) |
 | 3 Tenancy | Done — platform tenants CRUD + `/admin` Super Admin |
 | 4 Organization | Done — companies/factories APIs + `/org` UI |
-| 5 IAM | Not started |
+| 5 IAM | Done — users/roles/scopes + `/iam` + invite accept |
 | 6 Modules | Not started |
 | 7 Inventory | Not started |
 | 8 Manufacturing | Not started |
@@ -181,4 +183,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 5** for IAM (users, roles, permissions, factory scope).
+Say **Start Section 6** for Modules & Entitlements.

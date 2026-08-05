@@ -33,6 +33,7 @@ declare global {
         tenant: AuthTenant | null;
         sessionId: string;
         payload: AccessTokenPayload;
+        permissions?: Set<string>;
       };
     }
   }

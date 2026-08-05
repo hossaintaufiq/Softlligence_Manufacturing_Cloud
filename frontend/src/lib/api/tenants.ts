@@ -1,3 +1,5 @@
+import { parseJson } from './client';
+
 export type Tenant = {
   id: string;
   slug: string;
@@ -7,18 +9,6 @@ export type Tenant = {
   createdAt: string;
   updatedAt: string;
 };
-
-type ApiErrorBody = {
-  error?: { code?: string; message?: string };
-};
-
-async function parseJson<T>(res: Response): Promise<T> {
-  const data = (await res.json()) as T & ApiErrorBody;
-  if (!res.ok) {
-    throw new Error(data?.error?.message || `Request failed (${res.status})`);
-  }
-  return data;
-}
 
 export async function listTenants(): Promise<Tenant[]> {
   const res = await fetch('/api/v1/platform/tenants', {

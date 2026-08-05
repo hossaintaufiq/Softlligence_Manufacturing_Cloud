@@ -8,40 +8,45 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/// SaaS workspace boundary (Document 02 §19.1)
 model Tenant {
   id        String    @id @default(uuid())
   slug      String    @unique @db.VarChar(64)
   name      String
-  status    String    @default("active") // active | trial | suspended | pending_delete
+  status    String    @default("active")
   planCode  String?   @map("plan_code")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  users     User[]
-  sessions  AuthSession[]
-  companies Company[]
-  factories Factory[]
+  users      User[]
+  sessions   AuthSession[]
+  companies  Company[]
+  factories  Factory[]
+  roles      Role[]
+  userRoles  UserRole[]
+  userScopes UserScope[]
 
   @@map("tenant")
 }
 
-/// Login identity (Document 02 §19.3)
 model User {
-  id              String    @id @default(uuid())
-  tenantId        String?   @map("tenant_id")
-  email           String
-  name            String
-  passwordHash    String?   @map("password_hash")
-  status          String    @default("active") // active | invited | deactivated
-  isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deactivatedAt   DateTime? @map("deactivated_at")
+  id               String    @id @default(uuid())
+  tenantId         String?   @map("tenant_id")
+  email            String
+  name             String
+  passwordHash     String?   @map("password_hash")
+  status           String    @default("active")
+  isPlatformAdmin  Boolean   @default(false) @map("is_platform_admin")
+  inviteTokenHash  String?   @unique @map("invite_token_hash")
+  inviteExpiresAt  DateTime? @map("invite_expires_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deactivatedAt    DateTime? @map("deactivated_at")
 
-  tenant   Tenant?       @relation(fields: [tenantId], references: [id])
-  sessions AuthSession[]
+  tenant     Tenant?       @relation(fields: [tenantId], references: [id])
+  sessions   AuthSession[]
+  userRoles  UserRole[]
+  userScopes UserScope[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -49,7 +54,6 @@ model User {
   @@map("user_account")
 }
 
-/// Server session registry (Document 02 §19.4)
 model AuthSession {
   id               String    @id @default(uuid())
   userId           String    @map("user_id")
@@ -69,7 +73,6 @@ model AuthSession {
   @@map("auth_session")
 }
 
-/// Legal / operating company within a tenant (Document 02 §20.2)
 model Company {
   id          String    @id @default(uuid())
   tenantId    String    @map("tenant_id")
@@ -91,7 +94,6 @@ model Company {
   @@map("company")
 }
 
-/// Factory / site under a company (Document 02 §20.3)
 model Factory {
   id          String    @id @default(uuid())
   tenantId    String    @map("tenant_id")
@@ -111,4 +113,81 @@ model Factory {
   @@unique([tenantId, companyId, code])
   @@index([tenantId, companyId])
   @@map("factory")
+}
+
+/// Platform permission catalog (Document 02 §21.1)
+model PermissionCatalog {
+  id          String @id @default(uuid())
+  code        String @unique
+  moduleCode  String @map("module_code")
+  description String?
+
+  rolePermissions RolePermission[]
+
+  @@map("permission_catalog")
+}
+
+/// Tenant-scoped role (Document 02 §21.2)
+model Role {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  code        String    @db.VarChar(64)
+  name        String
+  description String?
+  isSystem    Boolean   @default(false) @map("is_system")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  permissions RolePermission[]
+  userRoles   UserRole[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("role")
+}
+
+model RolePermission {
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role               @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission PermissionCatalog  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permission")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([tenantId, userId])
+  @@map("user_role")
+}
+
+/// Factory (or later warehouse) scope limits (Document 02 §21.5)
+model UserScope {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  userId    String   @map("user_id")
+  scopeType String   @map("scope_type") // factory | warehouse | company
+  scopeId   String   @map("scope_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scopeType, scopeId])
+  @@index([tenantId, userId])
+  @@map("user_scope")
 }

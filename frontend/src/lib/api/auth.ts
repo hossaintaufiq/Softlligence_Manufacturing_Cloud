@@ -1,3 +1,5 @@
+import { parseJson } from './client';
+
 export type AuthUser = {
   id: string;
   email: string;
@@ -19,6 +21,7 @@ export type MeResponse = {
   user: AuthUser;
   tenant: AuthTenant | null;
   permissions: string[];
+  scopes?: { factories: string[] | null };
 };
 
 export type LoginResponse = {
@@ -28,19 +31,6 @@ export type LoginResponse = {
   user: AuthUser;
   tenant: AuthTenant | null;
 };
-
-type ApiErrorBody = {
-  error?: { code?: string; message?: string };
-};
-
-async function parseJson<T>(res: Response): Promise<T> {
-  const data = (await res.json()) as T & ApiErrorBody;
-  if (!res.ok) {
-    const message = data?.error?.message || `Request failed (${res.status})`;
-    throw new Error(message);
-  }
-  return data;
-}
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
   const res = await fetch('/api/v1/auth/login', {

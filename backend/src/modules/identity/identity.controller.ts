@@ -84,3 +84,18 @@ export async function me(req: Request, res: Response, next: NextFunction) {
     next(err);
   }
 }
+
+export async function acceptInvite(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { token, password, name } = req.body ?? {};
+    const { acceptInvite } = await import('../iam/iam.service.js');
+    const result = await acceptInvite({
+      token: String(token ?? ''),
+      password: String(password ?? ''),
+      name: name === undefined ? undefined : String(name),
+    });
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    next(err);
+  }
+}

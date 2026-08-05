@@ -1,11 +1,12 @@
 import process from 'node:process';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { ensureTenantIamDefaults } from '../src/modules/iam/iam.permissions.js';
 
 const prisma = new PrismaClient();
 
 /**
- * Sections 1–4 seed — platform admin, demo tenant admin, default company + factory.
+ * Sections 1–5 seed — platform admin, demo tenant, org, IAM defaults.
  */
 async function main() {
   const demoPassword = process.env.SEED_DEMO_PASSWORD || 'password123';
@@ -24,7 +25,7 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: {
       tenantId_email: {
         tenantId: tenant.id,
@@ -121,12 +122,29 @@ async function main() {
     },
   });
 
+  const { adminRoleId } = await ensureTenantIamDefaults(tenant.id);
+  await prisma.userRole.upsert({
+    where: {
+      userId_roleId: {
+        userId: adminUser.id,
+        roleId: adminRoleId,
+      },
+    },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      userId: adminUser.id,
+      roleId: adminRoleId,
+    },
+  });
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
     platformAdmin: platformEmail,
     company: company.code,
     factory: 'MAIN',
+    role: 'tenant_admin',
   });
 }
 

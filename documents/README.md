@@ -53,6 +53,7 @@ What was **actually shipped** per plan section (complements specs 01–05):
 | 2 Identity & Auth | [`sections/SECTION_02_Identity_Auth.md`](./sections/SECTION_02_Identity_Auth.md) | Done (MFA → 2b) |
 | 3 Tenancy & Super Admin | [`sections/SECTION_03_Tenancy_Super_Admin.md`](./sections/SECTION_03_Tenancy_Super_Admin.md) | Done |
 | 4 Organization | [`sections/SECTION_04_Organization.md`](./sections/SECTION_04_Organization.md) | Done |
+| 5 IAM | [`sections/SECTION_05_IAM.md`](./sections/SECTION_05_IAM.md) | Done |
 
 ---
 
