@@ -1,9 +1,12 @@
 ﻿import { Router } from 'express';
 import { requirePermission } from './iam.middleware.js';
+import { requireModule } from '../modules/modules.middleware.js';
 import * as ctrl from './iam.controller.js';
 
 /** Section 5 — IAM (mounted at /api/v1) */
 export const iamRouter = Router();
+
+iamRouter.use(requireModule('iam'));
 
 iamRouter.get('/users', requirePermission('iam.user.read'), ctrl.listUsers);
 iamRouter.post('/users', requirePermission('iam.user.create'), ctrl.createUser);

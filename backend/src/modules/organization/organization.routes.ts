@@ -1,5 +1,6 @@
 ﻿import { Router } from 'express';
 import { requirePermission } from '../iam/iam.middleware.js';
+import { requireModule } from '../modules/modules.middleware.js';
 import {
   createCompany,
   createFactory,
@@ -15,6 +16,8 @@ import {
 
 /** Section 4 — Organization (Company + Factory) — permission-gated in Section 5 */
 export const organizationRouter = Router();
+
+organizationRouter.use(requireModule('org'));
 
 organizationRouter.get('/companies', requirePermission('org.company.manage'), listCompanies);
 organizationRouter.post('/companies', requirePermission('org.company.manage'), createCompany);

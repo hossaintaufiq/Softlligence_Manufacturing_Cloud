@@ -4,44 +4,84 @@ import { AppError } from '../../common/errors/AppError.js';
 import { MODULE_CATALOG } from './modules.catalog.js';
 
 export async function seedModuleCatalog() {
-  for (const item of MODULE_CATALOG) {
-    await prisma.moduleCatalog.upsert({
-      where: { code: item.code },
-      update: {
-        name: item.name,
-        description: item.description,
-        category: item.category,
-        isCore: item.isCore,
-        defaultEnabled: item.defaultEnabled,
-      },
-      create: {
+  const existing = await prisma.moduleCatalog.findMany({
+    select: { code: true, name: true, description: true, category: true, isCore: true, defaultEnabled: true },
+  });
+  const byCode = new Map(existing.map((row) => [row.code, row]));
+
+  const missing = MODULE_CATALOG.filter((item) => !byCode.has(item.code));
+  if (missing.length > 0) {
+    await prisma.moduleCatalog.createMany({
+      data: missing.map((item) => ({
         code: item.code,
         name: item.name,
         description: item.description,
         category: item.category,
         isCore: item.isCore,
         defaultEnabled: item.defaultEnabled,
-      },
+      })),
+      skipDuplicates: true,
     });
   }
+
+  const stale = MODULE_CATALOG.filter((item) => {
+    const row = byCode.get(item.code);
+    return (
+      row &&
+      (row.name !== item.name ||
+        row.description !== item.description ||
+        row.category !== item.category ||
+        row.isCore !== item.isCore ||
+        row.defaultEnabled !== item.defaultEnabled)
+    );
+  });
+
+  await Promise.all(
+    stale.map((item) =>
+      prisma.moduleCatalog.update({
+        where: { code: item.code },
+        data: {
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          isCore: item.isCore,
+          defaultEnabled: item.defaultEnabled,
+        },
+      }),
+    ),
+  );
 }
 
+/** Ensure default module rows exist for a tenant (idempotent). */
 export async function ensureTenantModuleDefaults(tenantId: string) {
   await seedModuleCatalog();
-  const catalog = await prisma.moduleCatalog.findMany();
+  const catalog = await prisma.moduleCatalog.findMany({
+    select: { code: true, defaultEnabled: true },
+  });
 
-  for (const item of catalog) {
-    await prisma.tenantModule.upsert({
-      where: {
-        tenantId_moduleCode: { tenantId, moduleCode: item.code },
-      },
-      update: {},
-      create: {
-        tenantId,
-        moduleCode: item.code,
-        enabled: item.defaultEnabled,
-      },
-    });
+  const existing = await prisma.tenantModule.findMany({
+    where: { tenantId },
+    select: { moduleCode: true },
+  });
+  const existingCodes = new Set(existing.map((row) => row.moduleCode));
+
+  const missing = catalog.filter((item) => !existingCodes.has(item.code));
+  if (missing.length === 0) return;
+
+  await prisma.tenantModule.createMany({
+    data: missing.map((item) => ({
+      tenantId,
+      moduleCode: item.code,
+      enabled: item.defaultEnabled,
+    })),
+    skipDuplicates: true,
+  });
+}
+
+async function backfillTenantModulesIfEmpty(tenantId: string) {
+  const count = await prisma.tenantModule.count({ where: { tenantId } });
+  if (count === 0) {
+    await ensureTenantModuleDefaults(tenantId);
   }
 }
 
@@ -62,7 +102,7 @@ export async function listModuleCatalog() {
 }
 
 export async function listTenantModules(tenantId: string) {
-  await ensureTenantModuleDefaults(tenantId);
+  await backfillTenantModulesIfEmpty(tenantId);
   const rows = await prisma.tenantModule.findMany({
     where: { tenantId },
     include: { module: true },
@@ -84,7 +124,7 @@ export async function listTenantModules(tenantId: string) {
 }
 
 export async function getTenantEntitlements(tenantId: string): Promise<string[]> {
-  await ensureTenantModuleDefaults(tenantId);
+  await backfillTenantModulesIfEmpty(tenantId);
   const rows = await prisma.tenantModule.findMany({
     where: { tenantId, enabled: true },
     select: { moduleCode: true },
@@ -97,7 +137,15 @@ export async function isModuleEnabledForTenant(tenantId: string, moduleCode: str
     where: { tenantId_moduleCode: { tenantId, moduleCode } },
     select: { enabled: true },
   });
-  return row?.enabled ?? false;
+  if (!row) {
+    await backfillTenantModulesIfEmpty(tenantId);
+    const refreshed = await prisma.tenantModule.findUnique({
+      where: { tenantId_moduleCode: { tenantId, moduleCode } },
+      select: { enabled: true },
+    });
+    return refreshed?.enabled ?? false;
+  }
+  return row.enabled;
 }
 
 export async function toggleTenantModule(
@@ -114,6 +162,8 @@ export async function toggleTenantModule(
   if (moduleItem.isCore && !input.enabled) {
     throw new AppError(400, `Core module '${moduleCode}' cannot be disabled`, 'VALIDATION_ERROR');
   }
+
+  await backfillTenantModulesIfEmpty(tenantId);
 
   const updated = await prisma.tenantModule.upsert({
     where: { tenantId_moduleCode: { tenantId, moduleCode } },
@@ -138,6 +188,9 @@ export async function toggleTenantModule(
     enabledAt: updated.enabledAt.toISOString(),
     configJson: updated.configJson,
     name: updated.module.name,
+    description: updated.module.description,
+    category: updated.module.category,
+    isCore: updated.module.isCore,
   };
 }
 

@@ -95,6 +95,10 @@ export async function createTenant(input: {
         deletedAt: null,
       },
     });
+    const { ensureTenantIamDefaults } = await import('../iam/iam.permissions.js');
+    const { ensureTenantModuleDefaults } = await import('../modules/modules.service.js');
+    await ensureTenantIamDefaults(revived.id);
+    await ensureTenantModuleDefaults(revived.id);
     return mapTenant(revived);
   }
 
@@ -108,7 +112,9 @@ export async function createTenant(input: {
   });
 
   const { ensureTenantIamDefaults } = await import('../iam/iam.permissions.js');
+  const { ensureTenantModuleDefaults } = await import('../modules/modules.service.js');
   await ensureTenantIamDefaults(created.id);
+  await ensureTenantModuleDefaults(created.id);
 
   return mapTenant(created);
 }

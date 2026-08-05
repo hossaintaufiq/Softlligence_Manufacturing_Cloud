@@ -34,6 +34,7 @@ declare global {
         sessionId: string;
         payload: AccessTokenPayload;
         permissions?: Set<string>;
+        entitlements?: Set<string>;
       };
     }
   }
