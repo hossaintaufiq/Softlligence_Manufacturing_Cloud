@@ -1,9 +1,11 @@
 ﻿import { Router } from 'express';
-import { AppError } from '../../common/errors/AppError.js';
+import { login, logout, me, refresh } from './identity.controller.js';
+import { requireAuth } from './identity.middleware.js';
 
-/** Section 2 — Identity & Auth (stub) */
+/** Section 2 — Identity & Auth */
 export const identityRouter = Router();
 
-identityRouter.use((_req, _res, next) => {
-  next(new AppError(501, 'Identity module not implemented yet (Section 2)', 'NOT_IMPLEMENTED'));
-});
+identityRouter.post('/login', login);
+identityRouter.post('/refresh', refresh);
+identityRouter.post('/logout', logout);
+identityRouter.get('/me', requireAuth, me);

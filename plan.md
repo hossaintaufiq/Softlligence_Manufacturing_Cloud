@@ -76,6 +76,7 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 - `/auth/me`
 - MFA for admin roles (can be Section 2b)
 - No demo passwords in client bundle
+- **As-built:** [`documents/sections/SECTION_02_Identity_Auth.md`](./documents/sections/SECTION_02_Identity_Auth.md)
 
 ### Section 3 — Tenancy & Super Admin
 - Tenant CRUD, status active/suspended
@@ -146,7 +147,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | Section | Status |
 |---------|--------|
 | 1 Foundation | Done — local web :3000 + api :5001, Prisma P0, health/ready green |
-| 2 Auth | Not started |
+| 2 Auth | Done — login/refresh/logout/me + `/login` UI (MFA → 2b) |
 | 3 Tenancy | Not started |
 | 4 Organization | Not started |
 | 5 IAM | Not started |
@@ -178,4 +179,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 2** for Identity & Auth (login, sessions, `/auth/me`).
+Say **Start Section 3** for Tenancy & Super Admin (tenants, suspend, Super Admin shell).

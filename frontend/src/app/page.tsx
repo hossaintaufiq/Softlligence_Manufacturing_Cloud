@@ -1,4 +1,5 @@
 import { StatusPanel } from '@/components/foundation/StatusPanel';
+import { SessionPanel } from '@/components/auth/SessionPanel';
 
 export default function HomePage() {
   return (
@@ -11,9 +12,10 @@ export default function HomePage() {
           Softlligence Manufacturing Cloud
         </h1>
         <p className="max-w-lg text-[0.95rem] leading-relaxed text-mute">
-          Multi-tenant manufacturing platform foundation — Section 1 is live locally.
+          Multi-tenant manufacturing platform — Foundation and Identity are live locally.
         </p>
       </header>
+      <SessionPanel />
       <StatusPanel />
     </main>
   );

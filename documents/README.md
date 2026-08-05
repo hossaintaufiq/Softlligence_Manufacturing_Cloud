@@ -50,6 +50,7 @@ What was **actually shipped** per plan section (complements specs 01–05):
 |---------|------|--------|
 | Series index | [`sections/README.md`](./sections/README.md) | Active |
 | 1 Foundation | [`sections/SECTION_01_Foundation.md`](./sections/SECTION_01_Foundation.md) | Done |
+| 2 Identity & Auth | [`sections/SECTION_02_Identity_Auth.md`](./sections/SECTION_02_Identity_Auth.md) | Done (MFA → 2b) |
 
 ---
 

@@ -11,7 +11,7 @@ These documents sit **beside** the master specs (01–05). Specs define the targ
 | Section | Document | Status |
 |---------|----------|--------|
 | 1 Foundation | [`SECTION_01_Foundation.md`](./SECTION_01_Foundation.md) | Done |
-| 2 Identity & Auth | — | Not started |
+| 2 Identity & Auth | [`SECTION_02_Identity_Auth.md`](./SECTION_02_Identity_Auth.md) | Done (MFA → 2b) |
 | 3 Tenancy & Super Admin | — | Not started |
 | 4 Organization | — | Not started |
 | 5 IAM | — | Not started |
