@@ -19,8 +19,10 @@ model Tenant {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  users    User[]
-  sessions AuthSession[]
+  users     User[]
+  sessions  AuthSession[]
+  companies Company[]
+  factories Factory[]
 
   @@map("tenant")
 }
@@ -65,4 +67,48 @@ model AuthSession {
 
   @@index([userId])
   @@map("auth_session")
+}
+
+/// Legal / operating company within a tenant (Document 02 §20.2)
+model Company {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  name        String
+  code        String    @db.VarChar(64)
+  taxId       String?   @map("tax_id")
+  currency    String    @default("USD") @db.Char(3)
+  addressJson Json?     @map("address_json")
+  status      String    @default("active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  factories Factory[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("company")
+}
+
+/// Factory / site under a company (Document 02 §20.3)
+model Factory {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  companyId   String    @map("company_id")
+  name        String
+  code        String    @db.VarChar(64)
+  timezone    String    @default("UTC")
+  addressJson Json?     @map("address_json")
+  status      String    @default("active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([tenantId, companyId, code])
+  @@index([tenantId, companyId])
+  @@map("factory")
 }

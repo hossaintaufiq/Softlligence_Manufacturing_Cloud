@@ -87,6 +87,7 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 ### Section 4 — Organization
 - Company + Factory required
 - Plant / Warehouse / Department: add when Inventory needs them (still before Section 7)
+- **As-built:** [`documents/sections/SECTION_04_Organization.md`](./documents/sections/SECTION_04_Organization.md)
 
 ### Section 5 — IAM
 - Invite users, roles, permissions
@@ -150,7 +151,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 1 Foundation | Done — local web :3000 + api :5001, Prisma P0, health/ready green |
 | 2 Auth | Done — login/refresh/logout/me + `/login` UI (MFA → 2b) |
 | 3 Tenancy | Done — platform tenants CRUD + `/admin` Super Admin |
-| 4 Organization | Not started |
+| 4 Organization | Done — companies/factories APIs + `/org` UI |
 | 5 IAM | Not started |
 | 6 Modules | Not started |
 | 7 Inventory | Not started |
@@ -180,4 +181,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 4** for Organization (Company → Factory).
+Say **Start Section 5** for IAM (users, roles, permissions, factory scope).

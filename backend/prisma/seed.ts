@@ -5,8 +5,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 /**
- * Sections 1–3 seed — demo tenant admin + platform Super Admin.
- * Passwords come from env only (never shipped in the frontend bundle).
+ * Sections 1–4 seed — platform admin, demo tenant admin, default company + factory.
  */
 async function main() {
   const demoPassword = process.env.SEED_DEMO_PASSWORD || 'password123';
@@ -76,10 +75,58 @@ async function main() {
     });
   }
 
+  const company = await prisma.company.upsert({
+    where: {
+      tenantId_code: {
+        tenantId: tenant.id,
+        code: 'DEMO',
+      },
+    },
+    update: {
+      name: 'Demo Manufacturing Co Ltd',
+      status: 'active',
+      currency: 'USD',
+      deletedAt: null,
+    },
+    create: {
+      tenantId: tenant.id,
+      name: 'Demo Manufacturing Co Ltd',
+      code: 'DEMO',
+      currency: 'USD',
+      status: 'active',
+    },
+  });
+
+  await prisma.factory.upsert({
+    where: {
+      tenantId_companyId_code: {
+        tenantId: tenant.id,
+        companyId: company.id,
+        code: 'MAIN',
+      },
+    },
+    update: {
+      name: 'Main Plant',
+      timezone: 'Asia/Dhaka',
+      status: 'active',
+      deletedAt: null,
+    },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      name: 'Main Plant',
+      code: 'MAIN',
+      timezone: 'Asia/Dhaka',
+      status: 'active',
+    },
+  });
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
     platformAdmin: platformEmail,
+    company: company.code,
+    factory: 'MAIN',
   });
 }
 

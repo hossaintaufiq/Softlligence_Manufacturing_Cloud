@@ -115,6 +115,15 @@ export function SessionPanel() {
         </Link>
       ) : null}
 
+      {me.user.tenantId ? (
+        <Link
+          href="/org"
+          className="mt-4 ml-0 inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas sm:ml-3"
+        >
+          Organization
+        </Link>
+      ) : null}
+
       {error ? <p className="mt-3 text-sm text-bad">{error}</p> : null}
     </section>
   );

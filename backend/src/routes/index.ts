@@ -14,7 +14,7 @@ export const apiRouter = Router();
 apiRouter.use(healthRouter);
 apiRouter.use('/auth', identityRouter);
 apiRouter.use('/platform', platformTenancyRouter);
-apiRouter.use('/org', organizationRouter);
+apiRouter.use(organizationRouter);
 apiRouter.use('/iam', iamRouter);
 apiRouter.use('/modules', modulesRouter);
 apiRouter.use('/inventory', inventoryRouter);
