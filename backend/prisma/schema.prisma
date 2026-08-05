@@ -25,27 +25,29 @@ model Tenant {
   @@map("tenant")
 }
 
-/// Login identity (Document 02 §19.3) — auth filled in Section 2
+/// Login identity (Document 02 §19.3)
 model User {
-  id           String    @id @default(uuid())
-  tenantId     String?   @map("tenant_id")
-  email        String
-  name         String
-  passwordHash String?   @map("password_hash")
-  status       String    @default("active") // active | invited | deactivated
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deactivatedAt DateTime? @map("deactivated_at")
+  id              String    @id @default(uuid())
+  tenantId        String?   @map("tenant_id")
+  email           String
+  name            String
+  passwordHash    String?   @map("password_hash")
+  status          String    @default("active") // active | invited | deactivated
+  isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deactivatedAt   DateTime? @map("deactivated_at")
 
   tenant   Tenant?       @relation(fields: [tenantId], references: [id])
   sessions AuthSession[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
+  @@index([email])
   @@map("user_account")
 }
 
-/// Server session registry (Document 02 §19.4) — used from Section 2
+/// Server session registry (Document 02 §19.4)
 model AuthSession {
   id               String    @id @default(uuid())
   userId           String    @map("user_id")

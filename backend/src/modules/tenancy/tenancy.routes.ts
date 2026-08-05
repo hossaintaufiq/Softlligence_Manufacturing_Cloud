@@ -1,9 +1,22 @@
 ﻿import { Router } from 'express';
-import { AppError } from '../../common/errors/AppError.js';
+import { requirePlatformAdmin } from './tenancy.middleware.js';
+import {
+  createTenant,
+  getTenant,
+  listTenants,
+  reactivateTenant,
+  suspendTenant,
+  updateTenant,
+} from './tenancy.controller.js';
 
-/** Section 3 — Tenancy (stub) */
-export const tenancyRouter = Router();
+/** Section 3 — Platform tenancy (Super Admin) */
+export const platformTenancyRouter = Router();
 
-tenancyRouter.use((_req, _res, next) => {
-  next(new AppError(501, 'Tenancy module not implemented yet (Section 3)', 'NOT_IMPLEMENTED'));
-});
+platformTenancyRouter.use(requirePlatformAdmin);
+
+platformTenancyRouter.get('/tenants', listTenants);
+platformTenancyRouter.post('/tenants', createTenant);
+platformTenancyRouter.get('/tenants/:id', getTenant);
+platformTenancyRouter.patch('/tenants/:id', updateTenant);
+platformTenancyRouter.post('/tenants/:id/suspend', suspendTenant);
+platformTenancyRouter.post('/tenants/:id/reactivate', reactivateTenant);

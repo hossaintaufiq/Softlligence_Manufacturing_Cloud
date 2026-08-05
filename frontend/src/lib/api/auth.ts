@@ -4,6 +4,7 @@ export type AuthUser = {
   name: string;
   status: string;
   tenantId: string | null;
+  isPlatformAdmin: boolean;
 };
 
 export type AuthTenant = {

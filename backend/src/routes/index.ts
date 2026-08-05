@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { healthRouter } from '../modules/health/health.routes.js';
 import { identityRouter } from '../modules/identity/identity.routes.js';
-import { tenancyRouter } from '../modules/tenancy/tenancy.routes.js';
+import { platformTenancyRouter } from '../modules/tenancy/tenancy.routes.js';
 import { organizationRouter } from '../modules/organization/organization.routes.js';
 import { iamRouter } from '../modules/iam/iam.routes.js';
 import { modulesRouter } from '../modules/modules/modules.routes.js';
@@ -13,7 +13,7 @@ export const apiRouter = Router();
 
 apiRouter.use(healthRouter);
 apiRouter.use('/auth', identityRouter);
-apiRouter.use('/tenants', tenancyRouter);
+apiRouter.use('/platform', platformTenancyRouter);
 apiRouter.use('/org', organizationRouter);
 apiRouter.use('/iam', iamRouter);
 apiRouter.use('/modules', modulesRouter);

@@ -47,6 +47,7 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
         name: session.user.name,
         status: session.user.status,
         tenantId: session.user.tenantId,
+        isPlatformAdmin: session.user.isPlatformAdmin,
       },
       tenant: session.user.tenant
         ? {

@@ -16,6 +16,7 @@ function mapUser(user: {
   name: string;
   status: string;
   tenantId: string | null;
+  isPlatformAdmin: boolean;
 }): AuthUser {
   return {
     id: user.id,
@@ -23,6 +24,7 @@ function mapUser(user: {
     name: user.name,
     status: user.status,
     tenantId: user.tenantId,
+    isPlatformAdmin: user.isPlatformAdmin,
   };
 }
 
@@ -60,6 +62,7 @@ async function issueSession(params: {
     name: string;
     status: string;
     tenantId: string | null;
+    isPlatformAdmin: boolean;
     tenant: {
       id: string;
       slug: string;

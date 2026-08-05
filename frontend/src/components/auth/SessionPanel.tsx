@@ -98,13 +98,22 @@ export function SessionPanel() {
         <div className="flex justify-between gap-4 border-t border-line pt-3">
           <dt className="text-mute">Tenant</dt>
           <dd className="text-right font-medium text-ink">
-            {me.tenant?.name ?? '—'}
+            {me.tenant?.name ?? (me.user.isPlatformAdmin ? 'Platform' : '—')}
             {me.tenant?.slug ? (
               <span className="mt-0.5 block font-normal text-mute">{me.tenant.slug}</span>
             ) : null}
           </dd>
         </div>
       </dl>
+
+      {me.user.isPlatformAdmin ? (
+        <Link
+          href="/admin"
+          className="mt-4 inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-strong"
+        >
+          Open Super Admin
+        </Link>
+      ) : null}
 
       {error ? <p className="mt-3 text-sm text-bad">{error}</p> : null}
     </section>

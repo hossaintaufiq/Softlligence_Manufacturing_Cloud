@@ -82,6 +82,7 @@ Full steps: [`documents/DEPLOY.md`](./documents/DEPLOY.md)
 - Tenant CRUD, status active/suspended
 - Super Admin portal (minimal)
 - Billing = **stubs only** (plan name on tenant)
+- **As-built:** [`documents/sections/SECTION_03_Tenancy_Super_Admin.md`](./documents/sections/SECTION_03_Tenancy_Super_Admin.md)
 
 ### Section 4 — Organization
 - Company + Factory required
@@ -148,7 +149,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 |---------|--------|
 | 1 Foundation | Done — local web :3000 + api :5001, Prisma P0, health/ready green |
 | 2 Auth | Done — login/refresh/logout/me + `/login` UI (MFA → 2b) |
-| 3 Tenancy | Not started |
+| 3 Tenancy | Done — platform tenants CRUD + `/admin` Super Admin |
 | 4 Organization | Not started |
 | 5 IAM | Not started |
 | 6 Modules | Not started |
@@ -179,4 +180,4 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 
 ## Next command
 
-Say **Start Section 3** for Tenancy & Super Admin (tenants, suspend, Super Admin shell).
+Say **Start Section 4** for Organization (Company → Factory).

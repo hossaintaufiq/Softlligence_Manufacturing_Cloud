@@ -5,12 +5,14 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 /**
- * Section 1–2 seed — demo tenant + admin with password from env.
- * Default password is only used server-side in this script (never shipped to the client bundle).
+ * Sections 1–3 seed — demo tenant admin + platform Super Admin.
+ * Passwords come from env only (never shipped in the frontend bundle).
  */
 async function main() {
   const demoPassword = process.env.SEED_DEMO_PASSWORD || 'password123';
-  const passwordHash = await bcrypt.hash(demoPassword, 12);
+  const platformPassword = process.env.SEED_PLATFORM_PASSWORD || 'platform123';
+  const demoHash = await bcrypt.hash(demoPassword, 12);
+  const platformHash = await bcrypt.hash(platformPassword, 12);
 
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'demo' },
@@ -33,21 +35,51 @@ async function main() {
     update: {
       name: 'Demo Admin',
       status: 'active',
-      passwordHash,
+      passwordHash: demoHash,
+      isPlatformAdmin: false,
     },
     create: {
       tenantId: tenant.id,
       email: 'admin@demo.local',
       name: 'Demo Admin',
       status: 'active',
-      passwordHash,
+      passwordHash: demoHash,
+      isPlatformAdmin: false,
     },
   });
 
+  const platformEmail = 'superadmin@softlligence.local';
+  const existingPlatform = await prisma.user.findFirst({
+    where: { email: platformEmail, tenantId: null },
+  });
+
+  if (existingPlatform) {
+    await prisma.user.update({
+      where: { id: existingPlatform.id },
+      data: {
+        name: 'Softlligence Super Admin',
+        status: 'active',
+        passwordHash: platformHash,
+        isPlatformAdmin: true,
+      },
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        tenantId: null,
+        email: platformEmail,
+        name: 'Softlligence Super Admin',
+        status: 'active',
+        passwordHash: platformHash,
+        isPlatformAdmin: true,
+      },
+    });
+  }
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
-    user: 'admin@demo.local',
-    passwordSource: process.env.SEED_DEMO_PASSWORD ? 'SEED_DEMO_PASSWORD' : 'default',
+    tenantAdmin: 'admin@demo.local',
+    platformAdmin: platformEmail,
   });
 }
 
