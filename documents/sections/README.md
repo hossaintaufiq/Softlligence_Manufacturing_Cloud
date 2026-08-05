@@ -15,8 +15,8 @@ These documents sit **beside** the master specs (01–05). Specs define the targ
 | 3 Tenancy & Super Admin | [`SECTION_03_Tenancy_Super_Admin.md`](./SECTION_03_Tenancy_Super_Admin.md) | Done |
 | 4 Organization | [`SECTION_04_Organization.md`](./SECTION_04_Organization.md) | Done |
 | 5 IAM | [`SECTION_05_IAM.md`](./SECTION_05_IAM.md) | Done |
-| 6 Modules & Entitlements | — | Not started |
-| 7 Inventory Core | — | Not started |
+| 6 Modules & Entitlements | [`SECTION_06_Modules.md`](./SECTION_06_Modules.md) | Done |
+| 7 Inventory Core | [`SECTION_07_Inventory.md`](./SECTION_07_Inventory.md) | Done |
 | 8 Manufacturing Core | — | Not started |
 | 9 Commercial Ops | — | Not started |
 | 10 Steel + Live Deploy | — | Not started |

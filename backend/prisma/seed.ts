@@ -5,6 +5,7 @@ import process from 'node:process';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { ensureTenantIamDefaults } from '../src/modules/iam/iam.permissions.js';
+import { ensureTenantModuleDefaults } from '../src/modules/modules/modules.service.js';
 
 /**
  * Sections 1–7 seed — platform admin, demo tenant, org, IAM, modules, inventory.
@@ -126,8 +127,27 @@ async function main() {
   });
 
   const { adminRoleId } = await ensureTenantIamDefaults(tenant.id);
-  const { ensureTenantModuleDefaults } = await import('../src/modules/modules/modules.service.js');
   await ensureTenantModuleDefaults(tenant.id);
+
+  // --- Modules & Custom Fields Seed (Section 6) ---
+  await prisma.customFieldDefinition.upsert({
+    where: {
+      tenantId_entityType_fieldKey: {
+        tenantId: tenant.id,
+        entityType: 'item',
+        fieldKey: 'heat_number',
+      },
+    },
+    update: { label: 'Heat / Melt Number', dataType: 'string', isRequired: false },
+    create: {
+      tenantId: tenant.id,
+      entityType: 'item',
+      fieldKey: 'heat_number',
+      label: 'Heat / Melt Number',
+      dataType: 'string',
+      isRequired: false,
+    },
+  });
 
   await prisma.userRole.upsert({
     where: {

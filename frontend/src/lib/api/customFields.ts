@@ -1,4 +1,4 @@
-import { apiBase, parseJson } from './client.js';
+import { apiBase, parseJson } from './client';
 
 export type CustomFieldItem = {
   id: string;
