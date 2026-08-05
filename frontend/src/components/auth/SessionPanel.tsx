@@ -116,20 +116,26 @@ export function SessionPanel() {
       ) : null}
 
       {me.user.tenantId ? (
-        <>
+        <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/org"
-            className="mt-4 inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
+            className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
           >
             Organization
           </Link>
           <Link
             href="/iam"
-            className="mt-4 ml-0 inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas sm:ml-3"
+            className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
           >
             IAM
           </Link>
-        </>
+          <Link
+            href="/modules"
+            className="inline-flex rounded-lg border border-indigo-200 bg-indigo-50/50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+          >
+            Modules & Entitlements
+          </Link>
+        </div>
       ) : null}
 
       {error ? <p className="mt-3 text-sm text-bad">{error}</p> : null}

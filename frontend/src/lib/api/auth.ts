@@ -22,6 +22,7 @@ export type MeResponse = {
   tenant: AuthTenant | null;
   permissions: string[];
   scopes?: { factories: string[] | null };
+  entitlements?: { modules: string[] };
 };
 
 export type LoginResponse = {

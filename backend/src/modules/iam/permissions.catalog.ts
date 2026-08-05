@@ -11,6 +11,9 @@ export const PERMISSIONS = [
   { code: 'iam.role.manage', moduleCode: 'iam', description: 'Create and edit roles/permissions' },
   { code: 'org.company.manage', moduleCode: 'org', description: 'Manage companies' },
   { code: 'org.factory.manage', moduleCode: 'org', description: 'Manage factories' },
+  { code: 'modules.read', moduleCode: 'modules', description: 'View tenant enabled modules and entitlements' },
+  { code: 'modules.manage', moduleCode: 'modules', description: 'Enable or disable modules for tenant' },
+  { code: 'custom_fields.manage', moduleCode: 'modules', description: 'Manage tenant-scoped custom field definitions' },
 ] as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[number]['code'];

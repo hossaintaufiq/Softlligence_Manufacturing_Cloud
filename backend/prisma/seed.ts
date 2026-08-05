@@ -123,6 +123,9 @@ async function main() {
   });
 
   const { adminRoleId } = await ensureTenantIamDefaults(tenant.id);
+  const { ensureTenantModuleDefaults } = await import('../src/modules/modules/modules.service.js');
+  await ensureTenantModuleDefaults(tenant.id);
+
   await prisma.userRole.upsert({
     where: {
       userId_roleId: {

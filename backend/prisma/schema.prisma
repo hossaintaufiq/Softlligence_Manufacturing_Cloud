@@ -18,13 +18,15 @@ model Tenant {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  users      User[]
-  sessions   AuthSession[]
-  companies  Company[]
-  factories  Factory[]
-  roles      Role[]
-  userRoles  UserRole[]
-  userScopes UserScope[]
+  users         User[]
+  sessions      AuthSession[]
+  companies     Company[]
+  factories     Factory[]
+  roles         Role[]
+  userRoles     UserRole[]
+  userScopes    UserScope[]
+  tenantModules TenantModule[]
+  customFields  CustomFieldDefinition[]
 
   @@map("tenant")
 }
@@ -191,3 +193,59 @@ model UserScope {
   @@index([tenantId, userId])
   @@map("user_scope")
 }
+
+/// Global system module catalog (Document 02 §22)
+model ModuleCatalog {
+  id             String   @id @default(uuid())
+  code           String   @unique @db.VarChar(64)
+  name           String
+  description    String?
+  category       String   @default("core") @db.VarChar(64)
+  isCore         Boolean  @default(false) @map("is_core")
+  defaultEnabled Boolean  @default(true) @map("default_enabled")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tenantModules TenantModule[]
+
+  @@map("module_catalog")
+}
+
+/// Tenant-scoped module activation & config (Document 02 §22, §31)
+model TenantModule {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  moduleCode  String   @map("module_code") @db.VarChar(64)
+  enabled     Boolean  @default(true)
+  configJson  Json?    @map("config_json")
+  enabledAt   DateTime @default(now()) @map("enabled_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id])
+  module ModuleCatalog @relation(fields: [moduleCode], references: [code])
+
+  @@unique([tenantId, moduleCode])
+  @@index([tenantId])
+  @@map("tenant_module")
+}
+
+/// Tenant-scoped custom metadata field definitions (ADR-0011, Document 02 §31)
+model CustomFieldDefinition {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  entityType  String    @map("entity_type") @db.VarChar(64) // e.g. factory, item, work_order
+  fieldKey    String    @map("field_key") @db.VarChar(64)
+  label       String
+  dataType    String    @default("string") @map("data_type") @db.VarChar(32) // string, number, boolean, select, date
+  isRequired  Boolean   @default(false) @map("is_required")
+  optionsJson Json?     @map("options_json")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, entityType, fieldKey])
+  @@index([tenantId, entityType])
+  @@map("custom_field_definition")
+}
+

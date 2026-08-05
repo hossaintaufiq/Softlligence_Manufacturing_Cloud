@@ -232,8 +232,11 @@ export async function getMe(userId: string) {
   }
 
   const { getUserPermissionCodes, getUserFactoryScopeIds } = await import('../iam/iam.permissions.js');
+  const { getTenantEntitlements } = await import('../modules/modules.service.js');
+
   const permissions = user.isPlatformAdmin ? ['*'] : await getUserPermissionCodes(user.id);
   const factoryScopeIds = user.isPlatformAdmin ? null : await getUserFactoryScopeIds(user.id);
+  const enabledModules = user.tenantId ? await getTenantEntitlements(user.tenantId) : ['org', 'iam', 'inventory', 'manufacturing', 'commercial', 'steel'];
 
   return {
     user: mapUser(user),
@@ -241,6 +244,9 @@ export async function getMe(userId: string) {
     permissions,
     scopes: {
       factories: factoryScopeIds,
+    },
+    entitlements: {
+      modules: enabledModules,
     },
   };
 }
