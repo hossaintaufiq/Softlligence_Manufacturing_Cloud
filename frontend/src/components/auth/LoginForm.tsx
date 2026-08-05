@@ -3,9 +3,11 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/api/auth';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 export function LoginForm() {
   const router = useRouter();
+  const { refreshUser } = useWorkspace();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,8 +19,8 @@ export function LoginForm() {
     setPending(true);
     try {
       await login(email.trim(), password);
-      router.replace('/');
-      router.refresh();
+      await refreshUser();
+      // WorkspaceContext will automatically redirect to the correct dashboard based on role
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

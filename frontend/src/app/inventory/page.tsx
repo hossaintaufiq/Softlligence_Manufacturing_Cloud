@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { SessionPanel } from '@/components/auth/SessionPanel';
 import { ItemCatalogPanel } from '@/components/inventory/ItemCatalogPanel';
 import { WarehousePanel } from '@/components/inventory/WarehousePanel';
 import { StockBalancePanel } from '@/components/inventory/StockBalancePanel';
 import { StockLedgerPanel } from '@/components/inventory/StockLedgerPanel';
 import { StockMovementModal } from '@/components/inventory/StockMovementModal';
-
 import { BinLocationPanel } from '@/components/wms/BinLocationPanel';
 import { LotGenealogyViewer } from '@/components/wms/LotGenealogyViewer';
 
@@ -19,7 +17,6 @@ export default function InventoryPage() {
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        <SessionPanel />
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">

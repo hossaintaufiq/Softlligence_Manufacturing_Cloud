@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { fetchMe, refreshSession, type AuthUser, type AuthTenant } from '@/lib/api/auth';
 
 type WorkspaceContextType = {
@@ -16,6 +17,10 @@ type WorkspaceContextType = {
   addRecent: (path: string) => void;
   isCmdPaletteOpen: boolean;
   setIsCmdPaletteOpen: (open: boolean) => void;
+  permissions: string[];
+  scopes: { factories: string[] | null } | null;
+  entitlements: { modules: string[] } | null;
+  refreshUser: () => Promise<void>;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -26,38 +31,86 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [scopes, setScopes] = useState<{ factories: string[] | null } | null>(null);
+  const [entitlements, setEntitlements] = useState<{ modules: string[] } | null>(null);
+
   const [isOperatorMode, setIsOperatorMode] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(['/steel', '/manufacturing', '/inventory']);
   const [recents, setRecents] = useState<string[]>([]);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        let meData;
-        try {
-          meData = await fetchMe();
-        } catch {
-          await refreshSession();
-          meData = await fetchMe();
-        }
-        if (!cancelled && meData?.user) {
-          setUser(meData.user);
-          setTenant(meData.tenant);
-          setIsPlatformAdmin(Boolean(meData.user.isPlatformAdmin));
-        }
-      } catch {
-        // Fallback for dev mode preview if auth server is unreachable
-      } finally {
-        if (!cancelled) setIsLoadingUser(false);
-      }
-    })();
+  const pathname = usePathname();
+  const router = useRouter();
 
-    return () => {
-      cancelled = true;
-    };
+  const resolveUserSession = async () => {
+    try {
+      let meData;
+      try {
+        meData = await fetchMe();
+      } catch {
+        await refreshSession();
+        meData = await fetchMe();
+      }
+      if (meData?.user) {
+        setUser(meData.user);
+        setTenant(meData.tenant);
+        setIsPlatformAdmin(Boolean(meData.user.isPlatformAdmin));
+        setPermissions(meData.permissions || []);
+        setScopes(meData.scopes || null);
+        setEntitlements(meData.entitlements || null);
+      } else {
+        setUser(null);
+        setTenant(null);
+        setIsPlatformAdmin(false);
+        setPermissions([]);
+        setScopes(null);
+        setEntitlements(null);
+      }
+    } catch {
+      setUser(null);
+      setTenant(null);
+      setIsPlatformAdmin(false);
+      setPermissions([]);
+      setScopes(null);
+      setEntitlements(null);
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
+
+  useEffect(() => {
+    resolveUserSession();
   }, []);
+
+  // Global Routing Middleware Protection
+  useEffect(() => {
+    if (isLoadingUser) return;
+
+    const publicRoutes = ['/login', '/register', '/invite'];
+    const isPublic = publicRoutes.includes(pathname);
+
+    if (!user) {
+      // Unauthenticated users trying to access protected routes go to /login
+      if (!isPublic) {
+        router.replace('/login');
+      }
+    } else {
+      // Authenticated users trying to access /login, /register, /invite, or / go to dashboard
+      if (pathname === '/' || pathname === '/login' || pathname === '/register' || pathname === '/invite') {
+        if (isPlatformAdmin) {
+          router.replace('/admin');
+        } else {
+          router.replace('/dashboard');
+        }
+      }
+
+      // Prevent standard users from entering the platform super admin console
+      if (pathname.startsWith('/admin') && !isPlatformAdmin) {
+        router.replace('/dashboard');
+      }
+    }
+  }, [user, isLoadingUser, pathname, isPlatformAdmin, router]);
 
   useEffect(() => {
     const storedFavs = localStorage.getItem('smc_favorites');
@@ -106,6 +159,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         addRecent,
         isCmdPaletteOpen,
         setIsCmdPaletteOpen,
+        permissions,
+        scopes,
+        entitlements,
+        refreshUser: resolveUserSession,
       }}
     >
       <div className={`${isOperatorMode ? 'operator-mode' : ''}`}>{children}</div>
@@ -120,4 +177,3 @@ export function useWorkspace() {
   }
   return context;
 }
-

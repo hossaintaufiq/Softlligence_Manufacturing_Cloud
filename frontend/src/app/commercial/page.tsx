@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SessionPanel } from '@/components/auth/SessionPanel';
 import {
   fetchParties,
   fetchPurchaseOrders,
@@ -209,8 +208,6 @@ export default function CommercialPage() {
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        <SessionPanel />
-
         {/* Commercial KPI Cards */}
         {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

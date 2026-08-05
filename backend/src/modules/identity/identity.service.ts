@@ -55,7 +55,7 @@ export type AuthBundle = {
   tenant: AuthTenant | null;
 };
 
-async function issueSession(params: {
+export async function issueSession(params: {
   user: {
     id: string;
     email: string;

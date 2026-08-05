@@ -2,13 +2,11 @@
 
 import React from 'react';
 import { AnalyticsPanel } from '@/components/analytics/AnalyticsPanel';
-import { SessionPanel } from '@/components/auth/SessionPanel';
 
 export default function AnalyticsPage() {
   return (
     <main className="min-h-screen bg-slate-100 p-6 space-y-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        <SessionPanel />
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

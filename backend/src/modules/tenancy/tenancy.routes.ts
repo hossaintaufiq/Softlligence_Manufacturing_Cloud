@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { requirePlatformAdmin } from './tenancy.middleware.js';
 import {
   createTenant,
@@ -8,10 +8,14 @@ import {
   suspendTenant,
   updateTenant,
 } from './tenancy.controller.js';
+import { registerOnboarding } from './onboarding.controller.js';
 
-/** Section 3 — Platform tenancy (Super Admin) */
 export const platformTenancyRouter = Router();
 
+// Public onboarding wizard endpoint
+platformTenancyRouter.post('/tenants/onboarding', registerOnboarding);
+
+// Protected super admin endpoints
 platformTenancyRouter.use(requirePlatformAdmin);
 
 platformTenancyRouter.get('/tenants', listTenants);

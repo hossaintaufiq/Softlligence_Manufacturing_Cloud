@@ -1,80 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { fetchMe, logout, refreshSession, type MeResponse } from '@/lib/api/auth';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import { OrgPanel } from '@/components/org/OrgPanel';
 
 export default function OrgPage() {
-  const router = useRouter();
-  const [me, setMe] = useState<MeResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, tenant, isLoadingUser } = useWorkspace();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        let data: MeResponse;
-        try {
-          data = await fetchMe();
-        } catch {
-          await refreshSession();
-          data = await fetchMe();
-        }
-        if (!cancelled) {
-          if (!data.user.tenantId) {
-            router.replace(data.user.isPlatformAdmin ? '/admin' : '/');
-            return;
-          }
-          setMe(data);
-        }
-      } catch {
-        if (!cancelled) router.replace('/login');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
-  if (loading || !me) {
+  if (isLoadingUser || !user) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-16">
-        <p className="text-sm text-mute">Loading organization…</p>
+        <p className="text-sm text-slate-500">Loading organization…</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-5xl px-6 pb-16 pt-12">
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-            {me.tenant?.name ?? 'Workspace'}
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600">
+            {tenant?.name ?? 'Workspace'}
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Organization</h1>
-          <p className="mt-1 text-sm text-mute">Companies and factories for this tenant.</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href="/"
-            className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-canvas"
-          >
-            Home
-          </Link>
-          <button
-            type="button"
-            onClick={async () => {
-              await logout();
-              router.push('/login');
-            }}
-            className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-canvas"
-          >
-            Sign out
-          </button>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Organization</h1>
+          <p className="mt-1 text-sm text-slate-500">Companies and factories for this tenant.</p>
         </div>
       </header>
 

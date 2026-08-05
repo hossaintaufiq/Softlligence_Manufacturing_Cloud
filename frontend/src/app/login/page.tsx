@@ -1,3 +1,6 @@
+'use client';
+
+import React from 'react';
 import Link from 'next/link';
 import { LoginForm } from '@/components/auth/LoginForm';
 
@@ -32,7 +35,13 @@ export default function LoginPage() {
           <LoginForm />
         </div>
 
-        <div className="text-center text-xs text-slate-500 space-y-1">
+        <div className="text-center text-xs text-slate-500 space-y-2">
+          <p>
+            Don't have a corporate workspace?{' '}
+            <Link href="/register" className="font-bold text-indigo-600 hover:text-indigo-500 underline">
+              Create a Workspace
+            </Link>
+          </p>
           <p>Softlligence Manufacturing Cloud • Multi-Tenant Enterprise Platform</p>
         </div>
       </div>

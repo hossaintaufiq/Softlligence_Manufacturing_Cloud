@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { SessionPanel } from '@/components/auth/SessionPanel';
 import { ModuleCatalogPanel } from '@/components/modules/ModuleCatalogPanel';
 import { CustomFieldManagerPanel } from '@/components/modules/CustomFieldManagerPanel';
 
@@ -14,8 +13,6 @@ export default function ModulesPage() {
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        <SessionPanel />
-
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
           <div className="flex border-b border-slate-200 pb-4">
             <button

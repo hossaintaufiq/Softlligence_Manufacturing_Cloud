@@ -10,10 +10,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useWorkspace();
 
-  const isAuthRoute = pathname === '/login';
+  const isAuthRoute = pathname === '/login' || pathname === '/register' || pathname === '/invite';
   const isPublicLanding = pathname === '/' && !user;
 
-  // On /login or unauthenticated home landing, render clean viewport without sidebar/header
+  // On auth routes or unauthenticated home landing, render clean viewport without sidebar/header
   if (isAuthRoute || isPublicLanding) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
