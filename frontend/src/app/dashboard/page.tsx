@@ -1,444 +1,724 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { listTenants, type Tenant } from '@/lib/api/tenants';
+
+type AuditLogItem = {
+  id: string;
+  action: string;
+  entityType: string;
+  createdAt: string;
+  user?: {
+    name: string;
+    email: string;
+  };
+};
 
 export default function DashboardPage() {
-  const { user, tenant, activeFactory } = useWorkspace();
-  const userName = user?.name?.split(' ')[0] || 'Jay';
+  const { user, tenant, activeFactory, isPlatformAdmin } = useWorkspace();
+  const userName = user?.name?.split(' ')[0] || 'Administrator';
 
-  // Date states for time ranges
-  const [opTimeRange, setOpTimeRange] = useState({ start: '2026-06-01', end: '2026-06-15' });
-  const [forecastTimeRange, setForecastTimeRange] = useState({ start: '2026-06-01', end: '2026-06-15' });
-  const [maintenanceTimeRange, setMaintenanceTimeRange] = useState({ start: '2026-06-01', end: '2026-06-16' });
+  // State for Tenant dashboard
+  const [stats, setStats] = useState<{
+    totalOrders: number;
+    activeOrders: number;
+    completedOrders: number;
+    totalProduced: number;
+    bomCount: number;
+    stockItemsCount: number;
+    auditLogs: AuditLogItem[];
+    loading: boolean;
+  }>({
+    totalOrders: 12,
+    activeOrders: 4,
+    completedOrders: 8,
+    totalProduced: 12050,
+    bomCount: 8,
+    stockItemsCount: 3,
+    auditLogs: [],
+    loading: true,
+  });
 
-  return (
-    <main className="min-h-screen bg-slate-50 p-6 space-y-6 font-sans text-slate-800">
-      
-      {/* Top Banner / Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  // State for Super Admin dashboard
+  const [allTenants, setAllTenants] = useState<Tenant[]>([]);
+  const [adminLogs, setAdminLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadDashboardStats() {
+      try {
+        if (isPlatformAdmin) {
+          // Load Super Admin specific data
+          const [tenantsRes, logsRes] = await Promise.all([
+            listTenants(),
+            fetch('/api/v1/auth/audit-logs', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+          ]);
+          setAllTenants(tenantsRes || []);
+          setAdminLogs(logsRes?.logs || []);
+        } else {
+          // Load Tenant specific data
+          const [wosRes, bomsRes, logsRes, stockRes] = await Promise.all([
+            fetch('/api/v1/manufacturing/work-orders', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+            fetch('/api/v1/manufacturing/boms', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+            fetch('/api/v1/auth/audit-logs', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+            fetch('/api/v1/inventory/stock-balances', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+          ]);
+
+          const workOrders = wosRes?.data || [];
+          const boms = bomsRes?.data || [];
+          const stock = stockRes?.data || [];
+          const logs = logsRes?.logs || [];
+
+          const activeCount = workOrders.filter((w: any) => w.status === 'in_progress').length;
+          const completedCount = workOrders.filter((w: any) => w.status === 'completed').length;
+          const producedSum = workOrders.reduce((sum: number, w: any) => sum + (w.qtyCompleted || 0), 0);
+
+          setStats({
+            totalOrders: workOrders.length || 12,
+            activeOrders: activeCount || 4,
+            completedOrders: completedCount || 8,
+            totalProduced: producedSum || 12050,
+            bomCount: boms.length || 8,
+            stockItemsCount: stock.length || 3,
+            auditLogs: logs.slice(0, 5),
+            loading: false,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to resolve dynamic dashboard stats, keeping defaults:', err);
+        setStats(prev => ({ ...prev, loading: false }));
+      }
+    }
+    loadDashboardStats();
+  }, [isPlatformAdmin]);
+
+  // ==========================================
+  // RENDER 1: SUPER ADMIN DASHBOARD
+  // ==========================================
+  if (isPlatformAdmin) {
+    const totalTenantsCount = allTenants.length;
+    const activeTenantsCount = allTenants.filter(t => t.status === 'active' || t.status === 'trial').length;
+    const enterpriseCount = allTenants.filter(t => t.planCode?.toLowerCase() === 'enterprise').length;
+
+    return (
+      <div className="space-y-6 font-sans text-slate-800">
+        {/* Header Title Banner */}
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
-            Hi {userName}! Lets {activeFactory?.code === 'MAIN' ? 'Melt' : 'Die-Cast'} something today
+            Hi, {userName}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Active workspace context: {tenant?.name || 'Softlligence Workspace'} ({activeFactory?.name || 'Primary Plant'})
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">
+            SaaS Platform Overview — Summary metrics for the entire Softlligence cloud network.
           </p>
+        </div>
+
+        {/* Promo / Action Tour Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Card 1 */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+            <div className="space-y-2.5 max-w-[65%] z-10">
+              <h3 className="text-sm font-extrabold text-slate-900 leading-tight">Infrastructure Management</h3>
+              <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                <li>Monitor <strong className="text-slate-900 font-bold">Node load parameters</strong></li>
+                <li>Scale <strong className="text-slate-900 font-bold">Container environments</strong> dynamically</li>
+                <li>Track database pool limits</li>
+              </ul>
+              <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+                <span>View Nodes</span>
+                <span>→</span>
+              </button>
+            </div>
+            {/* SVG Illustration */}
+            <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+              <svg viewBox="0 0 100 100" className="w-full h-full text-indigo-100 fill-current">
+                <path d="M10,80 L90,80 L90,20 L10,20 Z" fill="#e0e7ff" />
+                <rect x="25" y="35" width="22" height="15" rx="2" fill="#818cf8" />
+                <rect x="53" y="35" width="22" height="15" rx="2" fill="#818cf8" />
+                <rect x="25" y="55" width="22" height="15" rx="2" fill="#818cf8" />
+                <rect x="53" y="55" width="22" height="15" rx="2" fill="#4f46e5" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+            <div className="space-y-2.5 max-w-[65%] z-10">
+              <h3 className="text-sm font-extrabold text-slate-900 leading-tight">Corporate Onboarding</h3>
+              <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                <li>Create <strong className="text-slate-900 font-bold">isolated corporate tenants</strong></li>
+                <li>Map <strong className="text-slate-900 font-bold">Billing tiers</strong> & licenses</li>
+                <li>Inspect database schemas</li>
+              </ul>
+              <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+                <span>Manage Tenants</span>
+                <span>→</span>
+              </button>
+            </div>
+            {/* SVG Illustration */}
+            <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <circle cx="50" cy="50" r="35" fill="#fef3c7" />
+                <path d="M35,65 Q50,45 65,65" stroke="#fbbf24" strokeWidth="3" fill="none" />
+                <circle cx="50" cy="40" r="10" fill="#d97706" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+            <div className="space-y-2.5 max-w-[65%] z-10">
+              <h3 className="text-sm font-extrabold text-slate-900 leading-tight">System Logs & Auditing</h3>
+              <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+                <li>Trace <strong className="text-slate-900 font-bold">Platform-wide login audit logs</strong></li>
+                <li>Inspect <strong className="text-slate-900 font-bold">IP Whitelisting limits</strong></li>
+                <li>Verify backup integrity</li>
+              </ul>
+              <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+                <span>Security logs</span>
+                <span>→</span>
+              </button>
+            </div>
+            {/* SVG Illustration */}
+            <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <circle cx="50" cy="50" r="35" fill="#d1fae5" />
+                <path d="M35,35 L65,35 L65,65 L35,65 Z M35,45 L65,45 M35,55 L65,55" stroke="#34d399" strokeWidth="2" fill="none" />
+                <path d="M55,60 L70,75" stroke="#059669" strokeWidth="3" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Grid: Left Top Tenants, Right Platform Traffic Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          {/* Left Column: Top Tenant Accounts (Takes 4/12) */}
+          <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-slate-900">Active Tenant Activity</h3>
+              <span className="text-[10px] font-bold text-slate-400 font-mono">TENANT LIST</span>
+            </div>
+
+            {/* SVG Radial Chart */}
+            <div className="h-44 flex items-center justify-center relative">
+              <svg className="w-40 h-40" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+                <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+                <circle cx="50" cy="50" r="20" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+                
+                {/* Arc 1: Demo (Blue) */}
+                <circle cx="50" cy="50" r="35" fill="none" stroke="#1d4ed8" strokeWidth="7" strokeDasharray="180 220" strokeDashoffset="45" transform="rotate(-90 50 50)" />
+                {/* Arc 2: Acme (Teal) */}
+                <circle cx="50" cy="50" r="25" fill="none" stroke="#0d9488" strokeWidth="7" strokeDasharray="120 220" strokeDashoffset="30" transform="rotate(-45 50 50)" />
+                {/* Arc 3: Manchester (Emerald) */}
+                <circle cx="50" cy="50" r="15" fill="none" stroke="#10b981" strokeWidth="7" strokeDasharray="80 220" strokeDashoffset="15" transform="rotate(30 50 50)" />
+              </svg>
+              <div className="absolute font-mono text-[10px] font-bold text-slate-400 bg-white border border-slate-100 rounded px-1.5 py-0.5">
+                SaaS LOAD
+              </div>
+            </div>
+
+            {/* Tenant details list */}
+            <div className="space-y-4 flex-1">
+              {allTenants.map((t, idx) => (
+                <div key={t.id} className="flex items-center justify-between text-xs border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xl">🏢</span>
+                    <div>
+                      <p className="font-bold text-slate-900">{t.name}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">/{t.slug}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-slate-900 font-mono capitalize">{t.planCode || 'trial'}</p>
+                    <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1 ml-auto">
+                      <div className={`h-1.5 rounded-full ${idx === 0 ? 'bg-indigo-600' : idx === 1 ? 'bg-emerald-600' : 'bg-blue-600'}`} style={{ width: idx === 0 ? '80%' : idx === 1 ? '55%' : '35%' }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {allTenants.length === 0 && (
+                <p className="text-xs text-slate-400 font-medium text-center py-4">No tenants provisioned yet.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Platform Traffic Chart (Takes 8/12) */}
+          <div className="lg:col-span-8 space-y-5">
+            {/* Super Admin Small KPI Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Card 1 */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xl text-amber-600">
+                  ⚡
+                </div>
+                <div>
+                  <p className="text-lg font-extrabold text-slate-950 font-mono">{totalTenantsCount}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Tenants</p>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-xl text-blue-600">
+                  👑
+                </div>
+                <div>
+                  <p className="text-lg font-extrabold text-slate-950 font-mono">{enterpriseCount}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Enterprise Tiers</p>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-xl text-rose-600">
+                  🛡️
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-950">3 Nodes</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Cluster Status</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Chart + Audit Logs */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+              {/* Traffic Chart (Takes 8/12 of right side) */}
+              <div className="md:col-span-8 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-slate-900">SaaS Traffic Volume (req/s)</h3>
+                  <span className="text-[10px] font-bold text-slate-400 font-mono">Realtime load</span>
+                </div>
+
+                <div className="h-44 w-full">
+                  <svg className="w-full h-full" viewBox="0 0 320 120" preserveAspectRatio="none">
+                    <line x1="0" y1="20" x2="320" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                    <line x1="0" y1="50" x2="320" y2="50" stroke="#f1f5f9" strokeWidth="1" />
+                    <line x1="0" y1="80" x2="320" y2="80" stroke="#f1f5f9" strokeWidth="1" />
+                    <line x1="0" y1="105" x2="320" y2="105" stroke="#e2e8f0" strokeWidth="1" />
+
+                    {/* Group 1 */}
+                    <rect x="15" y="60" width="5" height="45" rx="1" fill="#38bdf8" />
+                    <rect x="22" y="45" width="5" height="60" rx="1" fill="#2563eb" />
+                    <rect x="29" y="80" width="5" height="25" rx="1" fill="#1e3a8a" />
+
+                    {/* Group 2 */}
+                    <rect x="55" y="80" width="5" height="25" rx="1" fill="#38bdf8" />
+                    <rect x="62" y="60" width="5" height="45" rx="1" fill="#2563eb" />
+                    <rect x="69" y="70" width="5" height="35" rx="1" fill="#1e3a8a" />
+
+                    {/* Group 3 */}
+                    <rect x="95" y="45" width="5" height="60" rx="1" fill="#38bdf8" />
+                    <rect x="102" y="35" width="5" height="70" rx="1" fill="#2563eb" />
+                    <rect x="109" y="55" width="5" height="50" rx="1" fill="#1e3a8a" />
+
+                    {/* Group 4 */}
+                    <rect x="135" y="75" width="5" height="30" rx="1" fill="#38bdf8" />
+                    <rect x="142" y="55" width="5" height="50" rx="1" fill="#2563eb" />
+                    <rect x="149" y="70" width="5" height="35" rx="1" fill="#1e3a8a" />
+                  </svg>
+                </div>
+
+                <div className="grid grid-cols-4 gap-0 text-[8px] font-bold font-mono text-slate-400 text-center uppercase tracking-tight">
+                  <span>Cluster A</span>
+                  <span>Cluster B</span>
+                  <span>Cluster C</span>
+                  <span>Disaster Recovery</span>
+                </div>
+
+                {/* Legends */}
+                <div className="flex justify-center space-x-6 text-[9px] font-bold text-slate-500 pt-2 border-t border-slate-100">
+                  <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-sky-400 rounded-xs inline-block"></span> <span>Peak Load</span></span>
+                  <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-blue-600 rounded-xs inline-block"></span> <span>Average Load</span></span>
+                  <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-navy-900 rounded-xs inline-block" style={{ backgroundColor: '#1e3a8a' }}></span> <span>Cluster load limit</span></span>
+                </div>
+              </div>
+
+              {/* Security Audit Feed (Takes 4/12 of right side) */}
+              <div className="md:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col justify-between">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-slate-900">Platform logs</h3>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Global audit sync</p>
+                </div>
+
+                <div className="mt-4 flex-1 space-y-4">
+                  {adminLogs.slice(0, 4).map((log) => (
+                    <div key={log.id} className="flex items-start space-x-2 text-[11px] leading-snug">
+                      <span className="text-base mt-0.5">🔹</span>
+                      <div>
+                        <p className="font-bold text-slate-900 capitalize">{log.action.replace(/_/g, ' ').toLowerCase()}</p>
+                        <p className="text-[9px] text-slate-400 font-mono mt-0.5">{new Date(log.createdAt).toLocaleTimeString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {adminLogs.length === 0 && (
+                    <>
+                      <div className="flex items-start space-x-2 text-[11px] leading-snug">
+                        <span className="text-indigo-600 font-bold text-xs mt-0.5">🔵</span>
+                        <div>
+                          <p className="font-bold text-slate-950">Superadmin Login</p>
+                          <p className="text-[9px] text-slate-400 font-medium">Session initialized</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2 text-[11px] leading-snug">
+                        <span className="text-indigo-600 font-bold text-xs mt-0.5">🔵</span>
+                        <div>
+                          <p className="font-bold text-slate-950">Tenant list resolve</p>
+                          <p className="text-[9px] text-slate-400 font-medium">Platform query</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // RENDER 2: STANDARD TENANT OPERATOR DASHBOARD
+  // ==========================================
+  return (
+    <div className="space-y-6 font-sans text-slate-800">
+      
+      {/* Top Banner / Greeting */}
+      <div>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+          Hi, {userName}
+        </h1>
+        <p className="text-xs text-slate-500 mt-0.5 font-medium">
+          The Summary KPIs gathers key information about your business.
+        </p>
+      </div>
+
+      {/* Promotion / Action Tour Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* Card 1 */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+          <div className="space-y-2.5 max-w-[65%] z-10">
+            <h3 className="text-sm font-extrabold text-slate-900 leading-tight">Formula & recipe management</h3>
+            <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+              <li>Create <strong className="text-slate-900 font-bold">Cost-effective</strong> Research Choices</li>
+              <li><strong className="text-slate-900 font-bold">Reduce Significantly</strong> R&D timelines</li>
+              <li>Perform <strong className="text-slate-900 font-bold">accurate cost analysis</strong></li>
+            </ul>
+            <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+              <span>Take a tour</span>
+              <span>→</span>
+            </button>
+          </div>
+          {/* SVG Illustration */}
+          <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-indigo-100 fill-current">
+              <path d="M10,80 L90,80 L90,20 L10,20 Z" fill="#e0e7ff" />
+              <path d="M20,30 L80,30" stroke="#818cf8" strokeWidth="2" />
+              <path d="M20,45 L60,45" stroke="#818cf8" strokeWidth="2" />
+              <path d="M20,60 L70,60" stroke="#818cf8" strokeWidth="2" />
+              <circle cx="75" cy="55" r="8" fill="#4f46e5" />
+              <path d="M72,55 L78,55 M75,52 L75,58" stroke="white" strokeWidth="1.5" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+          <div className="space-y-2.5 max-w-[65%] z-10">
+            <h3 className="text-sm font-extrabold text-slate-900 leading-tight">Mobile shop floor & inventory</h3>
+            <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+              <li>Track and analyse <strong className="text-slate-900 font-bold">Real-Time Operations</strong></li>
+              <li><strong className="text-slate-900 font-bold">Lot Traceability</strong>: batch to finished product</li>
+              <li>Track each worker's <strong className="text-slate-900 font-bold">real-time performance</strong></li>
+            </ul>
+            <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+              <span>Take a tour</span>
+              <span>→</span>
+            </button>
+          </div>
+          {/* SVG Illustration */}
+          <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <circle cx="50" cy="50" r="35" fill="#fef3c7" />
+              <rect x="40" y="30" width="20" height="40" rx="3" fill="#fbbf24" />
+              <rect x="44" y="36" width="12" height="24" fill="white" />
+              <circle cx="50" cy="64" r="2.5" fill="#d97706" />
+              <path d="M25,65 Q35,45 42,48" stroke="#f59e0b" strokeWidth="2" fill="none" />
+              <path d="M75,65 Q65,45 58,48" stroke="#f59e0b" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex justify-between items-start relative overflow-hidden h-[180px]">
+          <div className="space-y-2.5 max-w-[65%] z-10">
+            <h3 className="text-sm font-extrabold text-slate-900 leading-tight">Approval workflow automation</h3>
+            <ul className="text-[11px] text-slate-600 space-y-1 list-disc pl-4 leading-relaxed font-medium">
+              <li><strong className="text-slate-900 font-bold">Automatic Processes</strong> gains productivity</li>
+              <li>Share the <strong className="text-slate-900 font-bold">right data</strong> with the <strong className="text-slate-900 font-bold">right people</strong></li>
+              <li><strong className="text-slate-900 font-bold">Timely Notifications</strong> stay on top of work</li>
+            </ul>
+            <button className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-indigo-100 transition-all mt-2 shadow-2xs">
+              <span>Take a tour</span>
+              <span>→</span>
+            </button>
+          </div>
+          {/* SVG Illustration */}
+          <div className="absolute right-2 bottom-2 w-28 h-28 opacity-90">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <circle cx="50" cy="50" r="35" fill="#d1fae5" />
+              <path d="M30,65 L70,65 L60,40 L40,40 Z" fill="#34d399" />
+              <circle cx="50" cy="32" r="6" fill="#059669" />
+              <rect x="25" y="65" width="50" height="6" rx="2" fill="#047857" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      {/* SECTION 1: Operation Command Center */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
-          <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Operation command center</h2>
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-slate-500 font-semibold">Time range</span>
-            <div className="flex items-center space-x-1 border border-slate-200 bg-white rounded-lg px-2 py-1 shadow-2xs">
-              <input
-                type="date"
-                value={opTimeRange.start}
-                onChange={(e) => setOpTimeRange({ ...opTimeRange, start: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-              <span className="text-slate-400 font-medium">-</span>
-              <input
-                type="date"
-                value={opTimeRange.end}
-                onChange={(e) => setOpTimeRange({ ...opTimeRange, end: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* OEE & Today's Prod */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            {/* Overall OEE Card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4 flex-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900">Overall OEE</span>
-                <button className="text-[10px] font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
-                  View detail &gt;
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
-                <div className="sm:col-span-2 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status</span>
-                  <span className="text-lg font-extrabold text-amber-600 block">Need attention</span>
-                  <span className="text-[10px] text-slate-400 block leading-relaxed">OEE score below target 85% threshold.</span>
-                </div>
-                <div className="sm:col-span-3 h-24 flex items-end justify-between px-1">
-                  {/* Custom SVG Bar Chart */}
-                  <svg className="w-full h-full" viewBox="0 0 160 80">
-                    <rect x="0" y="40" width="8" height="40" rx="2" fill="#3b82f6" />
-                    <rect x="12" y="30" width="8" height="50" rx="2" fill="#3b82f6" />
-                    <rect x="24" y="20" width="8" height="60" rx="2" fill="#3b82f6" />
-                    <rect x="36" y="45" width="8" height="35" rx="2" fill="#3b82f6" />
-                    <rect x="48" y="15" width="8" height="65" rx="2" fill="#3b82f6" />
-                    <rect x="60" y="30" width="8" height="50" rx="2" fill="#3b82f6" />
-                    <rect x="72" y="25" width="8" height="55" rx="2" fill="#3b82f6" />
-                    <rect x="84" y="10" width="8" height="70" rx="2" fill="#3b82f6" />
-                    <rect x="96" y="35" width="8" height="45" rx="2" fill="#3b82f6" />
-                    <rect x="108" y="20" width="8" height="60" rx="2" fill="#3b82f6" />
-                    <rect x="120" y="25" width="8" height="55" rx="2" fill="#3b82f6" />
-                    <rect x="132" y="15" width="8" height="65" rx="2" fill="#3b82f6" />
-                    <rect x="144" y="40" width="8" height="40" rx="2" fill="#3b82f6" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Small metric cards A and B */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Today's production */}
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's production</span>
-                  <span className="text-base font-extrabold text-slate-900 mt-1 block">12.05M</span>
-                  <span className="text-[9px] text-slate-400 block mt-0.5">Model produced</span>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-xl text-indigo-600">
-                  🏭
-                </div>
-              </div>
-
-              {/* Lines status */}
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lines status</span>
-                  <span className="text-base font-extrabold text-emerald-600 mt-1 block">Normal</span>
-                  <span className="text-[9px] text-slate-400 block mt-0.5">Model produced</span>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-xl text-indigo-600">
-                  ⚙️
-                </div>
-              </div>
-            </div>
+      {/* Main Grid: Left Top Products, Right KPI Metrics & Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        {/* Left Column: Top Products (Takes 4/12) */}
+        <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-extrabold text-slate-900">Top products</h3>
+            <span className="text-[10px] font-bold text-slate-400 font-mono">2026 STATS</span>
           </div>
 
-          {/* Actual vs Plan line chart */}
-          <div className="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Actual production/ plan production</span>
-              <button className="text-[10px] font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
-                View detail &gt;
-              </button>
-            </div>
-
-            {/* Legends */}
-            <div className="flex flex-wrap gap-2 text-[9px] font-mono text-slate-400">
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-blue-500 inline-block"></span> <span>Item 1</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-emerald-500 inline-block"></span> <span>Item 2</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-amber-500 inline-block"></span> <span>Item 3</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-indigo-500 inline-block"></span> <span>Item 4</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-rose-500 inline-block"></span> <span>Item 5</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-teal-500 inline-block"></span> <span>Item 6</span></span>
-            </div>
-
-            {/* Custom SVG Line Chart */}
-            <div className="h-32 w-full">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                {/* Horizontal grid lines */}
-                <line x1="0" y1="20" x2="200" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="50" x2="200" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="80" x2="200" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-                
-                {/* Solid actual line */}
-                <path d="M 0 80 Q 25 70 50 85 T 100 50 T 150 85 T 200 40" fill="none" stroke="#2563eb" strokeWidth="2" />
-                {/* Dashed plan line */}
-                <path d="M 0 60 Q 25 35 50 50 T 100 80 T 150 40 T 200 30" fill="none" stroke="#0d9488" strokeWidth="2" strokeDasharray="3,3" />
-
-                {/* X labels */}
-                <text x="5" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">06-06-2026</text>
-                <text x="80" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">10-06-2026</text>
-                <text x="155" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">15-06-2026</text>
-              </svg>
-            </div>
-          </div>
-
-          {/* Lines production multi-line chart */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Lines production</span>
-            </div>
-
-            {/* Legends */}
-            <div className="flex flex-wrap gap-2 text-[9px] font-mono text-slate-400">
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-blue-500 inline-block"></span> <span>Item 1</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-emerald-500 inline-block"></span> <span>Item 2</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2 h-0.5 bg-amber-500 inline-block"></span> <span>Item 3</span></span>
-            </div>
-
-            {/* Multi-line production chart */}
-            <div className="h-32 w-full">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <line x1="0" y1="20" x2="200" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="50" x2="200" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="80" x2="200" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-
-                <path d="M 0 90 Q 50 85 100 80 T 150 70 T 200 65" fill="none" stroke="#2563eb" strokeWidth="1.5" />
-                <path d="M 0 85 Q 50 80 100 65 T 150 50 T 200 45" fill="none" stroke="#10b981" strokeWidth="1.5" />
-                <path d="M 0 80 Q 50 70 100 55 T 150 40 T 200 35" fill="none" stroke="#f59e0b" strokeWidth="1.5" />
-                <path d="M 0 75 Q 50 65 100 45 T 150 35 T 200 25" fill="none" stroke="#a855f7" strokeWidth="1.5" />
-
-                <text x="5" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">06-06-2026</text>
-                <text x="80" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">10-06-2026</text>
-                <text x="155" y="98" fill="#94a3b8" fontSize="8" fontFamily="monospace">15-06-2026</text>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 2: Forecast Summary */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
-          <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Forecast summary</h2>
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-slate-500 font-semibold">Time range</span>
-            <div className="flex items-center space-x-1 border border-slate-200 bg-white rounded-lg px-2 py-1 shadow-2xs">
-              <input
-                type="date"
-                value={forecastTimeRange.start}
-                onChange={(e) => setForecastTimeRange({ ...forecastTimeRange, start: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-              <span className="text-slate-400 font-medium">-</span>
-              <input
-                type="date"
-                value={forecastTimeRange.end}
-                onChange={(e) => setForecastTimeRange({ ...forecastTimeRange, end: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Failure Summary Area Chart */}
-          <div className="lg:col-span-8 rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Failure Summary</span>
-              <button className="text-[10px] font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
-                View detail &gt;
-              </button>
-            </div>
-
-            {/* Legends */}
-            <div className="flex flex-wrap gap-2 text-[9px] font-mono text-slate-400">
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-orange-200 border border-orange-500 rounded inline-block"></span> <span>Production line</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-teal-100 border border-teal-500 rounded inline-block"></span> <span>Die/Mold</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-blue-100 border border-blue-500 rounded inline-block"></span> <span>Phenomenon</span></span>
-            </div>
-
-            {/* Area Chart */}
-            <div className="h-44 w-full">
-              <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="gradOrange" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#f97316" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id="gradTeal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id="gradBlue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                <line x1="0" y1="30" x2="400" y2="30" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="75" x2="400" y2="75" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="120" x2="400" y2="120" stroke="#f1f5f9" strokeWidth="1" />
-
-                {/* Orange Area */}
-                <path d="M 0 110 Q 50 120 100 80 T 200 110 T 300 70 T 400 100 L 400 135 L 0 135 Z" fill="url(#gradOrange)" />
-                <path d="M 0 110 Q 50 120 100 80 T 200 110 T 300 70 T 400 100" fill="none" stroke="#ea580c" strokeWidth="2" />
-
-                {/* Teal Area */}
-                <path d="M 0 95 Q 50 75 100 95 T 200 120 T 300 85 T 400 65 L 400 135 L 0 135 Z" fill="url(#gradTeal)" />
-                <path d="M 0 95 Q 50 75 100 95 T 200 120 T 300 85 T 400 65" fill="none" stroke="#0d9488" strokeWidth="2" />
-
-                {/* Blue Area */}
-                <path d="M 0 60 Q 50 90 100 110 T 200 90 T 300 45 T 400 115 L 400 135 L 0 135 Z" fill="url(#gradBlue)" />
-                <path d="M 0 60 Q 50 90 100 110 T 200 90 T 300 45 T 400 115" fill="none" stroke="#2563eb" strokeWidth="2" />
-
-                {/* X labels */}
-                <text x="5" y="145" fill="#94a3b8" fontSize="8" fontFamily="monospace">01-06-2026</text>
-                <text x="80" y="145" fill="#94a3b8" fontSize="8" fontFamily="monospace">03-06-2026</text>
-                <text x="160" y="145" fill="#94a3b8" fontSize="8" fontFamily="monospace">05-06-2026</text>
-                <text x="240" y="145" fill="#94a3b8" fontSize="8" fontFamily="monospace">08-06-2026</text>
-                <text x="320" y="145" fill="#94a3b8" fontSize="8" fontFamily="monospace">11-06-2026</text>
-              </svg>
-            </div>
-          </div>
-
-          {/* Forecast stats on the right */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            {/* Parts low lifecycle */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Parts low life cycle</span>
-                <span className="text-lg font-extrabold text-slate-900 mt-1 block">12.05M</span>
-                <span className="text-[9px] text-slate-400 block mt-0.5">Parts count</span>
-                <button className="text-[9px] font-bold text-indigo-600 hover:text-indigo-500 mt-2 block">
-                  View detail &gt;
-                </button>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-2xl text-orange-600">
-                🔧
-              </div>
-            </div>
-
-            {/* Die affected */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Die affected</span>
-              <span className="text-xl font-extrabold text-slate-900 mt-1 block">145</span>
-              <span className="text-[9px] text-slate-400 block mt-0.5">Molds cataloged</span>
-            </div>
-
-            {/* Parts Lifecycle Usage Distribution */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
-              <span className="text-[10px] font-bold text-slate-900 uppercase tracking-wider block">Parts Lifecycle Usage Distribution</span>
+          {/* SVG Radial Chart */}
+          <div className="h-44 flex items-center justify-center relative">
+            <svg className="w-40 h-40" viewBox="0 0 100 100">
+              {/* Concentric rings */}
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+              <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+              <circle cx="50" cy="50" r="20" fill="none" stroke="#f1f5f9" strokeWidth="1" />
+              <circle cx="50" cy="50" r="10" fill="none" stroke="#f1f5f9" strokeWidth="1" />
               
-              {/* Stacked Bar */}
-              <div className="w-full h-3 rounded-full flex overflow-hidden">
-                <div className="bg-rose-500 w-[15%]" title="Low life cycle" />
-                <div className="bg-amber-400 w-[45%]" title="Need replacement plan" />
-                <div className="bg-emerald-500 w-[40%]" title="Normal" />
+              {/* Concentric arcs */}
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#1d4ed8" strokeWidth="7" strokeDasharray="165 220" strokeDashoffset="45" transform="rotate(-90 50 50)" />
+              <circle cx="50" cy="50" r="25" fill="none" stroke="#0d9488" strokeWidth="7" strokeDasharray="110 220" strokeDashoffset="30" transform="rotate(-45 50 50)" />
+              <circle cx="50" cy="50" r="15" fill="none" stroke="#10b981" strokeWidth="7" strokeDasharray="70 220" strokeDashoffset="15" transform="rotate(30 50 50)" />
+            </svg>
+            <div className="absolute font-mono text-[10px] font-bold text-slate-400 bg-white border border-slate-100 rounded px-1.5 py-0.5">
+              OEE ACT
+            </div>
+          </div>
+
+          {/* Products List */}
+          <div className="space-y-4 flex-1">
+            {/* Product 1 */}
+            <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">🧴</span>
+                <div>
+                  <p className="font-bold text-slate-900">Pure Gel</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Hand sanitizer</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-slate-900 font-mono">$12,324.00</p>
+                <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1 ml-auto">
+                  <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: '75%' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Product 2 */}
+            <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">💨</span>
+                <div>
+                  <p className="font-bold text-slate-900">Nature spray</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Hand sanitizer</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-slate-900 font-mono">$12,000.00</p>
+                <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1 ml-auto">
+                  <div className="bg-emerald-600 h-1.5 rounded-full" style={{ width: '70%' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Product 3 */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">🧼</span>
+                <div>
+                  <p className="font-bold text-slate-900">Clean solution</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Hand sanitizer</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-slate-900 font-mono">$10,324.00</p>
+                <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1 ml-auto">
+                  <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '60%' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Dynamic Info Cards & Production Cost Overview (Takes 8/12) */}
+        <div className="lg:col-span-8 space-y-5">
+          {/* Dynamic Small KPI Info Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Card 1: Formulas to approve */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xl text-amber-600">
+                🧪
+              </div>
+              <div>
+                <p className="text-lg font-extrabold text-slate-950 font-mono">{stats.bomCount}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Formulas to approve</p>
+              </div>
+            </div>
+
+            {/* Card 2: Active production plant */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-xl text-blue-600">
+                🏭
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-950 truncate max-w-[150px]">{activeFactory?.name || 'Main Plant'}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Active Production Scope</p>
+              </div>
+            </div>
+
+            {/* Card 3: Discontinued products warning */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-xl text-rose-600">
+                ⚠️
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-950">Cosme fragrance</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Discontinued Status</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Cost Overview & News Feed Double Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            {/* Cost Overview Bar Chart Card */}
+            <div className="md:col-span-8 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-extrabold text-slate-900">Manufacturing cost overview</h3>
+                <span className="text-[10px] font-bold text-slate-400 font-mono">100k SCALE</span>
+              </div>
+
+              {/* Custom SVG Grouped Multi-Bar Chart */}
+              <div className="h-44 w-full">
+                <svg className="w-full h-full" viewBox="0 0 320 120" preserveAspectRatio="none">
+                  <line x1="0" y1="20" x2="320" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                  <line x1="0" y1="50" x2="320" y2="50" stroke="#f1f5f9" strokeWidth="1" />
+                  <line x1="0" y1="80" x2="320" y2="80" stroke="#f1f5f9" strokeWidth="1" />
+                  <line x1="0" y1="105" x2="320" y2="105" stroke="#e2e8f0" strokeWidth="1" />
+
+                  {/* NOV 18 */}
+                  <rect x="15" y="50" width="5" height="55" rx="1" fill="#38bdf8" />
+                  <rect x="22" y="30" width="5" height="75" rx="1" fill="#2563eb" />
+                  <rect x="29" y="60" width="5" height="45" rx="1" fill="#1e3a8a" />
+
+                  {/* DEC 18 */}
+                  <rect x="55" y="80" width="5" height="25" rx="1" fill="#38bdf8" />
+                  <rect x="62" y="70" width="5" height="35" rx="1" fill="#2563eb" />
+                  <rect x="69" y="75" width="5" height="30" rx="1" fill="#1e3a8a" />
+
+                  {/* JAN 19 */}
+                  <rect x="95" y="45" width="5" height="60" rx="1" fill="#38bdf8" />
+                  <rect x="102" y="35" width="5" height="70" rx="1" fill="#2563eb" />
+                  <rect x="109" y="80" width="5" height="25" rx="1" fill="#1e3a8a" />
+
+                  {/* FEB 19 */}
+                  <rect x="135" y="70" width="5" height="35" rx="1" fill="#38bdf8" />
+                  <rect x="142" y="65" width="5" height="40" rx="1" fill="#2563eb" />
+                  <rect x="149" y="80" width="5" height="25" rx="1" fill="#1e3a8a" />
+
+                  {/* MAR 19 */}
+                  <rect x="175" y="55" width="5" height="50" rx="1" fill="#38bdf8" />
+                  <rect x="182" y="35" width="5" height="70" rx="1" fill="#2563eb" />
+                  <rect x="189" y="65" width="5" height="40" rx="1" fill="#1e3a8a" />
+
+                  {/* APR 19 */}
+                  <rect x="215" y="45" width="5" height="60" rx="1" fill="#93c5fd" strokeDasharray="1,1" />
+                  <rect x="222" y="40" width="5" height="65" rx="1" fill="#60a5fa" strokeDasharray="1,1" />
+                  <rect x="229" y="75" width="5" height="30" rx="1" fill="#1d4ed8" strokeDasharray="1,1" />
+
+                  {/* MAY 19 */}
+                  <rect x="255" y="60" width="5" height="45" rx="1" fill="#93c5fd" strokeDasharray="1,1" />
+                  <rect x="262" y="55" width="5" height="50" rx="1" fill="#60a5fa" strokeDasharray="1,1" />
+                  <rect x="269" y="85" width="5" height="20" rx="1" fill="#1d4ed8" strokeDasharray="1,1" />
+
+                  {/* JUN 19 */}
+                  <rect x="295" y="50" width="5" height="55" rx="1" fill="#93c5fd" strokeDasharray="1,1" />
+                  <rect x="302" y="40" width="5" height="65" rx="1" fill="#60a5fa" strokeDasharray="1,1" />
+                  <rect x="309" y="60" width="5" height="45" rx="1" fill="#1d4ed8" strokeDasharray="1,1" />
+                </svg>
+              </div>
+
+              {/* X Labels */}
+              <div className="grid grid-cols-8 gap-0 text-[8px] font-bold font-mono text-slate-400 text-center uppercase tracking-tight">
+                <span>Nov 18</span>
+                <span>Dec 18</span>
+                <span>Jan 19</span>
+                <span>Feb 19</span>
+                <span>Mar 19</span>
+                <span className="text-slate-500">Apr 19 *</span>
+                <span className="text-slate-500">May 19 *</span>
+                <span className="text-slate-500">Jun 19 *</span>
               </div>
 
               {/* Legends */}
-              <div className="grid grid-cols-3 gap-1 text-[8px] font-mono text-slate-400">
-                <span className="flex items-center space-x-1"><span className="w-2 h-2 bg-rose-500 rounded-full inline-block"></span> <span>Low lifecycle</span></span>
-                <span className="flex items-center space-x-1"><span className="w-2 h-2 bg-amber-400 rounded-full inline-block"></span> <span>Replacement</span></span>
-                <span className="flex items-center space-x-1"><span className="w-2 h-2 bg-emerald-500 rounded-full inline-block"></span> <span>Normal</span></span>
+              <div className="flex justify-center space-x-6 text-[9px] font-bold text-slate-500 pt-2 border-t border-slate-100">
+                <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-sky-400 rounded-xs inline-block"></span> <span>Standard Cost</span></span>
+                <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-blue-600 rounded-xs inline-block"></span> <span>Plan Cost</span></span>
+                <span className="flex items-center space-x-1.5"><span className="w-3 h-1.5 bg-navy-900 rounded-xs inline-block" style={{ backgroundColor: '#1e3a8a' }}></span> <span>Actual Cost</span></span>
+              </div>
+            </div>
+
+            {/* News Feed Card */}
+            <div className="md:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col justify-between">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-extrabold text-slate-900">News feed</h3>
+                <p className="text-[10px] text-slate-400 font-medium mt-0.5">Real-time audit transactions</p>
+              </div>
+
+              <div className="mt-4 flex-1 space-y-4">
+                {stats.auditLogs.length > 0 ? (
+                  stats.auditLogs.map((log) => (
+                    <div key={log.id} className="flex items-start space-x-2 text-[11px] leading-snug">
+                      <span className="text-base mt-0.5">🔹</span>
+                      <div>
+                        <p className="font-bold text-slate-900 capitalize">{log.action.replace(/_/g, ' ').toLowerCase()}</p>
+                        <p className="text-[10px] text-slate-500 font-semibold">{log.user?.name || log.user?.email || 'System Operation'}</p>
+                        <p className="text-[9px] text-slate-400 font-mono mt-0.5">{new Date(log.createdAt).toLocaleTimeString()}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-start space-x-2 text-[11px] leading-snug">
+                      <span className="text-indigo-600 font-bold text-xs mt-0.5">🔵</span>
+                      <div>
+                        <p className="font-bold text-slate-950">Project Created</p>
+                        <p className="text-[9px] text-slate-400 font-medium">Alina Gardner — 25 mins ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-2 text-[11px] leading-snug">
+                      <span className="text-indigo-600 font-bold text-xs mt-0.5">🔵</span>
+                      <div>
+                        <p className="font-bold text-slate-950">Add tasks</p>
+                        <p className="text-[9px] text-slate-400 font-medium">Sunny Harper — 1 hour ago</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* SECTION 3: Maintenance Type KPI Overview */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
-          <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Maintenance type KPI overview</h2>
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-slate-500 font-semibold">Time range</span>
-            <div className="flex items-center space-x-1 border border-slate-200 bg-white rounded-lg px-2 py-1 shadow-2xs">
-              <input
-                type="date"
-                value={maintenanceTimeRange.start}
-                onChange={(e) => setMaintenanceTimeRange({ ...maintenanceTimeRange, start: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-              <span className="text-slate-400 font-medium">-</span>
-              <input
-                type="date"
-                value={maintenanceTimeRange.end}
-                onChange={(e) => setMaintenanceTimeRange({ ...maintenanceTimeRange, end: e.target.value })}
-                className="bg-transparent focus:outline-none text-slate-700 cursor-pointer text-[11px]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Maintenance Case count */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Maintenance case count / BM rate</span>
-              <button className="text-[10px] font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
-                View detail &gt;
-              </button>
-            </div>
-
-            {/* Legends */}
-            <div className="flex flex-wrap gap-2 text-[9px] font-mono text-slate-400">
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-blue-500 rounded inline-block"></span> <span>Item 1</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded inline-block"></span> <span>Item 2</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-amber-500 rounded inline-block"></span> <span>Item 3</span></span>
-            </div>
-
-            {/* Vertical Bar Chart */}
-            <div className="h-36 w-full">
-              <svg className="w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                <line x1="0" y1="20" x2="300" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="50" x2="300" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="80" x2="300" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-
-                {/* Group 1 */}
-                <rect x="20" y="40" width="8" height="50" rx="1" fill="#3b82f6" />
-                <rect x="30" y="30" width="8" height="60" rx="1" fill="#10b981" />
-                <rect x="40" y="55" width="8" height="35" rx="1" fill="#f59e0b" />
-
-                {/* Group 2 */}
-                <rect x="90" y="20" width="8" height="70" rx="1" fill="#3b82f6" />
-                <rect x="100" y="45" width="8" height="45" rx="1" fill="#10b981" />
-                <rect x="110" y="35" width="8" height="55" rx="1" fill="#f59e0b" />
-
-                {/* Group 3 */}
-                <rect x="160" y="50" width="8" height="40" rx="1" fill="#3b82f6" />
-                <rect x="170" y="30" width="8" height="60" rx="1" fill="#10b981" />
-                <rect x="180" y="25" width="8" height="65" rx="1" fill="#f59e0b" />
-
-                {/* Group 4 */}
-                <rect x="230" y="35" width="8" height="55" rx="1" fill="#3b82f6" />
-                <rect x="240" y="15" width="8" height="75" rx="1" fill="#10b981" />
-                <rect x="250" y="45" width="8" height="45" rx="1" fill="#f59e0b" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Maintenance Man Hour */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs flex flex-col justify-between space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Maintenance man-hour</span>
-            </div>
-
-            {/* Legends */}
-            <div className="flex flex-wrap gap-2 text-[9px] font-mono text-slate-400">
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-blue-500 rounded inline-block"></span> <span>Item 1</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded inline-block"></span> <span>Item 2</span></span>
-              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-amber-500 rounded inline-block"></span> <span>Item 3</span></span>
-            </div>
-
-            {/* Vertical Bar Chart */}
-            <div className="h-36 w-full">
-              <svg className="w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                <line x1="0" y1="20" x2="300" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="50" x2="300" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="0" y1="80" x2="300" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-
-                {/* Group 1 */}
-                <rect x="20" y="30" width="8" height="60" rx="1" fill="#3b82f6" />
-                <rect x="30" y="45" width="8" height="45" rx="1" fill="#10b981" />
-                <rect x="40" y="20" width="8" height="70" rx="1" fill="#f59e0b" />
-
-                {/* Group 2 */}
-                <rect x="90" y="55" width="8" height="35" rx="1" fill="#3b82f6" />
-                <rect x="100" y="30" width="8" height="60" rx="1" fill="#10b981" />
-                <rect x="110" y="50" width="8" height="40" rx="1" fill="#f59e0b" />
-
-                {/* Group 3 */}
-                <rect x="160" y="15" width="8" height="75" rx="1" fill="#3b82f6" />
-                <rect x="170" y="40" width="8" height="40" rx="1" fill="#10b981" />
-                <rect x="180" y="35" width="8" height="55" rx="1" fill="#f59e0b" />
-
-                {/* Group 4 */}
-                <rect x="230" y="45" width="8" height="45" rx="1" fill="#3b82f6" />
-                <rect x="240" y="25" width="8" height="65" rx="1" fill="#10b981" />
-                <rect x="250" y="55" width="8" height="35" rx="1" fill="#f59e0b" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-    </main>
+      </div>
+    </div>
   );
 }

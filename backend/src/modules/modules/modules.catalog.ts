@@ -56,4 +56,12 @@ export const MODULE_CATALOG: readonly ModuleCatalogItem[] = [
     isCore: false,
     defaultEnabled: false,
   },
+  {
+    code: 'accounting',
+    name: 'Financial Ledger & Cost Control',
+    description: 'Chart of Accounts, automated general ledger posting, cost centers, trial balance sheets, and dynamic income statements.',
+    category: 'finance',
+    isCore: false,
+    defaultEnabled: true,
+  },
 ] as const;

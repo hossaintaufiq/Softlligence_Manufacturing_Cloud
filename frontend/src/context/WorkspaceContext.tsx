@@ -32,18 +32,60 @@ type WorkspaceContextType = {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [tenant, setTenant] = useState<AuthTenant | null>(null);
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  // Load cached values from localStorage for instant, zero-latency initial render
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_user');
+      return stored ? JSON.parse(stored) : null;
+    }
+    return null;
+  });
+  const [tenant, setTenant] = useState<AuthTenant | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_tenant');
+      return stored ? JSON.parse(stored) : null;
+    }
+    return null;
+  });
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('smc_cached_is_admin') === 'true';
+    }
+    return false;
+  });
+  const [isLoadingUser, setIsLoadingUser] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_user');
+      return !stored; // Instant render if cached user exists
+    }
+    return true;
+  });
 
   const [permissions, setPermissions] = useState<string[]>([]);
   const [scopes, setScopes] = useState<{ factories: string[] | null } | null>(null);
-  const [entitlements, setEntitlements] = useState<{ modules: string[] } | null>(null);
+  const [entitlements, setEntitlements] = useState<{ modules: string[] } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_entitlements');
+      return stored ? JSON.parse(stored) : null;
+    }
+    return null;
+  });
 
   // Factory State
-  const [factories, setFactories] = useState<Factory[]>([]);
-  const [activeFactory, setActiveFactoryState] = useState<Factory | null>(null);
+  const [factories, setFactories] = useState<Factory[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_factories');
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
+  const [activeFactory, setActiveFactoryState] = useState<Factory | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('smc_cached_active_factory');
+      return stored ? JSON.parse(stored) : null;
+    }
+    return null;
+  });
 
   const [isOperatorMode, setIsOperatorMode] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(['/steel', '/manufacturing', '/inventory']);
@@ -71,21 +113,46 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setScopes(meData.scopes || null);
         setEntitlements(meData.entitlements || null);
 
+        // Cache for next instant reload
+        localStorage.setItem('smc_cached_user', JSON.stringify(meData.user));
+        if (meData.tenant) {
+          localStorage.setItem('smc_cached_tenant', JSON.stringify(meData.tenant));
+        } else {
+          localStorage.removeItem('smc_cached_tenant');
+        }
+        localStorage.setItem('smc_cached_is_admin', String(Boolean(meData.user.isPlatformAdmin)));
+        if (meData.entitlements) {
+          localStorage.setItem('smc_cached_entitlements', JSON.stringify(meData.entitlements));
+        } else {
+          localStorage.removeItem('smc_cached_entitlements');
+        }
+
         // Fetch factories list if tenant exists
         if (meData.user.tenantId) {
           try {
             const list = await listFactories();
             setFactories(list);
+            localStorage.setItem('smc_cached_factories', JSON.stringify(list));
             const savedFactoryId = localStorage.getItem('smc_active_factory_id');
             const found = list.find((f) => f.id === savedFactoryId);
-            setActiveFactoryState(found || list[0] || null);
+            const activeFac = found || list[0] || null;
+            setActiveFactoryState(activeFac);
+            if (activeFac) {
+              localStorage.setItem('smc_cached_active_factory', JSON.stringify(activeFac));
+            } else {
+              localStorage.removeItem('smc_cached_active_factory');
+            }
           } catch {
             setFactories([]);
             setActiveFactoryState(null);
+            localStorage.removeItem('smc_cached_factories');
+            localStorage.removeItem('smc_cached_active_factory');
           }
         } else {
           setFactories([]);
           setActiveFactoryState(null);
+          localStorage.removeItem('smc_cached_factories');
+          localStorage.removeItem('smc_cached_active_factory');
         }
       } else {
         setUser(null);
@@ -96,6 +163,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setEntitlements(null);
         setFactories([]);
         setActiveFactoryState(null);
+
+        localStorage.removeItem('smc_cached_user');
+        localStorage.removeItem('smc_cached_tenant');
+        localStorage.removeItem('smc_cached_is_admin');
+        localStorage.removeItem('smc_cached_entitlements');
+        localStorage.removeItem('smc_cached_factories');
+        localStorage.removeItem('smc_cached_active_factory');
       }
     } catch {
       setUser(null);
@@ -106,6 +180,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       setEntitlements(null);
       setFactories([]);
       setActiveFactoryState(null);
+
+      localStorage.removeItem('smc_cached_user');
+      localStorage.removeItem('smc_cached_tenant');
+      localStorage.removeItem('smc_cached_is_admin');
+      localStorage.removeItem('smc_cached_entitlements');
+      localStorage.removeItem('smc_cached_factories');
+      localStorage.removeItem('smc_cached_active_factory');
     } finally {
       setIsLoadingUser(false);
     }
