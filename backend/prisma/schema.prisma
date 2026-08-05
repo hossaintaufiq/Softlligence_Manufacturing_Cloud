@@ -35,6 +35,9 @@ model Tenant {
   stockLedgers     StockLedgerEntry[]
   stockTransfers   StockTransfer[]
   stockAdjustments StockAdjustment[]
+  bomHeaders       BomHeader[]
+  workOrders       WorkOrder[]
+  energyLogs       EnergyLog[]
 
   @@map("tenant")
 }
@@ -310,6 +313,10 @@ model UnitOfMeasure {
   stockLedgers  StockLedgerEntry[]
   transferLines StockTransferLine[]
   adjLines      StockAdjustmentLine[]
+  bomLines      BomLine[]
+  materialIssueLines WorkOrderMaterialIssueLine[]
+  outputs       WorkOrderOutput[]
+  scraps        WorkOrderScrap[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -342,6 +349,10 @@ model Item {
   stockLedgers  StockLedgerEntry[]
   transferLines StockTransferLine[]
   adjLines      StockAdjustmentLine[]
+  bomParentHeaders BomHeader[] @relation("ParentItem")
+  bomComponentLines BomLine[] @relation("ComponentItem")
+  workOrderOutputs WorkOrder[] @relation("OutputItem")
+  materialIssueLines WorkOrderMaterialIssueLine[]
 
   @@unique([tenantId, code])
   @@index([tenantId, itemType, status])
@@ -497,5 +508,174 @@ model StockAdjustmentLine {
 
   @@map("stock_adjustment_line")
 }
+
+// -----------------------------------------------------------------------------
+// Section 8 — Manufacturing Core Models
+// -----------------------------------------------------------------------------
+
+/// Bill of Materials Header (Document 02 §24.1)
+model BomHeader {
+  id            String    @id @default(uuid())
+  tenantId      String    @map("tenant_id")
+  companyId     String?   @map("company_id")
+  parentItemId  String    @map("parent_item_id")
+  version       String    @default("v1.0") @db.VarChar(32)
+  isActive      Boolean   @default(true) @map("is_active")
+  effectiveFrom DateTime? @map("effective_from")
+  effectiveTo   DateTime? @map("effective_to")
+  attrsJson     Json?     @map("attrs_json")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  parentItem Item      @relation("ParentItem", fields: [parentItemId], references: [id])
+  lines      BomLine[]
+  workOrders WorkOrder[]
+
+  @@unique([tenantId, parentItemId, version])
+  @@index([tenantId, parentItemId])
+  @@map("bom_header")
+}
+
+/// Bill of Materials Line Items
+model BomLine {
+  id              String @id @default(uuid())
+  bomHeaderId     String @map("bom_header_id")
+  componentItemId String @map("component_item_id")
+  qty             Float  @default(1.0)
+  uomId           String @map("uom_id")
+  scrapPercent    Float  @default(0.0) @map("scrap_percent")
+  sequence        Int    @default(1)
+
+  bomHeader     BomHeader     @relation(fields: [bomHeaderId], references: [id], onDelete: Cascade)
+  componentItem Item          @relation("ComponentItem", fields: [componentItemId], references: [id])
+  uom           UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("bom_line")
+}
+
+/// Work Order Header (Document 02 §24.3)
+model WorkOrder {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  companyId    String    @map("company_id")
+  factoryId    String    @map("factory_id")
+  docNo        String    @map("doc_no") @db.VarChar(64)
+  docDate      DateTime  @default(now()) @map("doc_date")
+  woType       String    @default("GENERIC") @map("wo_type") @db.VarChar(32) // MELT, ROLL, GENERIC
+  status       String    @default("draft") @db.VarChar(32) // draft, released, in_progress, completed, cancelled
+  itemId       String    @map("item_id") // Output FG item
+  qtyPlanned   Float     @map("qty_planned")
+  qtyCompleted Float     @default(0) @map("qty_completed")
+  bomHeaderId  String?   @map("bom_header_id")
+  priority     Int       @default(1)
+  plannedStart DateTime? @map("planned_start")
+  plannedEnd   DateTime? @map("planned_end")
+  attrsJson    Json?     @map("attrs_json")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  tenant Tenant    @relation(fields: [tenantId], references: [id])
+  item   Item      @relation("OutputItem", fields: [itemId], references: [id])
+  bom    BomHeader? @relation(fields: [bomHeaderId], references: [id])
+
+  materialIssues WorkOrderMaterialIssue[]
+  outputs        WorkOrderOutput[]
+  scraps         WorkOrderScrap[]
+  energyLogs     EnergyLog[]
+
+  @@unique([tenantId, companyId, docNo])
+  @@index([tenantId, factoryId, status])
+  @@map("work_order")
+}
+
+/// Work Order Material Issue Header (Document 02 §24.5)
+model WorkOrderMaterialIssue {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  workOrderId String   @map("work_order_id")
+  warehouseId String   @map("warehouse_id")
+  issuedAt    DateTime @default(now()) @map("issued_at")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workOrder WorkOrder                    @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  lines     WorkOrderMaterialIssueLine[]
+
+  @@index([tenantId, workOrderId])
+  @@map("work_order_material_issue")
+}
+
+/// Work Order Material Issue Line
+model WorkOrderMaterialIssueLine {
+  id        String @id @default(uuid())
+  issueId   String @map("issue_id")
+  itemId    String @map("item_id")
+  uomId     String @map("uom_id")
+  qtyIssued Float  @map("qty_issued")
+
+  issue WorkOrderMaterialIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  item  Item                   @relation(fields: [itemId], references: [id])
+  uom   UnitOfMeasure          @relation(fields: [uomId], references: [id])
+
+  @@map("work_order_material_issue_line")
+}
+
+/// Work Order Production Output Receipt (Document 02 §24.6)
+model WorkOrderOutput {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  workOrderId  String   @map("work_order_id")
+  warehouseId  String   @map("warehouse_id")
+  qtyProduced  Float    @map("qty_produced")
+  uomId        String   @map("uom_id")
+  producedAt   DateTime @default(now()) @map("produced_at")
+  lotCode      String?  @map("lot_code")
+  attrsJson    Json?    @map("attrs_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  workOrder WorkOrder     @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  uom       UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@index([tenantId, workOrderId])
+  @@map("work_order_output")
+}
+
+/// Work Order Scrap Log (Document 02 §24.7)
+model WorkOrderScrap {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  workOrderId String   @map("work_order_id")
+  qtyScrapped Float    @map("qty_scrapped")
+  uomId       String   @map("uom_id")
+  reasonCode  String   @map("reason_code") @db.VarChar(64)
+  notes       String?
+  scrappedAt  DateTime @default(now()) @map("scrapped_at")
+
+  workOrder WorkOrder     @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  uom       UnitOfMeasure @relation(fields: [uomId], references: [id])
+
+  @@map("work_order_scrap")
+}
+
+/// Utility & Energy Consumption Log (Document 02 §24.8)
+model EnergyLog {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  factoryId   String   @map("factory_id")
+  workOrderId String?  @map("work_order_id")
+  utilityType String   @map("utility_type") @db.VarChar(32) // electricity, gas, water
+  quantity    Float
+  uomCode     String   @default("kWh") @map("uom_code") @db.VarChar(16)
+  loggedAt    DateTime @default(now()) @map("logged_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
+
+  @@index([tenantId, factoryId, loggedAt])
+  @@map("energy_log")
+}
+
 
 

@@ -157,7 +157,7 @@ See [`documents/PHASE_1_SCOPE.md`](./documents/PHASE_1_SCOPE.md)
 | 5 IAM | Done — users/roles/scopes + `/iam` + invite accept |
 | 6 Modules | Done — module catalog toggle + custom fields `/modules` UI |
 | 7 Inventory | Done — items/warehouses/UOMs, stock balances, ledger & movements `/inventory` UI |
-| 8 Manufacturing | Not started |
+| 8 Manufacturing | Done — BOMs, Work Orders, Raw Material Issues, FG Receipts, Scrap/Energy & Yield KPIs `/manufacturing` UI |
 | 9 Commercial | Not started |
 | 10 Steel + Deploy | Not started |
 

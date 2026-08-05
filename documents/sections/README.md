@@ -17,7 +17,7 @@ These documents sit **beside** the master specs (01–05). Specs define the targ
 | 5 IAM | [`SECTION_05_IAM.md`](./SECTION_05_IAM.md) | Done |
 | 6 Modules & Entitlements | [`SECTION_06_Modules.md`](./SECTION_06_Modules.md) | Done |
 | 7 Inventory Core | [`SECTION_07_Inventory.md`](./SECTION_07_Inventory.md) | Done |
-| 8 Manufacturing Core | — | Not started |
+| 8 Manufacturing Core | [`SECTION_08_Manufacturing.md`](./SECTION_08_Manufacturing.md) | Done |
 | 9 Commercial Ops | — | Not started |
 | 10 Steel + Live Deploy | — | Not started |
 

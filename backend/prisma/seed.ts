@@ -217,7 +217,7 @@ async function main() {
     },
   });
 
-  await prisma.item.upsert({
+  const itemRebar = await prisma.item.upsert({
     where: { tenantId_code: { tenantId: tenant.id, code: 'FG-REBAR-12MM' } },
     update: { name: 'Deformed Bar 12mm 500W (Grade 60)' },
     create: {
@@ -248,6 +248,61 @@ async function main() {
     },
   });
 
+  // Section 8 — Seed Bill of Materials (BOM)
+  let bom = await prisma.bomHeader.findUnique({
+    where: { tenantId_parentItemId_version: { tenantId: tenant.id, parentItemId: itemRebar.id, version: 'v1.0' } },
+  });
+  if (!bom) {
+    bom = await prisma.bomHeader.create({
+      data: {
+        tenantId: tenant.id,
+        companyId: company.id,
+        parentItemId: itemRebar.id,
+        version: 'v1.0',
+        lines: {
+          create: [
+            {
+              componentItemId: itemBillet.id,
+              qty: 1.05, // 1.05 MT Billet per 1.00 MT Rebar
+              uomId: uomMt.id,
+              scrapPercent: 5.0,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // Section 8 — Seed Work Order
+  const wo = await prisma.workOrder.upsert({
+    where: { tenantId_companyId_docNo: { tenantId: tenant.id, companyId: company.id, docNo: 'WO-2026-001' } },
+    update: { status: 'in_progress', qtyPlanned: 100.0, qtyCompleted: 50.0 },
+    create: {
+      tenantId: tenant.id,
+      companyId: company.id,
+      factoryId: factory.id,
+      docNo: 'WO-2026-001',
+      woType: 'ROLL',
+      status: 'in_progress',
+      itemId: itemRebar.id,
+      qtyPlanned: 100.0,
+      qtyCompleted: 50.0,
+      bomHeaderId: bom.id,
+    },
+  });
+
+  // Seed energy log
+  await prisma.energyLog.create({
+    data: {
+      tenantId: tenant.id,
+      factoryId: factory.id,
+      workOrderId: wo.id,
+      utilityType: 'electricity',
+      quantity: 12500.0,
+      uomCode: 'kWh',
+    },
+  }).catch(() => {});
+
   console.log('Seed complete:', {
     tenant: tenant.slug,
     tenantAdmin: 'admin@demo.local',
@@ -255,6 +310,7 @@ async function main() {
     company: company.code,
     factory: 'MAIN',
     inventory: 'Warehouses (WH-RM, WH-FG), Items (RM-BILLET-150, FG-REBAR-12MM)',
+    manufacturing: 'BOM (v1.0), Work Order (WO-2026-001 in_progress)',
   });
 
   await prisma.$disconnect();
