@@ -19,6 +19,8 @@ import {
 import { fetchParties, type PartyItem } from '@/lib/api/commercial';
 import { fetchWarehouses, type Warehouse } from '@/lib/api/inventory';
 
+import { VirtualDataTable, type ColumnDef } from '@/components/enterprise/VirtualDataTable';
+
 export default function SteelPage() {
   const [activeTab, setActiveTab] = useState<'heats' | 'rolling' | 'scrap' | 'import'>('heats');
   const [heats, setHeats] = useState<SteelHeatLogItem[]>([]);
@@ -147,7 +149,6 @@ export default function SteelPage() {
       const companyId = warehouses[0]?.companyId || 'company-1';
       const factoryId = warehouses[0]?.factoryId || 'factory-1';
 
-      // Simple CSV parser for demonstration: heatNo, scrapKg, billetKg, powerKwh
       const lines = importText.trim().split('\n');
       const records: Array<{ type: 'heat'; heatNo: string; scrapInputKg: number; billetOutputKg: number; powerKwh: number }> = [];
 
@@ -178,76 +179,103 @@ export default function SteelPage() {
     }
   };
 
+  const heatColumns: ColumnDef<SteelHeatLogItem>[] = [
+    { key: 'heatNo', header: 'Heat No', accessor: (h) => <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{h.heatNo}</span>, sortable: true, mono: true },
+    { key: 'furnaceNo', header: 'Furnace', accessor: (h) => <span className="font-semibold">{h.furnaceNo}</span>, sortable: true },
+    { key: 'scrapInputKg', header: 'Scrap Input (kg)', accessor: (h) => <span className="font-mono">{h.scrapInputKg.toLocaleString()}</span>, sortable: true, align: 'right', mono: true },
+    { key: 'billetOutputKg', header: 'Billet Output (kg)', accessor: (h) => <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{h.billetOutputKg.toLocaleString()}</span>, sortable: true, align: 'right', mono: true },
+    { key: 'yieldPct', header: 'Melt Yield', accessor: (h) => <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{h.yieldPct}%</span>, sortable: true, align: 'right', mono: true },
+    { key: 'powerKwh', header: 'Power (kWh)', accessor: (h) => <span className="font-mono text-slate-500">{h.powerKwh.toLocaleString()}</span>, sortable: true, align: 'right', mono: true },
+    { key: 'shift', header: 'Shift', accessor: (h) => <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-medium">{h.shift}</span>, sortable: true },
+  ];
+
+  const rollingColumns: ColumnDef<SteelRollingLogItem>[] = [
+    { key: 'heatRef', header: 'Heat Ref', accessor: (r) => <span className="font-mono text-xs">{r.heatRef || 'N/A'}</span>, sortable: true, mono: true },
+    { key: 'rodSizeSpec', header: 'Rod Specification', accessor: (r) => <span className="font-bold text-slate-900 dark:text-slate-100">{r.rodSizeSpec}</span>, sortable: true },
+    { key: 'billetInputKg', header: 'Billet Input (kg)', accessor: (r) => <span className="font-mono">{r.billetInputKg.toLocaleString()}</span>, sortable: true, align: 'right', mono: true },
+    { key: 'rodOutputKg', header: 'Rod Output (kg)', accessor: (r) => <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{r.rodOutputKg.toLocaleString()}</span>, sortable: true, align: 'right', mono: true },
+    { key: 'burningLossKg', header: 'Burning Loss', accessor: (r) => <span className="font-mono text-amber-600">{r.burningLossKg} kg ({r.burningLossPct}%)</span>, sortable: true, align: 'right', mono: true },
+    { key: 'rollingYieldPct', header: 'Rolling Yield', accessor: (r) => <span className="font-mono font-bold text-emerald-600">{r.rollingYieldPct}%</span>, sortable: true, align: 'right', mono: true },
+  ];
+
+  const scrapColumns: ColumnDef<SteelScrapReceiptItem>[] = [
+    { key: 'supplierName', header: 'Supplier', accessor: (s) => <span className="font-semibold">{s.supplierName}</span>, sortable: true },
+    { key: 'warehouseName', header: 'Yard Warehouse', accessor: (s) => <span>{s.warehouseName}</span>, sortable: true },
+    { key: 'gradeCategory', header: 'Scrap Grade', accessor: (s) => <span className="font-mono text-xs">{s.gradeCategory}</span>, sortable: true },
+    { key: 'receivedKg', header: 'Received Weight', accessor: (s) => <span className="font-mono font-bold">{s.receivedKg.toLocaleString()} kg</span>, sortable: true, align: 'right', mono: true },
+    { key: 'vehicleNo', header: 'Vehicle No', accessor: (s) => <span className="font-mono text-xs">{s.vehicleNo || 'N/A'}</span>, sortable: true },
+  ];
+
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <SessionPanel />
 
         {/* Steel KPI Summary Cards */}
         {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Furnace Melting Yield</p>
-              <p className="mt-1 text-2xl font-bold text-indigo-600">{kpis.meltYieldPct}%</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Furnace Melting Yield</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">{kpis.meltYieldPct}%</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalHeatsCount} Heats logged ({kpis.totalBilletProducedKg.toLocaleString()} kg Billets)</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Rolling Mill Yield</p>
-              <p className="mt-1 text-2xl font-bold text-emerald-600">{kpis.rollingYieldPct}%</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rolling Mill Yield</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">{kpis.rollingYieldPct}%</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalRodProducedKg.toLocaleString()} kg Rods ({kpis.totalBurningLossKg.toLocaleString()} kg loss)</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Energy Specific Cost</p>
-              <p className="mt-1 text-2xl font-bold text-amber-600">{kpis.kwhPerBilletTon} kWh</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Energy Specific Cost</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{kpis.kwhPerBilletTon} kWh</p>
               <p className="mt-1 text-xs text-slate-500">Per Metric Ton Billet Melted</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Scrap Inventory Inflow</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{(kpis.totalScrapReceivedKg / 1000).toLocaleString()} MT</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Scrap Inventory Inflow</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{(kpis.totalScrapReceivedKg / 1000).toLocaleString()} MT</p>
               <p className="mt-1 text-xs text-slate-500">Total Raw Scrap Received</p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
-            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 gap-2">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 dark:border-slate-800 gap-2">
               <button
                 onClick={() => setActiveTab('heats')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                   activeTab === 'heats'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 Furnace Heat Logs (Melting)
               </button>
               <button
                 onClick={() => setActiveTab('rolling')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                   activeTab === 'rolling'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 Rolling Mill Logs (Rebar Rods)
               </button>
               <button
                 onClick={() => setActiveTab('scrap')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                   activeTab === 'scrap'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 Scrap Receiving Yard
               </button>
               <button
                 onClick={() => setActiveTab('import')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
+                className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
                   activeTab === 'import'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 Steel Excel / CSV Import Wizard
@@ -258,7 +286,7 @@ export default function SteelPage() {
               {activeTab === 'heats' && (
                 <button
                   onClick={() => setShowCreateHeat(true)}
-                  className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                  className="rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 shadow-xs transition-colors"
                 >
                   + Log Heat
                 </button>
@@ -266,7 +294,7 @@ export default function SteelPage() {
               {activeTab === 'rolling' && (
                 <button
                   onClick={() => setShowCreateRolling(true)}
-                  className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                  className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs transition-colors"
                 >
                   + Log Rolling Batch
                 </button>
@@ -274,7 +302,7 @@ export default function SteelPage() {
               {activeTab === 'scrap' && (
                 <button
                   onClick={() => setShowCreateScrap(true)}
-                  className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+                  className="rounded-lg bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-amber-700 shadow-xs transition-colors"
                 >
                   + Receive Scrap
                 </button>
@@ -282,94 +310,34 @@ export default function SteelPage() {
             </div>
           </div>
 
-          {loading && <p className="text-sm text-slate-500">Loading steel vertical operations...</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {loading && <p className="text-xs text-slate-500">Loading steel vertical operations...</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
 
           {!loading && activeTab === 'heats' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3">Heat No</th>
-                    <th className="px-4 py-3">Furnace</th>
-                    <th className="px-4 py-3">Scrap Input (kg)</th>
-                    <th className="px-4 py-3">Billet Output (kg)</th>
-                    <th className="px-4 py-3">Melt Yield %</th>
-                    <th className="px-4 py-3">Power (kWh)</th>
-                    <th className="px-4 py-3">Shift</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {heats.map((h) => (
-                    <tr key={h.id} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-3 font-semibold text-slate-900 font-mono">{h.heatNo}</td>
-                      <td className="px-4 py-3">{h.furnaceNo}</td>
-                      <td className="px-4 py-3 font-mono">{h.scrapInputKg.toLocaleString()}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-slate-900">{h.billetOutputKg.toLocaleString()}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-emerald-600">{h.yieldPct}%</td>
-                      <td className="px-4 py-3 font-mono text-xs">{h.powerKwh.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-xs">{h.shift}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <VirtualDataTable
+              title="Induction Furnace Heat Logs"
+              data={heats}
+              columns={heatColumns}
+              exportFileName="steel_heat_logs"
+            />
           )}
 
           {!loading && activeTab === 'rolling' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3">Heat Ref</th>
-                    <th className="px-4 py-3">Rod Specification</th>
-                    <th className="px-4 py-3">Billet Input (kg)</th>
-                    <th className="px-4 py-3">Rod Output (kg)</th>
-                    <th className="px-4 py-3">Burning Loss</th>
-                    <th className="px-4 py-3">Rolling Yield</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {rollingLogs.map((r) => (
-                    <tr key={r.id} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-3 font-mono text-xs font-medium">{r.heatRef || 'N/A'}</td>
-                      <td className="px-4 py-3 font-semibold text-slate-900">{r.rodSizeSpec}</td>
-                      <td className="px-4 py-3 font-mono">{r.billetInputKg.toLocaleString()}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-slate-900">{r.rodOutputKg.toLocaleString()}</td>
-                      <td className="px-4 py-3 font-mono text-xs text-amber-600">{r.burningLossKg} kg ({r.burningLossPct}%)</td>
-                      <td className="px-4 py-3 font-mono font-bold text-emerald-600">{r.rollingYieldPct}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <VirtualDataTable
+              title="Steel Rolling Mill Logs"
+              data={rollingLogs}
+              columns={rollingColumns}
+              exportFileName="steel_rolling_logs"
+            />
           )}
 
           {!loading && activeTab === 'scrap' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3">Supplier</th>
-                    <th className="px-4 py-3">Yard / Warehouse</th>
-                    <th className="px-4 py-3">Scrap Grade</th>
-                    <th className="px-4 py-3">Received Weight</th>
-                    <th className="px-4 py-3">Vehicle No</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {scrapReceipts.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-3 font-medium text-slate-900">{s.supplierName}</td>
-                      <td className="px-4 py-3">{s.warehouseName}</td>
-                      <td className="px-4 py-3 font-mono text-xs">{s.gradeCategory}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-slate-900">{s.receivedKg.toLocaleString()} kg</td>
-                      <td className="px-4 py-3 font-mono text-xs">{s.vehicleNo || 'N/A'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <VirtualDataTable
+              title="Scrap Yard Receipts"
+              data={scrapReceipts}
+              columns={scrapColumns}
+              exportFileName="steel_scrap_receipts"
+            />
           )}
 
           {!loading && activeTab === 'import' && (

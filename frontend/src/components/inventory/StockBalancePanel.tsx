@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { fetchStockBalances, fetchWarehouses, type StockBalance, type Warehouse } from '@/lib/api/inventory';
+import { VirtualDataTable, type ColumnDef } from '@/components/enterprise/VirtualDataTable';
+import { AdvancedFilterBuilder, type FilterCondition } from '@/components/enterprise/AdvancedFilterBuilder';
 
 export function StockBalancePanel() {
   const [balances, setBalances] = useState<StockBalance[]>([]);
@@ -9,6 +11,11 @@ export function StockBalancePanel() {
   const [selectedWh, setSelectedWh] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [activeFilters, setActiveFilters] = useState<{ logic: 'AND' | 'OR'; conditions: FilterCondition[] }>({
+    logic: 'AND',
+    conditions: [],
+  });
 
   async function load() {
     setLoading(true);
@@ -31,23 +38,109 @@ export function StockBalancePanel() {
     load();
   }, [selectedWh]);
 
+  // Apply Multilevel Advanced Filter Logic
+  const filteredBalances = useMemo(() => {
+    if (activeFilters.conditions.length === 0) return balances;
+
+    return balances.filter((b) => {
+      const evaluateCondition = (cond: FilterCondition) => {
+        let fieldVal = '';
+        if (cond.field === 'warehouse') fieldVal = b.warehouse?.name || b.warehouseId || '';
+        else if (cond.field === 'itemCode') fieldVal = b.item?.code || b.itemId || '';
+        else if (cond.field === 'itemName') fieldVal = b.item?.name || '';
+        else if (cond.field === 'qtyOnHand') fieldVal = String(b.qtyOnHand);
+        else if (cond.field === 'uom') fieldVal = b.item?.uom?.code || '';
+
+        const targetVal = cond.value.toLowerCase();
+        const strVal = String(fieldVal).toLowerCase();
+
+        if (cond.operator === 'contains') return strVal.includes(targetVal);
+        if (cond.operator === 'equals') return strVal === targetVal;
+        if (cond.operator === 'greater_than') return Number(fieldVal) > Number(cond.value);
+        if (cond.operator === 'less_than') return Number(fieldVal) < Number(cond.value);
+        return true;
+      };
+
+      if (activeFilters.logic === 'AND') {
+        return activeFilters.conditions.every(evaluateCondition);
+      } else {
+        return activeFilters.conditions.some(evaluateCondition);
+      }
+    });
+  }, [balances, activeFilters]);
+
   const totalItemsWithStock = balances.filter((b) => b.qtyOnHand > 0).length;
+
+  const tableColumns: ColumnDef<StockBalance>[] = [
+    {
+      key: 'warehouse',
+      header: 'Warehouse',
+      accessor: (b) => <span className="font-semibold">{b.warehouse?.name || b.warehouseId}</span>,
+      sortable: true,
+    },
+    {
+      key: 'itemCode',
+      header: 'Item Code',
+      accessor: (b) => <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{b.item?.code || b.itemId}</span>,
+      sortable: true,
+      mono: true,
+    },
+    {
+      key: 'itemName',
+      header: 'Item Name',
+      accessor: (b) => <span>{b.item?.name || '—'}</span>,
+      sortable: true,
+    },
+    {
+      key: 'qtyOnHand',
+      header: 'Qty On-Hand',
+      accessor: (b) => (
+        <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+          {b.qtyOnHand.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </span>
+      ),
+      sortable: true,
+      align: 'right',
+      mono: true,
+    },
+    {
+      key: 'uom',
+      header: 'UOM',
+      accessor: (b) => <span className="font-mono text-slate-500">{b.item?.uom?.code || '—'}</span>,
+      sortable: true,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      accessor: (b) =>
+        b.qtyOnHand > 0 ? (
+          <span className="rounded bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+            In Stock
+          </span>
+        ) : (
+          <span className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+            Zero Stock
+          </span>
+        ),
+      sortable: false,
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Live On-Hand Stock Balances</h2>
-          <p className="text-sm text-slate-500">Real-time inventory levels across storage locations.</p>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">Live On-Hand Stock Balances</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Section 12 high-density virtualized inventory levels across locations.</p>
         </div>
 
         {/* Warehouse Filter */}
         <div className="flex items-center space-x-2">
-          <label className="text-xs font-semibold text-slate-700">Filter Warehouse:</label>
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Warehouse Scope:</label>
           <select
             value={selectedWh}
             onChange={(e) => setSelectedWh(e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-900 focus:outline-none bg-white shadow-sm font-medium"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none shadow-xs font-medium"
           >
             <option value="all">All Warehouses</option>
             {warehouses.map((wh) => (
@@ -58,86 +151,56 @@ export function StockBalancePanel() {
           </select>
           <button
             onClick={load}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             Refresh
           </button>
         </div>
       </div>
 
-      {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200">{error}</div>}
+      {error && <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-xs text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">{error}</div>}
 
-      {/* KPI Cards */}
+      {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Warehouses</span>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{warehouses.length}</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Warehouses</span>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 font-mono">{warehouses.length}</p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">SKUs with Positive Stock</span>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{totalItemsWithStock}</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">SKUs with Positive Stock</span>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{totalItemsWithStock}</p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tracked Balances</span>
-          <p className="text-2xl font-bold text-indigo-600 mt-1">{balances.length}</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tracked Balances</span>
+          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1 font-mono">{balances.length}</p>
         </div>
       </div>
 
-      {/* Balances Table */}
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-          <thead className="bg-slate-50 text-slate-600 font-semibold uppercase">
-            <tr>
-              <th className="px-4 py-2.5">Warehouse</th>
-              <th className="px-4 py-2.5">Item Code</th>
-              <th className="px-4 py-2.5">Item Name</th>
-              <th className="px-4 py-2.5 text-right">Qty On-Hand</th>
-              <th className="px-4 py-2.5">UOM</th>
-              <th className="px-4 py-2.5">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-800">
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
-                  Loading stock balances...
-                </td>
-              </tr>
-            ) : balances.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
-                  No stock balance records found for this view.
-                </td>
-              </tr>
-            ) : (
-              balances.map((bal) => (
-                <tr key={bal.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-2.5 font-medium text-slate-900">{bal.warehouse?.name || bal.warehouseId}</td>
-                  <td className="px-4 py-2.5 font-mono font-semibold text-indigo-700">{bal.item?.code || bal.itemId}</td>
-                  <td className="px-4 py-2.5 font-medium text-slate-800">{bal.item?.name || '—'}</td>
-                  <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-900 text-sm">
-                    {bal.qtyOnHand.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
-                  <td className="px-4 py-2.5 font-mono text-slate-600">{bal.item?.uom?.code || '—'}</td>
-                  <td className="px-4 py-2.5">
-                    {bal.qtyOnHand > 0 ? (
-                      <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
-                        In Stock
-                      </span>
-                    ) : (
-                      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
-                        Zero Stock
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* Advanced Filter Builder Component */}
+      <AdvancedFilterBuilder
+        presetCategory="stock_balances"
+        availableFields={[
+          { key: 'itemCode', label: 'Item Code' },
+          { key: 'itemName', label: 'Item Name' },
+          { key: 'warehouse', label: 'Warehouse Name' },
+          { key: 'qtyOnHand', label: 'Qty On-Hand' },
+          { key: 'uom', label: 'Unit of Measure' },
+        ]}
+        onApplyFilters={(logic, conditions) => setActiveFilters({ logic, conditions })}
+        onClearFilters={() => setActiveFilters({ logic: 'AND', conditions: [] })}
+      />
+
+      {/* Virtualized Data Table Component */}
+      <VirtualDataTable
+        title="Materialized Stock Ledger Balances"
+        subtitle={`Showing ${filteredBalances.length} records (${activeFilters.conditions.length} active filter rules)`}
+        data={filteredBalances}
+        columns={tableColumns}
+        exportFileName="stock_balances"
+      />
     </div>
   );
 }
+

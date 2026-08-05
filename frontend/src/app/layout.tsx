@@ -14,10 +14,17 @@ export const metadata: Metadata = {
   description: 'Multi-tenant manufacturing ERP / MIS',
 };
 
+import { WorkspaceProvider } from '@/context/WorkspaceContext';
+import { AppShell } from '@/components/layout/AppShell';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${plex.variable} font-sans`}>{children}</body>
+      <body className={`${plex.variable} font-sans`}>
+        <WorkspaceProvider>
+          <AppShell>{children}</AppShell>
+        </WorkspaceProvider>
+      </body>
     </html>
   );
 }

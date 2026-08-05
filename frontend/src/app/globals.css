@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,14 +7,62 @@
 @layer base {
   html,
   body {
-    @apply min-h-full bg-canvas font-sans text-ink antialiased;
+    @apply min-h-full font-sans antialiased text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-950;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  body {
-    background-image:
-      radial-gradient(ellipse 70% 45% at 0% 0%, rgba(2, 132, 199, 0.07), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(5, 150, 105, 0.05), transparent 50%);
-    background-color: theme('colors.canvas');
-    background-repeat: no-repeat;
+  code, kbd, samp, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
+}
+
+/* Custom Utilities for Enterprise High-Density Components */
+.table-compact td, .table-compact th {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.table-comfortable td, .table-comfortable th {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  font-size: 0.8125rem;
+}
+
+.table-cozy td, .table-cozy th {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  font-size: 0.875rem;
+}
+
+/* Operator Touch HMI Mode overrides */
+.operator-mode button,
+.operator-mode a {
+  min-height: 48px;
+  font-size: 0.95rem !important;
+}
+
+.operator-mode table td,
+.operator-mode table th {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.95rem !important;
+}
+
+/* Custom Scrollbar for Virtual Tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
 }

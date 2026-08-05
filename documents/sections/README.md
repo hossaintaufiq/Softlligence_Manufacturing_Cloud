@@ -20,6 +20,7 @@ These documents sit **beside** the master specs (01–05). Specs define the targ
 | 8 Manufacturing Core | [`SECTION_08_Manufacturing.md`](./SECTION_08_Manufacturing.md) | Done |
 | 9 Commercial Ops | [`SECTION_09_Commercial.md`](./SECTION_09_Commercial.md) | Done |
 | 10 Steel + Live Deploy | [`SECTION_10_Steel_Deploy.md`](./SECTION_10_Steel_Deploy.md) | Done |
+| 11 Product Experience | [`SECTION_11_Product_Experience.md`](./SECTION_11_Product_Experience.md) | Done |
 
 When a section ships, add `SECTION_NN_*.md` here and update this table.
 

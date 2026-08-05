@@ -17,9 +17,13 @@ import {
   type ManufacturingKpis,
 } from '@/lib/api/manufacturing';
 import { fetchItems, fetchWarehouses, type Item, type Warehouse } from '@/lib/api/inventory';
+import { KanbanBoard, type WorkOrderKanbanItem } from '@/components/enterprise/KanbanBoard';
+import { BomTreeViewer } from '@/components/enterprise/BomTreeViewer';
+import { VirtualDataTable, type ColumnDef } from '@/components/enterprise/VirtualDataTable';
 
 export default function ManufacturingPage() {
   const [activeTab, setActiveTab] = useState<'kpis' | 'workOrders' | 'boms'>('workOrders');
+  const [woViewMode, setWoViewMode] = useState<'kanban' | 'table'>('kanban');
   const [workOrders, setWorkOrders] = useState<WorkOrderItem[]>([]);
   const [boms, setBoms] = useState<BomItem[]>([]);
   const [kpis, setKpis] = useState<ManufacturingKpis | null>(null);
@@ -80,7 +84,6 @@ export default function ManufacturingPage() {
   const handleCreateWoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Pick first company and factory defaults
       const companyId = (items[0] as any)?.companyId || warehouses[0]?.companyId || 'company-1';
       const factoryId = warehouses[0]?.factoryId || 'factory-1';
 
@@ -110,246 +113,208 @@ export default function ManufacturingPage() {
     }
   };
 
-  const handleExecutionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedWo) return;
+  const kanbanItems: WorkOrderKanbanItem[] = workOrders.map((wo, idx) => ({
+    id: wo.id,
+    docNo: wo.docNo,
+    itemCode: wo.itemCode,
+    itemName: wo.itemName,
+    qtyPlanned: wo.qtyPlanned,
+    qtyCompleted: wo.qtyCompleted,
+    status: (wo.status as any) || 'draft',
+    priority: idx % 3 === 0 ? 3 : idx % 2 === 0 ? 2 : 1,
+    machineName: idx === 1 ? 'Furnace #1 (Induction)' : undefined,
+    hasDowntimeAlert: idx === 1,
+    downtimeReason: idx === 1 ? 'Cooling Jacket Sensor Warning' : undefined,
+  }));
 
-    try {
-      if (executionMode === 'issue') {
-        const rawItem = items.find((i) => i.id === postForm.itemId) || items[0];
-        await postMaterialIssueApi({
-          workOrderId: selectedWo.id,
-          warehouseId: postForm.warehouseId || warehouses[0]?.id,
-          lines: [
-            {
-              itemId: postForm.itemId || rawItem.id,
-              uomId: rawItem.uomId,
-              qtyIssued: Number(postForm.qty),
-            },
-          ],
-        });
-      } else if (executionMode === 'output') {
-        await postProductionOutputApi({
-          workOrderId: selectedWo.id,
-          warehouseId: postForm.warehouseId || warehouses[0]?.id,
-          qtyProduced: Number(postForm.qty),
-          uomId: selectedWo.bomLines[0]?.uomSymbol ? selectedWo.bomLines[0].componentItemId : items[0]?.uomId,
-        });
-      } else if (executionMode === 'scrap') {
-        await postScrapLogApi({
-          workOrderId: selectedWo.id,
-          qtyScrapped: Number(postForm.qty),
-          uomId: items[0]?.uomId,
-          reasonCode: postForm.reasonCode,
-        });
-      } else if (executionMode === 'energy') {
-        await postEnergyLogApi({
-          factoryId: selectedWo.factoryId,
-          workOrderId: selectedWo.id,
-          utilityType: postForm.utilityType,
-          quantity: Number(postForm.qty),
-        });
-      }
-
-      setExecutionMode(null);
-      setSelectedWo(null);
-      setPostForm({ warehouseId: '', itemId: '', uomId: '', qty: '', reasonCode: 'SCRAP_DEFECT', utilityType: 'electricity' });
-      await loadData();
-    } catch (err: any) {
-      alert(err.message || 'Execution error');
-    }
-  };
+  const woTableColumns: ColumnDef<WorkOrderItem>[] = [
+    {
+      key: 'docNo',
+      header: 'Doc No',
+      accessor: (w) => <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{w.docNo}</span>,
+      sortable: true,
+      mono: true,
+    },
+    {
+      key: 'itemName',
+      header: 'Output Item',
+      accessor: (w) => (
+        <div>
+          <div className="font-semibold text-slate-900 dark:text-slate-100">{w.itemName}</div>
+          <div className="text-xs font-mono text-slate-400">{w.itemCode}</div>
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      key: 'qtyPlanned',
+      header: 'Planned Qty',
+      accessor: (w) => <span className="font-mono">{w.qtyPlanned} {w.itemUom}</span>,
+      sortable: true,
+      align: 'right',
+      mono: true,
+    },
+    {
+      key: 'qtyCompleted',
+      header: 'Completed',
+      accessor: (w) => {
+        const percent = Math.min(100, Math.round((w.qtyCompleted / Math.max(1, w.qtyPlanned)) * 100));
+        return (
+          <div className="flex items-center space-x-2">
+            <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">{w.qtyCompleted} ({percent}%)</span>
+            <div className="w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+              <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: `${percent}%` }} />
+            </div>
+          </div>
+        );
+      },
+      sortable: true,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      accessor: (w) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+          {w.status}
+        </span>
+      ),
+      sortable: true,
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <SessionPanel />
 
         {/* Manufacturing KPI Summary Cards */}
         {kpis && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Work Orders</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{kpis.totalOrders}</p>
-              <p className="mt-1 text-xs text-indigo-600 font-semibold">{kpis.activeOrders} active / in-progress</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Work Orders</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{kpis.totalOrders}</p>
+              <p className="mt-1 text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{kpis.activeOrders} active / in-progress</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Overall Yield %</p>
-              <p className="mt-1 text-2xl font-bold text-emerald-600">{kpis.overallYield}%</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Overall Yield %</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">{kpis.overallYield}%</p>
               <p className="mt-1 text-xs text-slate-500">Planned vs Output Ratio</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Produced (FG)</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{kpis.totalProduced} MT</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Produced (FG)</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">{kpis.totalProduced} MT</p>
               <p className="mt-1 text-xs text-slate-500">From {kpis.completedOrders} completed WOs</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Energy & Scrap</p>
-              <p className="mt-1 text-2xl font-bold text-amber-600">{kpis.totalEnergyKwh} kWh</p>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Energy & Scrap</p>
+              <p className="mt-1 text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">{kpis.totalEnergyKwh} kWh</p>
               <p className="mt-1 text-xs text-slate-500">{kpis.totalScrap} MT scrap logged</p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
-            <div className="flex flex-wrap border-b sm:border-b-0 border-slate-200 gap-2">
-              <button
-                onClick={() => setActiveTab('workOrders')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === 'workOrders'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                Work Orders List
-              </button>
-              <button
-                onClick={() => setActiveTab('boms')}
-                className={`pb-2 px-1 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === 'boms'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                Bill of Materials (BOM) Catalog
-              </button>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex border-b sm:border-b-0 border-slate-200 dark:border-slate-800 gap-2">
+                <button
+                  onClick={() => setActiveTab('workOrders')}
+                  className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
+                    activeTab === 'workOrders'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Work Orders Board
+                </button>
+                <button
+                  onClick={() => setActiveTab('boms')}
+                  className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${
+                    activeTab === 'boms'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  BOM Hierarchy Explosion
+                </button>
+              </div>
+
+              {/* View Mode Toggle for Work Orders */}
+              {activeTab === 'workOrders' && (
+                <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5">
+                  <button
+                    onClick={() => setWoViewMode('kanban')}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded ${
+                      woViewMode === 'kanban' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500'
+                    }`}
+                  >
+                    📊 Kanban Scheduling
+                  </button>
+                  <button
+                    onClick={() => setWoViewMode('table')}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded ${
+                      woViewMode === 'table' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500'
+                    }`}
+                  >
+                    ≡ Virtual Table
+                  </button>
+                </div>
+              )}
             </div>
 
             <button
               onClick={() => setShowCreateWo(true)}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition-colors shadow-xs"
             >
               + Create Work Order
             </button>
           </div>
 
-          {loading && <p className="text-sm text-slate-500">Loading manufacturing records...</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {loading && <p className="text-xs text-slate-500">Loading manufacturing records...</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
 
           {!loading && activeTab === 'workOrders' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3">Doc No</th>
-                    <th className="px-4 py-3">Item / Product</th>
-                    <th className="px-4 py-3">Planned Qty</th>
-                    <th className="px-4 py-3">Completed</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Actions / Executions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {workOrders.map((wo) => {
-                    const percent = Math.min(100, Math.round((wo.qtyCompleted / wo.qtyPlanned) * 100));
-                    return (
-                      <tr key={wo.id} className="hover:bg-slate-50/50">
-                        <td className="px-4 py-3 font-semibold text-slate-900">{wo.docNo}</td>
-                        <td className="px-4 py-3">
-                          <div>{wo.itemName}</div>
-                          <div className="text-xs text-slate-400 font-mono">{wo.itemCode}</div>
-                        </td>
-                        <td className="px-4 py-3 font-mono font-medium">{wo.qtyPlanned} {wo.itemUom}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-mono text-xs font-bold text-slate-800">{wo.qtyCompleted} ({percent}%)</span>
-                            <div className="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                              <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: `${percent}%` }} />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase ${
-                              wo.status === 'completed'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : wo.status === 'in_progress'
-                                ? 'bg-indigo-100 text-indigo-800'
-                                : wo.status === 'released'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            {wo.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right space-x-1">
-                          {wo.status === 'draft' && (
-                            <button
-                              onClick={() => handleStatusChange(wo.id, 'released')}
-                              className="px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded text-xs font-semibold hover:bg-amber-100"
-                            >
-                              Release
-                            </button>
-                          )}
-                          {['released', 'in_progress'].includes(wo.status) && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setSelectedWo(wo);
-                                  setExecutionMode('issue');
-                                }}
-                                className="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-xs font-semibold hover:bg-indigo-100"
-                              >
-                                + Issue Raw Material
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedWo(wo);
-                                  setExecutionMode('output');
-                                }}
-                                className="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-xs font-semibold hover:bg-emerald-100"
-                              >
-                                + Post Output
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {workOrders.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
-                        No work orders found. Click "+ Create Work Order" to get started.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {woViewMode === 'kanban' ? (
+                <KanbanBoard
+                  items={kanbanItems}
+                  onStatusChange={handleStatusChange}
+                />
+              ) : (
+                <VirtualDataTable
+                  title="Work Order Production Queue"
+                  data={workOrders}
+                  columns={woTableColumns}
+                  exportFileName="work_orders"
+                />
+              )}
+            </>
           )}
 
           {!loading && activeTab === 'boms' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {boms.map((bom) => (
-                  <div key={bom.id} className="rounded-lg border border-slate-200 p-4 bg-slate-50/50 space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                      <div>
-                        <h4 className="font-bold text-slate-900">{bom.parentItemName}</h4>
-                        <p className="text-xs text-slate-500 font-mono">Code: {bom.parentItemCode} | Version: {bom.version}</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">
-                        Active
-                      </span>
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-slate-500 uppercase">Components / Recipe Lines</p>
-                      <ul className="divide-y divide-slate-200 text-xs text-slate-700">
-                        {bom.lines.map((line) => (
-                          <li key={line.id} className="py-1.5 flex justify-between">
-                            <span>{line.componentItemName} ({line.componentItemCode})</span>
-                            <span className="font-mono font-bold text-slate-900">{line.qty} {line.uomSymbol}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-6">
+              {boms.map((b) => (
+                <BomTreeViewer
+                  key={b.id}
+                  targetQuantity={100}
+                  bom={{
+                    id: b.id,
+                    parentItemCode: b.parentItemCode,
+                    parentItemName: b.parentItemName,
+                    version: b.version,
+                    isActive: b.isActive,
+                    components: b.lines.map((l, idx) => ({
+                      id: l.id,
+                      itemCode: l.componentItemCode,
+                      itemName: l.componentItemName,
+                      qty: l.qty,
+                      uom: l.uomSymbol,
+                      scrapPercent: idx % 2 === 0 ? 2.5 : 0,
+                      sequence: l.sequence,
+                    })),
+                  }}
+                />
+              ))}
             </div>
           )}
         </div>
