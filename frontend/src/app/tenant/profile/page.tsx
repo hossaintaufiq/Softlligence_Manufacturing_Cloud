@@ -13,6 +13,7 @@ export default function TenantProfilePage() {
   const [densityPref, setDensityPref] = useState<'cozy' | 'compact'>('cozy');
   const [landingTabPref, setLandingTabPref] = useState('overview');
   const [tenantNamePref, setTenantNamePref] = useState('');
+  const [workspaceNotes, setWorkspaceNotes] = useState('');
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
@@ -23,6 +24,8 @@ export default function TenantProfilePage() {
       setDensityPref(user.preferences?.density || 'cozy');
       setLandingTabPref(user.preferences?.defaultTab || 'overview');
       setTenantNamePref(user.tenantName || '');
+      const savedNotes = localStorage.getItem(`smc_workspace_notes_${user.tenantId}`);
+      setWorkspaceNotes(savedNotes || '');
     }
   }, [user]);
 
@@ -90,6 +93,10 @@ export default function TenantProfilePage() {
       tenantName: tenantNamePref.trim(),
     });
 
+    if (res.success && user) {
+      localStorage.setItem(`smc_workspace_notes_${user.tenantId}`, workspaceNotes);
+    }
+
     setIsUpdatingProfile(false);
 
     if (res.success) {
@@ -154,6 +161,31 @@ export default function TenantProfilePage() {
                 className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl text-xs font-semibold cursor-not-allowed font-mono"
               />
               <p className="text-[9px] text-slate-400">Used for identifying database pools and server connections.</p>
+            </div>
+          </div>
+
+          {/* Node Diagnostics & Notes */}
+          <div className="border-t border-slate-100 pt-4 mt-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-extrabold text-[#B48F48] uppercase tracking-wider font-mono">Workspace Node Status / Notes</h4>
+              <div className="flex items-center space-x-1.5 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-500/10">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[8px] font-bold text-emerald-700 font-mono tracking-wide uppercase">
+                  Platform Sync: Active
+                </span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Workspace Operational Memo / Notes</label>
+              <textarea
+                value={workspaceNotes}
+                onChange={(e) => setWorkspaceNotes(e.target.value)}
+                rows={3}
+                className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-800 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-medium"
+                placeholder="Enter details on fabric suppliers, line capacities, or shipping specifications..."
+              />
+              <p className="text-[9px] text-slate-400">Notes are saved locally on this terminal client.</p>
             </div>
           </div>
         </div>
