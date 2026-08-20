@@ -10,6 +10,7 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [businessType, setBusinessType] = useState<'garments' | 'steel' | 'local'>('garments');
 
   // Security guard redirect if not authorized or suspended
   useEffect(() => {
@@ -21,10 +22,14 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
         if (tenantsData) {
           const tenants = JSON.parse(tenantsData);
           const currentTenant = tenants.find((t: any) => t.id === user.tenantId);
-          if (currentTenant && currentTenant.status === 'suspended') {
-            logout();
-            alert('Your corporate workspace node has been suspended by the platform administrator.');
-            router.replace('/login');
+          if (currentTenant) {
+            if (currentTenant.status === 'suspended') {
+              logout();
+              alert('Your corporate workspace node has been suspended by the platform administrator.');
+              router.replace('/login');
+            } else if (currentTenant.businessType) {
+              setBusinessType(currentTenant.businessType);
+            }
           }
         }
       }
@@ -45,20 +50,73 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
   let activeTab = 'overview';
   if (pathname.includes('/merchandising')) activeTab = 'merchandising';
   else if (pathname.includes('/production-planning')) activeTab = 'production-planning';
+  else if (pathname.includes('/garments-production')) activeTab = 'garments-production';
+  else if (pathname.includes('/textile-manufacturing')) activeTab = 'textile-manufacturing';
   else if (pathname.includes('/procurement-management')) activeTab = 'procurement-management';
   else if (pathname.includes('/inventory-management')) activeTab = 'inventory-management';
-  else if (pathname.includes('/garments-production')) activeTab = 'garments-production';
+  else if (pathname.includes('/printing-embroidery')) activeTab = 'printing-embroidery';
   else if (pathname.includes('/commercial')) activeTab = 'commercial';
   else if (pathname.includes('/financial-accounting')) activeTab = 'financial-accounting';
   else if (pathname.includes('/hrms')) activeTab = 'hrms';
-  else if (pathname.includes('/textile-manufacturing')) activeTab = 'textile-manufacturing';
   else if (pathname.includes('/industrial-engineering')) activeTab = 'industrial-engineering';
   else if (pathname.includes('/quality-management')) activeTab = 'quality-management';
-  else if (pathname.includes('/printing-embroidery')) activeTab = 'printing-embroidery';
   else if (pathname.includes('/system-configuration')) activeTab = 'system-configuration';
   else if (pathname.includes('/profile')) activeTab = 'profile';
 
-  // Sidebar navigation panel grouping JSX
+  // Conditional links based on Tenant Industry
+  const getNavLinks = () => {
+    if (businessType === 'steel') {
+      return [
+        { href: '/tenant', activeKey: 'overview', text: 'Overview', icon: 'M4 6h16M4 12h16M4 18h16' },
+        { href: '/tenant/merchandising', activeKey: 'merchandising', text: 'Scrap Management', icon: 'M20 7l-8-4-8 4m16 0l-8 4' },
+        { href: '/tenant/production-planning', activeKey: 'production-planning', text: 'Furnace Smelting', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+        { href: '/tenant/garments-production', activeKey: 'garments-production', text: 'Casting & Rolling', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' },
+        { href: '/tenant/procurement-management', activeKey: 'procurement-management', text: 'Sourcing & Fuel', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+        { href: '/tenant/inventory-management', activeKey: 'inventory-management', text: 'Material Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+        { href: '/tenant/printing-embroidery', activeKey: 'printing-embroidery', text: 'Laboratory Composition', icon: 'M9 7h6m0 10v-3m-3 3h.01' },
+        { href: '/tenant/commercial', activeKey: 'commercial', text: 'Weighbridge Gates', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9' },
+        { href: '/tenant/financial-accounting', activeKey: 'financial-accounting', text: 'Invoices & Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2' },
+        { href: '/tenant/hrms', activeKey: 'hrms', text: 'HRMS & Shift Log', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7' },
+        { href: '/tenant/industrial-engineering', activeKey: 'industrial-engineering', text: 'Equipment Maintenance', icon: 'M12 6V4m0 2a2 2 0 100 4' },
+        { href: '/tenant/quality-management', activeKey: 'quality-management', text: 'Laboratory QA Audits', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944' },
+        { href: '/tenant/system-configuration', activeKey: 'system-configuration', text: 'Config Parameters', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4' }
+      ];
+    } else if (businessType === 'local') {
+      return [
+        { href: '/tenant', activeKey: 'overview', text: 'Store Dashboard', icon: 'M4 6h16M4 12h16M4 18h16' },
+        { href: '/tenant/merchandising', activeKey: 'merchandising', text: 'Products Catalog', icon: 'M12 3v16M8 7l4-4 4 4M4 10l8 4' },
+        { href: '/tenant/production-planning', activeKey: 'production-planning', text: 'POS Sales Terminal', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2' },
+        { href: '/tenant/garments-production', activeKey: 'garments-production', text: 'Orders Fulfillment', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9' },
+        { href: '/tenant/procurement-management', activeKey: 'procurement-management', text: 'Vendor Purchases', icon: 'M16 11V7a4 4 0 00-8 0v4' },
+        { href: '/tenant/inventory-management', activeKey: 'inventory-management', text: 'Store Stockroom', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10' },
+        { href: '/tenant/printing-embroidery', activeKey: 'printing-embroidery', text: 'Campaigns Promo', icon: 'M12 3v1m0 16v1' },
+        { href: '/tenant/commercial', activeKey: 'commercial', text: 'Customer CRM', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857' },
+        { href: '/tenant/financial-accounting', activeKey: 'financial-accounting', text: 'Invoices & Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2' },
+        { href: '/tenant/hrms', activeKey: 'hrms', text: 'Staff Roster Shifts', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7' },
+        { href: '/tenant/quality-management', activeKey: 'quality-management', text: 'Store Ratings & Reviews', icon: 'M9 12l2 2 4-4' },
+        { href: '/tenant/system-configuration', activeKey: 'system-configuration', text: 'System Config', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4' }
+      ];
+    } else {
+      // Default: Garments ERP
+      return [
+        { href: '/tenant', activeKey: 'overview', text: 'Overview', icon: 'M4 6h16M4 12h16M4 18h16' },
+        { href: '/tenant/merchandising', activeKey: 'merchandising', text: 'Merchandising', icon: 'M12 3v16M8 7l4-4 4 4M4 10l8 4-8-4' },
+        { href: '/tenant/production-planning', activeKey: 'production-planning', text: 'Production Planning', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+        { href: '/tenant/garments-production', activeKey: 'garments-production', text: 'Garments Production', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2' },
+        { href: '/tenant/textile-manufacturing', activeKey: 'textile-manufacturing', text: 'Textile Mfg.', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5' },
+        { href: '/tenant/procurement-management', activeKey: 'procurement-management', text: 'Procurement', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+        { href: '/tenant/inventory-management', activeKey: 'inventory-management', text: 'Inventory Management', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+        { href: '/tenant/printing-embroidery', activeKey: 'printing-embroidery', text: 'Printing & Embroidery', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707-.707M12 7a5 5 0 100 10 5 5 0 000-10z' },
+        { href: '/tenant/commercial', activeKey: 'commercial', text: 'Commercial Gate', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
+        { href: '/tenant/financial-accounting', activeKey: 'financial-accounting', text: 'Financial Ledger', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { href: '/tenant/hrms', activeKey: 'hrms', text: 'HRMS Payroll', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+        { href: '/tenant/industrial-engineering', activeKey: 'industrial-engineering', text: 'IE Operations', icon: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z' },
+        { href: '/tenant/quality-management', activeKey: 'quality-management', text: 'Quality Audits', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+        { href: '/tenant/system-configuration', activeKey: 'system-configuration', text: 'System Settings', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' }
+      ];
+    }
+  };
+
   const sidebarElement = (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Sidebar Header Brand */}
@@ -88,257 +146,26 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
 
       {/* Navigation Links Scroll Box */}
       <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
-        <Link
-          href="/tenant"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'overview'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'overview' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <span>Overview</span>
-        </Link>
-
-        <Link
-          href="/tenant/merchandising"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'merchandising'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'merchandising' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v16M8 7l4-4 4 4M4 10l8 4 8-4" />
-          </svg>
-          <span>Merchandising</span>
-        </Link>
-
-        <Link
-          href="/tenant/production-planning"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'production-planning'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'production-planning' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span>Production Planning</span>
-        </Link>
-
-        <Link
-          href="/tenant/garments-production"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'garments-production'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'garments-production' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2" />
-          </svg>
-          <span>Garments Production</span>
-        </Link>
-
-        <Link
-          href="/tenant/textile-manufacturing"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'textile-manufacturing'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'textile-manufacturing' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" />
-          </svg>
-          <span>Textile Mfg.</span>
-        </Link>
-
-        <Link
-          href="/tenant/procurement-management"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'procurement-management'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'procurement-management' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-          <span>Procurement</span>
-        </Link>
-
-        <Link
-          href="/tenant/inventory-management"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'inventory-management'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'inventory-management' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <span>Inventory Management</span>
-        </Link>
-
-        <Link
-          href="/tenant/printing-embroidery"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'printing-embroidery'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'printing-embroidery' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707-.707M12 7a5 5 0 100 10 5 5 0 000-10z" />
-          </svg>
-          <span>Printing & Embroidery</span>
-        </Link>
-
-        <Link
-          href="/tenant/commercial"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'commercial'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'commercial' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-          </svg>
-          <span>Commercial Gate</span>
-        </Link>
-
-        <Link
-          href="/tenant/financial-accounting"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'financial-accounting'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'financial-accounting' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Financial Ledger</span>
-        </Link>
-
-        <Link
-          href="/tenant/hrms"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'hrms'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'hrms' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span>HRMS Payroll</span>
-        </Link>
-
-        <Link
-          href="/tenant/industrial-engineering"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'industrial-engineering'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'industrial-engineering' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          <span>IE Operations</span>
-        </Link>
-
-        <Link
-          href="/tenant/quality-management"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'quality-management'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'quality-management' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <span>Quality Audits</span>
-        </Link>
-
-        <Link
-          href="/tenant/system-configuration"
-          onClick={() => setIsSidebarOpen(false)}
-          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-            activeTab === 'system-configuration'
-              ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-          }`}
-        >
-          {activeTab === 'system-configuration' && (
-            <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
-          )}
-          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg>
-          <span>System Settings</span>
-        </Link>
+        {getNavLinks().map((link, idx) => (
+          <Link
+            key={idx}
+            href={link.href}
+            onClick={() => setIsSidebarOpen(false)}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === link.activeKey
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === link.activeKey && (
+              <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
+            </svg>
+            <span>{link.text}</span>
+          </Link>
+        ))}
       </nav>
 
       {/* Sidebar Footer User Details */}

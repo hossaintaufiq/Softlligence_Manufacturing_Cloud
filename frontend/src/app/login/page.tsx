@@ -223,21 +223,53 @@ export default function LoginPage() {
               onClick={() => handleQuickLogin('admin@softlligence.com', 'admin123')}
               className="group p-2.5 bg-slate-50/50 hover:bg-[#FAF6EE] border border-slate-100 hover:border-[#C5A059]/40 rounded-xl flex flex-col items-center text-center transition-all hover:scale-[1.01]"
             >
-              <span className="text-base mb-1">👑</span>
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-[#B48F48] mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+              </svg>
               <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight">
                 Super Admin
               </h4>
             </button>
 
-            {/* Tenant Admin */}
+            {/* Garments ERP */}
             <button
               type="button"
               onClick={() => handleQuickLogin('manager@acme.com', 'manager123')}
               className="group p-2.5 bg-slate-50/50 hover:bg-[#FAF6EE] border border-slate-100 hover:border-[#C5A059]/40 rounded-xl flex flex-col items-center text-center transition-all hover:scale-[1.01]"
             >
-              <span className="text-base mb-1">🏢</span>
-              <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight">
-                Acme Admin
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-[#B48F48] mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v16M8 7l4-4 4 4M4 10l8 4 8-4" />
+              </svg>
+              <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight font-mono">
+                Garments ERP
+              </h4>
+            </button>
+
+            {/* Steel Mill */}
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('manager@steel.com', 'steel123')}
+              className="group p-2.5 bg-slate-50/50 hover:bg-[#FAF6EE] border border-slate-100 hover:border-[#C5A059]/40 rounded-xl flex flex-col items-center text-center transition-all hover:scale-[1.01]"
+            >
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-[#B48F48] mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
+              </svg>
+              <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight font-mono">
+                Steel Mill ERP
+              </h4>
+            </button>
+
+            {/* Local Business */}
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('manager@local.com', 'local123')}
+              className="group p-2.5 bg-slate-50/50 hover:bg-[#FAF6EE] border border-slate-100 hover:border-[#C5A059]/40 rounded-xl flex flex-col items-center text-center transition-all hover:scale-[1.01]"
+            >
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-[#B48F48] mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight font-mono">
+                Local Business
               </h4>
             </button>
           </div>

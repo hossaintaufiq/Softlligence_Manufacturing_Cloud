@@ -29,7 +29,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Pre-seeded demo credentials
 const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; tenantId?: string; tenantName?: string; preferences?: UserPreferences }> = {
   'admin@softlligence.com': {
     hash: 'admin123',
@@ -42,7 +41,23 @@ const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; t
     name: 'Sarah Jenkins',
     role: 'tenant-admin',
     tenantId: 'acme',
-    tenantName: 'Acme Steel Corp',
+    tenantName: 'Acme Garments ERP',
+    preferences: { density: 'cozy', defaultTab: 'overview' }
+  },
+  'manager@steel.com': {
+    hash: 'steel123',
+    name: 'James Sterling',
+    role: 'tenant-admin',
+    tenantId: 'steelmill',
+    tenantName: 'Acme Steel Mill',
+    preferences: { density: 'cozy', defaultTab: 'overview' }
+  },
+  'manager@local.com': {
+    hash: 'local123',
+    name: 'Claire Adams',
+    role: 'tenant-admin',
+    tenantId: 'localbiz',
+    tenantName: 'Apex Local Business',
     preferences: { density: 'cozy', defaultTab: 'overview' }
   },
 };
@@ -50,6 +65,22 @@ const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; t
 // Seed Local Data if not present
 const seedLocalDatabase = () => {
   if (typeof window === 'undefined') return;
+
+  // Check if steel admin is seeded, if not, reset database seeds to include new multi-tenant roles
+  const usersData = localStorage.getItem('smc_users');
+  if (!usersData || !JSON.parse(usersData)['manager@steel.com']) {
+    localStorage.setItem('smc_users', JSON.stringify(DEMO_USERS));
+    localStorage.setItem(
+      'smc_tenants',
+      JSON.stringify([
+        { id: 'acme', name: 'Acme Garments ERP', slug: 'acme', status: 'active', planCode: 'Enterprise', createdAt: '2026-08-01', businessType: 'garments' },
+        { id: 'steelmill', name: 'Acme Steel Mill', slug: 'steelmill', status: 'active', planCode: 'Enterprise', createdAt: '2026-08-20', businessType: 'steel' },
+        { id: 'localbiz', name: 'Apex Local Business', slug: 'localbiz', status: 'active', planCode: 'Standard', createdAt: '2026-08-20', businessType: 'local' },
+        { id: 'manchester', name: 'Manchester Foundries', slug: 'manchester', status: 'active', planCode: 'Growth', createdAt: '2026-08-10', businessType: 'steel' },
+        { id: 'globalalloys', name: 'Global Alloys LLC', slug: 'globalalloys', status: 'suspended', planCode: 'Standard', createdAt: '2026-08-12', businessType: 'steel' },
+      ])
+    );
+  }
 
   if (!localStorage.getItem('smc_users')) {
     localStorage.setItem('smc_users', JSON.stringify(DEMO_USERS));
@@ -59,9 +90,11 @@ const seedLocalDatabase = () => {
     localStorage.setItem(
       'smc_tenants',
       JSON.stringify([
-        { id: 'acme', name: 'Acme Steel Corp', slug: 'acme', status: 'active', planCode: 'Enterprise', createdAt: '2026-08-01' },
-        { id: 'manchester', name: 'Manchester Foundries', slug: 'manchester', status: 'active', planCode: 'Growth', createdAt: '2026-08-10' },
-        { id: 'globalalloys', name: 'Global Alloys LLC', slug: 'globalalloys', status: 'suspended', planCode: 'Standard', createdAt: '2026-08-12' },
+        { id: 'acme', name: 'Acme Garments ERP', slug: 'acme', status: 'active', planCode: 'Enterprise', createdAt: '2026-08-01', businessType: 'garments' },
+        { id: 'steelmill', name: 'Acme Steel Mill', slug: 'steelmill', status: 'active', planCode: 'Enterprise', createdAt: '2026-08-20', businessType: 'steel' },
+        { id: 'localbiz', name: 'Apex Local Business', slug: 'localbiz', status: 'active', planCode: 'Standard', createdAt: '2026-08-20', businessType: 'local' },
+        { id: 'manchester', name: 'Manchester Foundries', slug: 'manchester', status: 'active', planCode: 'Growth', createdAt: '2026-08-10', businessType: 'steel' },
+        { id: 'globalalloys', name: 'Global Alloys LLC', slug: 'globalalloys', status: 'suspended', planCode: 'Standard', createdAt: '2026-08-12', businessType: 'steel' },
       ])
     );
   }

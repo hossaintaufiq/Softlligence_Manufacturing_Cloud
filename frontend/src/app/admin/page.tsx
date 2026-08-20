@@ -10,17 +10,20 @@ type Tenant = {
   status: 'active' | 'suspended';
   planCode: string;
   createdAt: string;
+  businessType?: 'garments' | 'steel' | 'local';
 };
 
 export default function SubscriptionsDashboard() {
   const { user } = useAuth();
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [usersMap, setUsersMap] = useState<Record<string, any>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   
   // New Tenant Form State
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [planCode, setPlanCode] = useState('Growth');
+  const [businessType, setBusinessType] = useState<'garments' | 'steel' | 'local'>('garments');
   const [error, setError] = useState<string | null>(null);
 
   // Load tenants from localStorage
@@ -28,6 +31,10 @@ export default function SubscriptionsDashboard() {
     const data = localStorage.getItem('smc_tenants');
     if (data) {
       setTenants(JSON.parse(data));
+    }
+    const uData = localStorage.getItem('smc_users');
+    if (uData) {
+      setUsersMap(JSON.parse(uData));
     }
   };
 
@@ -37,8 +44,8 @@ export default function SubscriptionsDashboard() {
 
   // Spacing presets based on density preference
   const isCompact = user?.preferences?.density === 'compact';
-  const tableCellPadding = isCompact ? 'px-4 py-2 text-[11px]' : 'px-6 py-3.5 text-xs';
-  const tableHeaderPadding = isCompact ? 'px-4 py-2.5 text-[8px]' : 'px-6 py-3.5 text-[9px]';
+  const tableCellPadding = isCompact ? 'px-4 py-2.5 text-[11px]' : 'px-6 py-4 text-xs';
+  const tableHeaderPadding = isCompact ? 'px-4 py-2.5 text-[8px]' : 'px-6 py-4 text-[9px]';
   const gridGap = isCompact ? 'gap-3.5' : 'gap-4 sm:gap-6';
   const kpiPadding = isCompact ? 'p-4' : 'p-5';
 
@@ -64,20 +71,17 @@ export default function SubscriptionsDashboard() {
       slug: cleanSlug,
       status: 'active',
       planCode,
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: new Date().toISOString().split('T')[0],
+      businessType
     };
 
-    const updated = [...tenants, newTenant];
-    setTenants(updated);
-    localStorage.setItem('smc_tenants', JSON.stringify(updated));
-
-    // Register details in default user profiles as well
+    // Register details in default user profiles
     const defaultManagerEmail = `manager@${cleanSlug}.com`;
     const storedUsers = localStorage.getItem('smc_users');
     if (storedUsers) {
-      const usersMap = JSON.parse(storedUsers);
-      usersMap[defaultManagerEmail] = {
-        name: 'Sarah Jenkins',
+      const parsedUsers = JSON.parse(storedUsers);
+      parsedUsers[defaultManagerEmail] = {
+        name: `${newTenant.name} Administrator`,
         role: 'tenant-admin',
         hash: 'manager123',
         tenantId: newTenant.id,
@@ -87,12 +91,18 @@ export default function SubscriptionsDashboard() {
           defaultTab: 'overview'
         }
       };
-      localStorage.setItem('smc_users', JSON.stringify(usersMap));
+      localStorage.setItem('smc_users', JSON.stringify(parsedUsers));
+      setUsersMap(parsedUsers);
     }
+
+    const updated = [...tenants, newTenant];
+    setTenants(updated);
+    localStorage.setItem('smc_tenants', JSON.stringify(updated));
 
     setName('');
     setSlug('');
     setPlanCode('Growth');
+    setBusinessType('garments');
     setError(null);
     setShowAddModal(false);
   };
@@ -124,12 +134,9 @@ export default function SubscriptionsDashboard() {
     <>
       {/* KPI Panel */}
       <div className={`grid grid-cols-1 sm:grid-cols-3 ${gridGap} animate-fade-in`}>
-        
         <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
           <div>
-            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Total Workspaces
-            </p>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Total Workspaces</p>
             <h3 className="text-2xl font-extrabold text-slate-900 mt-1 font-mono">{totalTenants}</h3>
           </div>
           <span className="text-xl text-[#C5A059] bg-[#FAF6EE] p-2 rounded-xl border border-[#C5A059]/10">🏢</span>
@@ -137,9 +144,7 @@ export default function SubscriptionsDashboard() {
 
         <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
           <div>
-            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Active Instances
-            </p>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Active Instances</p>
             <h3 className="text-2xl font-extrabold text-emerald-600 mt-1 font-mono">{activeTenants}</h3>
           </div>
           <span className="text-xl text-emerald-600 bg-emerald-50 p-2 rounded-xl border border-emerald-500/10">🟢</span>
@@ -147,9 +152,7 @@ export default function SubscriptionsDashboard() {
 
         <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
           <div>
-            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Suspended Instances
-            </p>
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Suspended Instances</p>
             <h3 className="text-2xl font-extrabold text-amber-600 mt-1 font-mono">{suspendedTenants}</h3>
           </div>
           <span className="text-xl text-amber-600 bg-amber-50 p-2 rounded-xl border border-amber-500/10">⚠️</span>
@@ -164,7 +167,7 @@ export default function SubscriptionsDashboard() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-3.5 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 active:scale-[0.98] flex items-center justify-center space-x-1"
+          className="px-3.5 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 active:scale-[0.98] flex items-center justify-center space-x-1 font-mono uppercase tracking-wider"
         >
           <span>+ Provision Workspace</span>
         </button>
@@ -173,62 +176,116 @@ export default function SubscriptionsDashboard() {
       {/* Tenants Grid/Table */}
       <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs animate-fade-in">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
+          <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200/80 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                <th className={tableHeaderPadding}>Company Name</th>
+                <th className={tableHeaderPadding}>Company / Node Name</th>
+                <th className={tableHeaderPadding}>Administrator User</th>
+                <th className={tableHeaderPadding}>quick credentials</th>
                 <th className={tableHeaderPadding}>Slug URL</th>
                 <th className={tableHeaderPadding}>Billing Plan</th>
-                <th className={tableHeaderPadding}>Date Created</th>
                 <th className={`${tableHeaderPadding} text-center`}>Status</th>
                 <th className={`${tableHeaderPadding} text-right`}>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-              {tenants.map((tenant) => (
-                <tr key={tenant.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className={`${tableCellPadding} text-slate-950 font-bold`}>{tenant.name}</td>
-                  <td className={`${tableCellPadding} text-[#B48F48] font-mono`}>/{tenant.slug}</td>
-                  <td className={tableCellPadding}>
-                    <span className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-bold font-mono">
-                      {tenant.planCode}
-                    </span>
-                  </td>
-                  <td className={`${tableCellPadding} text-slate-400 font-mono`}>{tenant.createdAt}</td>
-                  <td className={`${tableCellPadding} text-center`}>
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider ${
-                        tenant.status === 'active'
-                          ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                      }`}
-                    >
-                      {tenant.status}
-                    </span>
-                  </td>
-                  <td className={`${tableCellPadding} text-right space-x-1.5 whitespace-nowrap`}>
-                    <button
-                      onClick={() => toggleTenantStatus(tenant.id)}
-                      className={`px-2 py-1 text-[10px] font-bold rounded-lg border transition-all ${
-                        tenant.status === 'active'
-                          ? 'bg-amber-50/60 hover:bg-amber-100/60 border-amber-200/50 text-amber-700'
-                          : 'bg-emerald-50/60 hover:bg-emerald-100/60 border-emerald-200/50 text-emerald-700'
-                      }`}
-                    >
-                      {tenant.status === 'active' ? 'Suspend' : 'Activate'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTenant(tenant.id)}
-                      className="px-2 py-1 bg-rose-50/60 hover:bg-rose-100/60 border border-rose-200/50 text-rose-600 rounded-lg transition-all"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {tenants.map((tenant) => {
+                // Find admin user associated with this tenant
+                const adminEntry = Object.entries(usersMap).find(
+                  ([email, info]: [string, any]) => info.tenantId === tenant.id && info.role === 'tenant-admin'
+                );
+                
+                const adminEmail = adminEntry ? adminEntry[0] : `manager@${tenant.slug}.com`;
+                const adminName = adminEntry ? adminEntry[1].name : 'Default Manager';
+                const adminPassword = adminEntry ? adminEntry[1].hash : 'manager123';
+                const typeLabel = tenant.businessType === 'steel' 
+                  ? 'Steel Mill ERP' 
+                  : tenant.businessType === 'local' 
+                    ? 'Local Business' 
+                    : 'Garments ERP';
+
+                return (
+                  <tr key={tenant.id} className="hover:bg-slate-50/30 transition-colors">
+                    
+                    {/* Workspace Company details */}
+                    <td className={tableCellPadding}>
+                      <div>
+                        <p className="text-slate-950 font-bold">{tenant.name}</p>
+                        <span className={`inline-block px-1.5 py-0.2 rounded text-[8px] font-extrabold uppercase font-mono mt-1 ${
+                          tenant.businessType === 'steel' 
+                            ? 'bg-orange-500/10 text-orange-600 border border-orange-500/20' 
+                            : tenant.businessType === 'local' 
+                              ? 'bg-indigo-500/10 text-indigo-600 border border-indigo-500/20' 
+                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                        }`}>
+                          {typeLabel}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Admin User Contact details */}
+                    <td className={tableCellPadding}>
+                      <div>
+                        <p className="text-slate-900 font-bold">{adminName}</p>
+                        <p className="text-[9px] text-slate-450 font-mono mt-0.5">{adminEmail}</p>
+                      </div>
+                    </td>
+
+                    {/* Admin Credentials */}
+                    <td className={tableCellPadding}>
+                      <div className="font-mono bg-slate-50 border border-slate-150 px-2 py-1.5 rounded-lg inline-block">
+                        <p className="text-[9px] text-slate-500">Hash: <span className="font-bold text-slate-800">{adminPassword}</span></p>
+                      </div>
+                    </td>
+
+                    {/* Slug */}
+                    <td className={`${tableCellPadding} text-[#B48F48] font-mono`}>/{tenant.slug}</td>
+
+                    {/* Pricing */}
+                    <td className={tableCellPadding}>
+                      <span className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-bold font-mono">
+                        {tenant.planCode}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+                    <td className={`${tableCellPadding} text-center`}>
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider ${
+                          tenant.status === 'active'
+                            ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                        }`}
+                      >
+                        {tenant.status}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className={`${tableCellPadding} text-right space-x-1.5 whitespace-nowrap`}>
+                      <button
+                        onClick={() => toggleTenantStatus(tenant.id)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-lg border transition-all ${
+                          tenant.status === 'active'
+                            ? 'bg-amber-50/60 hover:bg-amber-100/60 border-amber-200/50 text-amber-700'
+                            : 'bg-emerald-50/60 hover:bg-emerald-100/60 border-emerald-200/50 text-emerald-700'
+                        }`}
+                      >
+                        {tenant.status === 'active' ? 'Suspend' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTenant(tenant.id)}
+                        className="px-2 py-1 bg-rose-50/60 hover:bg-rose-100/60 border border-rose-200/50 text-rose-600 rounded-lg transition-all"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={6} className={`${tableCellPadding} text-center text-xs text-slate-400 font-mono py-10`}>
+                  <td colSpan={7} className={`${tableCellPadding} text-center text-xs text-slate-400 font-mono py-10`}>
                     No corporate workspaces provisioned yet.
                   </td>
                 </tr>
@@ -248,7 +305,7 @@ export default function SubscriptionsDashboard() {
             </div>
 
             {error && (
-              <div className="p-3 bg-rose-500/5 border border-rose-200 text-rose-700 text-xs font-bold rounded-xl mb-4">
+              <div className="p-3 bg-rose-500/5 border border-rose-200 text-rose-700 text-xs font-bold rounded-xl mb-4 animate-shake">
                 {error}
               </div>
             )}
@@ -282,17 +339,32 @@ export default function SubscriptionsDashboard() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Service Pricing Tier</label>
-                <select
-                  value={planCode}
-                  onChange={(e) => setPlanCode(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] text-xs font-semibold"
-                >
-                  <option value="Starter">Starter Pack</option>
-                  <option value="Growth">Growth Module</option>
-                  <option value="Enterprise">Enterprise Unlimited</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Industry Module Type</label>
+                  <select
+                    value={businessType}
+                    onChange={(e) => setBusinessType(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] text-xs font-semibold"
+                  >
+                    <option value="garments">Garments ERP</option>
+                    <option value="steel">Steel Mill ERP</option>
+                    <option value="local">Local Business</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Service Pricing Tier</label>
+                  <select
+                    value={planCode}
+                    onChange={(e) => setPlanCode(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] text-xs font-semibold"
+                  >
+                    <option value="Starter">Starter Pack</option>
+                    <option value="Growth">Growth Module</option>
+                    <option value="Enterprise">Enterprise Unlimited</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-2 pt-2">
@@ -305,7 +377,7 @@ export default function SubscriptionsDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98]"
+                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] font-mono uppercase tracking-wider"
                 >
                   Confirm Provisioning
                 </button>
