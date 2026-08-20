@@ -24,6 +24,8 @@ type InventoryItem = {
   tenantId: string;
 };
 
+type TabType = 'overview' | 'work-orders' | 'inventory';
+
 export default function TenantDashboard() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
@@ -31,6 +33,8 @@ export default function TenantDashboard() {
   // Local state representing database queries
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Modals State
   const [showWoModal, setShowWoModal] = useState(false);
@@ -50,7 +54,7 @@ export default function TenantDashboard() {
 
   // Security guard redirect if not authorized
   useEffect(() => {
-    if (!loading && (!user || (user.role !== 'tenant-admin' && user.role !== 'tenant-operator'))) {
+    if (!loading && (!user || user.role !== 'tenant-admin')) {
       router.replace('/login');
     }
   }, [user, loading, router]);
@@ -78,7 +82,7 @@ export default function TenantDashboard() {
 
   if (loading || !user || !user.tenantId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400 font-mono text-xs">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] text-slate-400 font-mono text-xs">
         Loading Corporate Workspace...
       </div>
     );
@@ -122,7 +126,6 @@ export default function TenantDashboard() {
     localStorage.setItem('smc_work_orders', JSON.stringify(updated));
     setWorkOrders(updated.filter((w) => w.tenantId === user.tenantId));
 
-    // Reset Form
     setWoItem('');
     setWoQty('');
     setWoDocNo('');
@@ -163,7 +166,6 @@ export default function TenantDashboard() {
     localStorage.setItem('smc_inventory', JSON.stringify(updated));
     setInventory(updated.filter((i) => i.tenantId === user.tenantId));
 
-    // Reset Form
     setInvName('');
     setInvQty('');
     setInvError(null);
@@ -188,199 +190,364 @@ export default function TenantDashboard() {
     setWorkOrders(updated.filter((w) => w.tenantId === user.tenantId));
   };
 
-  return (
-    <div className="min-h-screen bg-[#FAF9F6] text-slate-800 flex flex-col font-sans">
-      {/* Header Banner */}
-      <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/60 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-        <div className="flex items-center space-x-3">
-          <span className="text-xl">🏢</span>
-          <div>
-            <h1 className="text-base font-extrabold text-slate-900 leading-none">
-              {user.tenantName}
-            </h1>
-            <p className="text-[9px] text-[#B48F48] font-mono tracking-wider uppercase mt-1.5 font-bold">
-              Workspace Core Module / {user.role === 'tenant-admin' ? 'Admin Mode' : 'Operator Mode'}
-            </p>
+  const SidebarContent = () => (
+    <>
+      <div className="flex flex-col">
+        {/* Sidebar Header Brand */}
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-white to-slate-50/40">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-[#FAF6EE] border border-[#C5A059]/20 flex items-center justify-center text-sm shadow-xs">
+              🏢
+            </div>
+            <div className="leading-none overflow-hidden max-w-[140px]">
+              <h2 className="text-xs font-black text-slate-900 truncate">
+                {user.tenantName || 'Workspace'}
+              </h2>
+              <p className="text-[8px] text-[#B48F48] font-mono tracking-wider uppercase font-extrabold mt-1">
+                Workspace Node
+              </p>
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-slate-900">
-              {user.name} <span className="text-[9px] bg-slate-100 text-[#B48F48] border border-slate-200/60 px-1.5 py-0.5 rounded font-mono font-bold ml-1 capitalize">{user.role.split('-')[1]}</span>
-            </p>
-            <p className="text-[10px] text-slate-500 font-mono font-medium">{user.email}</p>
-          </div>
-          <button
-            onClick={logout}
-            className="px-3.5 py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-bold rounded-xl transition-all shadow-xs"
+          {/* Close button for Mobile */}
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="block lg:hidden text-slate-400 hover:text-slate-700"
           >
-            Sign Out
+            ✕
           </button>
         </div>
-      </header>
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-8">
-        
-        {/* KPI Panel */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1 */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Total Work Orders
-            </p>
-            <h3 className="text-2xl font-extrabold text-slate-900 mt-1.5 font-mono">{totalOrders}</h3>
-            <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">OPERATIONAL HIST</p>
-          </div>
+        {/* Navigation Links */}
+        <nav className="p-4 space-y-1.5 flex-1">
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2.5 pb-2 font-mono">
+            Manufacturing ERP
+          </p>
 
-          {/* Card 2 */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Active Orders
-            </p>
-            <h3 className="text-2xl font-extrabold text-indigo-600 mt-1.5 font-mono">{activeOrders}</h3>
-            <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">ON SHOP FLOOR</p>
-          </div>
+          <button
+            onClick={() => {
+              setActiveTab('overview');
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === 'overview'
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === 'overview' && (
+              <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <span>📊</span>
+            <span>Workspace Overview</span>
+          </button>
 
-          {/* Card 3 */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Completed Orders
-            </p>
-            <h3 className="text-2xl font-extrabold text-emerald-600 mt-1.5 font-mono">{completedOrders}</h3>
-            <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">SHIPPED & METED</p>
-          </div>
+          <button
+            onClick={() => {
+              setActiveTab('work-orders');
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === 'work-orders'
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === 'work-orders' && (
+              <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <span>⚙️</span>
+            <span>Work Orders List</span>
+          </button>
 
-          {/* Card 4 */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
-              Raw Scrap Yard
-            </p>
-            <h3 className="text-2xl font-extrabold text-amber-600 mt-1.5 font-mono">
-              {rawMaterialTons.toLocaleString()} <span className="text-xs text-slate-400">MT</span>
-            </h3>
-            <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">CURRENT STOCK</p>
+          <button
+            onClick={() => {
+              setActiveTab('inventory');
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === 'inventory'
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === 'inventory' && (
+              <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <span>📦</span>
+            <span>Stock Balances</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Sidebar Footer User Details */}
+      <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+        <div className="flex items-center justify-between mb-3.5">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#FAF6EE] border border-[#C5A059]/30 flex items-center justify-center font-bold text-[10px] text-[#B48F48]">
+              {user.name.split(' ').map(n => n[0]).join('')}
+            </div>
+            <div className="leading-tight">
+              <p className="text-[10px] font-black text-slate-900">{user.name}</p>
+              <span className="inline-flex px-1.5 py-0.2 bg-slate-100 text-[#B48F48] rounded text-[8px] font-bold uppercase tracking-wider font-mono">
+                {user.role.split('-')[1]}
+              </span>
+            </div>
           </div>
         </div>
+        <button
+          onClick={logout}
+          className="w-full py-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[10px] font-bold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1"
+        >
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </>
+  );
 
-        {/* Dynamic Dual Module Split */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Column: Work Orders Module (Takes 7/12) */}
-          <div className="lg:col-span-7 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h2 className="text-base font-extrabold text-slate-900">Work Orders</h2>
-                <p className="text-[10px] text-slate-500">Track and dispatch manufacturing runs.</p>
-              </div>
-              <button
-                onClick={() => setShowWoModal(true)}
-                className="px-3.5 py-1.5 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md"
-              >
-                + Create WO
-              </button>
-            </div>
+  return (
+    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-hidden relative">
+      
+      {/* DESKTOP SIDEBAR NAVIGATION (Visible on lg screens) */}
+      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
+        <SidebarContent />
+      </aside>
 
-            {/* Work Orders Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200/85 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                      <th className="px-4 py-3">Doc No</th>
-                      <th className="px-4 py-3">Item Master</th>
-                      <th className="px-4 py-3 text-right">Planned (MT)</th>
-                      <th className="px-4 py-3 text-right">Completed (MT)</th>
-                      <th className="px-4 py-3 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                    {workOrders.map((wo) => (
-                      <tr key={wo.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-4 py-3 text-indigo-600 font-mono font-bold">{wo.docNo}</td>
-                        <td className="px-4 py-3 text-slate-950 font-bold">{wo.item}</td>
-                        <td className="px-4 py-3 text-right font-mono">{wo.qtyPlanned}</td>
-                        <td className="px-4 py-3 text-right font-mono text-slate-400">{wo.qtyCompleted || '-'}</td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            onClick={() => cycleWoStatus(wo.id, wo.status)}
-                            className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider border cursor-pointer select-none transition-all active:scale-95 ${
-                              wo.status === 'completed'
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : wo.status === 'in_progress'
-                                ? 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20'
-                                : wo.status === 'cancelled'
-                                ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                                : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
-                            }`}
-                          >
-                            {wo.status.replace('_', ' ')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {workOrders.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-[10px] text-slate-400 font-mono">
-                          No work orders cataloged.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+      {/* MOBILE SIDEBAR OVERLAY */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden"
+        />
+      )}
+
+      {/* MOBILE SIDEBAR SLIDE PANEL */}
+      <aside 
+        className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 transform lg:hidden ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* MAIN CONTENT AREA: Right Side */}
+      <div className="flex-1 h-full flex flex-col overflow-hidden">
+        
+        {/* Top Header Breadcrumbs */}
+        <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex items-center justify-between px-6 flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="block lg:hidden p-1 text-slate-500 hover:bg-slate-100 rounded-lg focus:outline-none"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 font-mono">
+              <span>SMC</span>
+              <span>/</span>
+              <span className="truncate max-w-[80px]">{(user.tenantName || 'Workspace').toUpperCase()}</span>
+              <span>/</span>
+              <span className="text-slate-800 capitalize font-bold">{activeTab}</span>
             </div>
           </div>
+          <div className="text-[10px] font-bold text-slate-400 font-mono uppercase hidden sm:block">
+            ROLE: {user.role.replace('-', ' ')}
+          </div>
+        </header>
 
-          {/* Right Column: Inventory Core Module (Takes 5/12) */}
-          <div className="lg:col-span-5 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h2 className="text-base font-extrabold text-slate-900">Stock Balances</h2>
-                <p className="text-[10px] text-slate-500">Real-time inventory levels.</p>
+        {/* Scrollable Dashboard View */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 bg-slate-50/50">
+          
+          {/* COMMON KPI PANEL for overview and stats reference */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
+                    Total Work Orders
+                  </p>
+                  <h3 className="text-2xl font-extrabold text-slate-900 mt-1.5 font-mono">{totalOrders}</h3>
+                  <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">OPERATIONAL HIST</p>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
+                    Active Orders
+                  </p>
+                  <h3 className="text-2xl font-extrabold text-indigo-600 mt-1.5 font-mono">{activeOrders}</h3>
+                  <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">ON SHOP FLOOR</p>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
+                    Completed Orders
+                  </p>
+                  <h3 className="text-2xl font-extrabold text-emerald-600 mt-1.5 font-mono">{completedOrders}</h3>
+                  <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">SHIPPED & METED</p>
+                </div>
+
+                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
+                    Raw Scrap Yard
+                  </p>
+                  <h3 className="text-2xl font-extrabold text-amber-600 mt-1.5 font-mono">
+                    {rawMaterialTons.toLocaleString()} <span className="text-xs text-slate-450">MT</span>
+                  </h3>
+                  <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">CURRENT STOCK</p>
+                </div>
               </div>
-              <button
-                onClick={() => setShowInvModal(true)}
-                className="px-3.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all shadow-xs"
-              >
-                + Update Stock
-              </button>
-            </div>
 
-            {/* Inventory List Cards */}
-            <div className="space-y-3.5">
-              {inventory.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between shadow-xs"
-                >
-                  <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-slate-950">{inv.name}</h4>
-                    <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest font-extrabold">
-                      {inv.type}
-                    </p>
+              {/* Sub-KPI Graph Mockups */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">Shop floor melt yield</h3>
+                  <div className="h-32 flex items-end space-x-2.5 pb-2">
+                    <div className="w-full bg-[#FAF6EE] border border-[#C5A059]/25 h-[85%] rounded flex flex-col justify-end text-center pb-1"><span className="text-[9px] font-mono text-[#B48F48] font-bold">94.2%</span></div>
+                    <div className="w-full bg-[#FAF6EE] border border-[#C5A059]/25 h-[90%] rounded flex flex-col justify-end text-center pb-1"><span className="text-[9px] font-mono text-[#B48F48] font-bold">94.8%</span></div>
+                    <div className="w-full bg-[#FAF6EE] border border-[#C5A059]/25 h-[88%] rounded flex flex-col justify-end text-center pb-1"><span className="text-[9px] font-mono text-[#B48F48] font-bold">94.5%</span></div>
+                    <div className="w-full bg-[#FAF6EE] border border-[#C5A059]/25 h-[95%] rounded flex flex-col justify-end text-center pb-1"><span className="text-[9px] font-mono text-[#B48F48] font-bold">95.2%</span></div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm font-extrabold text-slate-900 font-mono">
-                      {inv.qty.toLocaleString()}
-                    </span>
-                    <span className="text-[10px] font-extrabold text-slate-400 font-mono ml-1">
-                      {inv.uom}
-                    </span>
+                  <p className="text-[9px] text-slate-400 font-bold text-center uppercase font-mono">LAST 4 MELTING RUNS</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm flex flex-col justify-between">
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">Active Workspaces Telemetry</h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-2 gap-3">
+                      <span className="text-slate-500 font-medium">BOM explosion status</span>
+                      <span className="font-bold text-emerald-600 font-mono">OK (100% matched)</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-slate-500 font-medium">Stock ledger sync status</span>
+                      <span className="font-bold text-[#B48F48] font-mono">SYNCED</span>
+                    </div>
                   </div>
                 </div>
-              ))}
-              {inventory.length === 0 && (
-                <p className="text-center text-[10px] text-slate-400 font-mono py-8 bg-white border border-slate-200 rounded-2xl">
-                  No stock entries registered.
-                </p>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
-        </div>
-      </main>
+          {activeTab === 'work-orders' && (
+            <div className="space-y-5 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3 gap-3">
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">Work Orders Ledger</h2>
+                  <p className="text-[11px] text-slate-500">Track and dispatch manufacturing runs.</p>
+                </div>
+                <button
+                  onClick={() => setShowWoModal(true)}
+                  className="px-3.5 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center"
+                >
+                  + Create WO
+                </button>
+              </div>
+
+              {/* Work Orders Table */}
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[500px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200/85 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">
+                        <th className="px-4 py-3.5">Doc No</th>
+                        <th className="px-4 py-3.5">Item Master</th>
+                        <th className="px-4 py-3.5 text-right">Planned (MT)</th>
+                        <th className="px-4 py-3.5 text-right">Completed (MT)</th>
+                        <th className="px-4 py-3.5 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                      {workOrders.map((wo) => (
+                        <tr key={wo.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-3 text-indigo-600 font-mono font-bold">#{wo.docNo}</td>
+                          <td className="px-4 py-3 text-slate-950 font-bold">{wo.item}</td>
+                          <td className="px-4 py-3 text-right font-mono">{wo.qtyPlanned}</td>
+                          <td className="px-4 py-3 text-right font-mono text-slate-450">{wo.qtyCompleted || '-'}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => cycleWoStatus(wo.id, wo.status)}
+                              className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider border cursor-pointer select-none transition-all active:scale-95 ${
+                                wo.status === 'completed'
+                                  ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                  : wo.status === 'in_progress'
+                                  ? 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20'
+                                  : wo.status === 'cancelled'
+                                  ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                                  : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                              }`}
+                            >
+                              {wo.status.replace('_', ' ')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {workOrders.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-8 text-center text-[10px] text-slate-400 font-mono">
+                            No work orders cataloged.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'inventory' && (
+            <div className="space-y-5 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3 gap-3">
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">Stock Balances</h2>
+                  <p className="text-[11px] text-slate-500">Real-time inventory levels.</p>
+                </div>
+                <button
+                  onClick={() => setShowInvModal(true)}
+                  className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center"
+                >
+                  + Receive / Adjust Stock
+                </button>
+              </div>
+
+              {/* Inventory List Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {inventory.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className="p-4 bg-white border border-slate-200/80 rounded-2xl flex flex-col justify-between shadow-xs space-y-4"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-bold text-slate-950">{inv.name}</h4>
+                        <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest font-extrabold">
+                          {inv.type}
+                        </p>
+                      </div>
+                      <span className="text-lg">📦</span>
+                    </div>
+                    <div className="text-right border-t border-slate-50 pt-2.5">
+                      <span className="text-base font-extrabold text-slate-900 font-mono">
+                        {inv.qty.toLocaleString()}
+                      </span>
+                      <span className="text-[9px] font-extrabold text-slate-400 font-mono ml-1">
+                        {inv.uom}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {inventory.length === 0 && (
+                  <p className="text-center text-[10px] text-slate-400 font-mono py-8 bg-white border border-slate-200 rounded-2xl col-span-3">
+                    No stock entries registered.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
 
       {/* WO Create Modal */}
       {showWoModal && (
@@ -512,7 +679,7 @@ export default function TenantDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#FAF9F6] font-mono uppercase tracking-wider">Unit of Measure (UoM)</label>
+                  <label className="text-xs font-bold text-slate-550 font-mono uppercase tracking-wider">Unit of Measure (UoM)</label>
                   <select
                     value={invUom}
                     onChange={(e) => setInvUom(e.target.value)}

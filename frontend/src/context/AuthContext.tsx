@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export type UserRole = 'super-admin' | 'tenant-admin' | 'tenant-operator';
+export type UserRole = 'super-admin' | 'tenant-admin';
 
 export type AuthUser = {
   email: string;
@@ -35,13 +35,6 @@ const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; t
     role: 'tenant-admin',
     tenantId: 'acme',
     tenantName: 'Acme Steel Corp',
-  },
-  'operator@manchester.com': {
-    hash: 'operator123',
-    name: 'Dave Vance',
-    role: 'tenant-operator',
-    tenantId: 'manchester',
-    tenantName: 'Manchester Foundries',
   },
 };
 

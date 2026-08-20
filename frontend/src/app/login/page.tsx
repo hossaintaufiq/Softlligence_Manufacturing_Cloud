@@ -64,10 +64,10 @@ export default function LoginPage() {
         <div className="relative max-w-lg w-full space-y-6 z-10 flex flex-col items-center text-center">
           
           {/* Top Logo Stub */}
-          <div className="flex items-center space-x-2 bg-white/80 border border-slate-200/80 shadow-xs px-3.5 py-1.5 rounded-full">
-            <span className="text-[#C5A059] text-xs">✨</span>
-            <span className="text-[9px] font-extrabold tracking-widest text-slate-500 uppercase font-mono">
-              Premium Corporate Edition
+          <div className="flex items-center space-x-3 bg-white/85 border border-slate-200/80 shadow-sm px-4 py-2 rounded-full">
+            <span className="text-[#C5A059] text-sm">✨</span>
+            <span className="text-xs font-black tracking-tight text-slate-800 uppercase font-mono">
+              Softlligence Manufacturing Cloud
             </span>
           </div>
 
@@ -133,22 +133,15 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(197,160,89,0.03),transparent_50%)]" />
 
         <div className="w-full max-w-sm space-y-6 relative z-10">
-          
-          {/* Header Mobile Title */}
+          {/* Workspace access header */}
           <div className="space-y-1">
-            <div className="inline-flex lg:hidden p-2.5 bg-amber-500/10 border border-amber-500/20 text-[#C5A059] rounded-xl mb-1">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h1 className="text-2xl font-black text-slate-900 leading-tight">
               Workspace Access
             </h1>
-            <p className="text-[10px] font-bold text-slate-450 uppercase tracking-widest font-mono">
+            <p className="text-[10px] font-semibold text-[#B48F48] uppercase tracking-wider font-mono">
               Sign In to Your Secure Tenant Node
             </p>
           </div>
-
           {/* Error Alert Box */}
           {error && (
             <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-[11px] font-bold rounded-xl flex items-center space-x-2 animate-shake">
@@ -223,7 +216,7 @@ export default function LoginPage() {
           </div>
 
           {/* Demo Presets Horizontal Grid */}
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5">
             {/* Super Admin */}
             <button
               type="button"
@@ -245,18 +238,6 @@ export default function LoginPage() {
               <span className="text-base mb-1">🏢</span>
               <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight">
                 Acme Admin
-              </h4>
-            </button>
-
-            {/* Tenant Operator */}
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('operator@manchester.com', 'operator123')}
-              className="group p-2.5 bg-slate-50/50 hover:bg-[#FAF6EE] border border-slate-100 hover:border-[#C5A059]/40 rounded-xl flex flex-col items-center text-center transition-all hover:scale-[1.01]"
-            >
-              <span className="text-base mb-1">⚙️</span>
-              <h4 className="text-[9px] font-extrabold text-slate-700 group-hover:text-[#B48F48] transition-colors leading-tight">
-                Operator
               </h4>
             </button>
           </div>
