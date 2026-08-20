@@ -5,12 +5,18 @@ import { useRouter } from 'next/navigation';
 
 export type UserRole = 'super-admin' | 'tenant-admin';
 
+export type UserPreferences = {
+  density: 'cozy' | 'compact';
+  defaultTab?: string;
+};
+
 export type AuthUser = {
   email: string;
   name: string;
   role: UserRole;
   tenantId?: string;
   tenantName?: string;
+  preferences?: UserPreferences;
 };
 
 type AuthContextType = {
@@ -18,16 +24,18 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateProfile: (updatedData: { name: string; password?: string; tenantName?: string; preferences?: UserPreferences }) => Promise<{ success: boolean; error?: string }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Pre-seeded demo credentials
-const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; tenantId?: string; tenantName?: string }> = {
+const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; tenantId?: string; tenantName?: string; preferences?: UserPreferences }> = {
   'admin@softlligence.com': {
     hash: 'admin123',
     name: 'System Administrator',
     role: 'super-admin',
+    preferences: { density: 'cozy', defaultTab: 'subscriptions' }
   },
   'manager@acme.com': {
     hash: 'manager123',
@@ -35,12 +43,17 @@ const DEMO_USERS: Record<string, { hash: string; name: string; role: UserRole; t
     role: 'tenant-admin',
     tenantId: 'acme',
     tenantName: 'Acme Steel Corp',
+    preferences: { density: 'cozy', defaultTab: 'overview' }
   },
 };
 
 // Seed Local Data if not present
 const seedLocalDatabase = () => {
   if (typeof window === 'undefined') return;
+
+  if (!localStorage.getItem('smc_users')) {
+    localStorage.setItem('smc_users', JSON.stringify(DEMO_USERS));
+  }
 
   if (!localStorage.getItem('smc_tenants')) {
     localStorage.setItem(
@@ -103,14 +116,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Artificial delay to simulate network call
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const found = DEMO_USERS[email.toLowerCase().trim()];
+    const storedUsers = localStorage.getItem('smc_users');
+    let usersDb = DEMO_USERS;
+    if (storedUsers) {
+      try {
+        usersDb = JSON.parse(storedUsers);
+      } catch (e) {
+        console.error('Error parsing stored users database, using memory seeding');
+      }
+    }
+
+    const found = usersDb[email.toLowerCase().trim()];
     if (found && found.hash === password) {
+      const defaultPrefs: UserPreferences = {
+        density: 'cozy',
+        defaultTab: found.role === 'super-admin' ? 'subscriptions' : 'overview',
+      };
+
       const authUser: AuthUser = {
         email: email.toLowerCase().trim(),
         name: found.name,
         role: found.role,
         tenantId: found.tenantId,
         tenantName: found.tenantName,
+        preferences: found.preferences || defaultPrefs,
       };
 
       setUser(authUser);
@@ -126,8 +155,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const updateProfile = async (updatedData: {
+    name: string;
+    password?: string;
+    tenantName?: string;
+    preferences?: UserPreferences;
+  }): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: 'No active session' };
+
+    const storedUsers = localStorage.getItem('smc_users');
+    if (!storedUsers) return { success: false, error: 'User database not found' };
+
+    let usersMap;
+    try {
+      usersMap = JSON.parse(storedUsers);
+    } catch (e) {
+      return { success: false, error: 'Failed to parse user database' };
+    }
+
+    const userEmailKey = user.email.toLowerCase().trim();
+    const existingUserData = usersMap[userEmailKey];
+
+    if (!existingUserData) return { success: false, error: 'User profile not found' };
+
+    // Update in database map
+    existingUserData.name = updatedData.name;
+    if (updatedData.password) {
+      existingUserData.hash = updatedData.password;
+    }
+    if (updatedData.preferences) {
+      existingUserData.preferences = updatedData.preferences;
+    }
+
+    if (user.role === 'tenant-admin' && updatedData.tenantName) {
+      existingUserData.tenantName = updatedData.tenantName;
+
+      // Update tenant list (smc_tenants)
+      const storedTenants = localStorage.getItem('smc_tenants');
+      if (storedTenants && user.tenantId) {
+        try {
+          const tenants = JSON.parse(storedTenants);
+          const updatedTenants = tenants.map((t: any) => {
+            if (t.id === user.tenantId) {
+              return { ...t, name: updatedData.tenantName };
+            }
+            return t;
+          });
+          localStorage.setItem('smc_tenants', JSON.stringify(updatedTenants));
+        } catch (e) {
+          console.error('Failed to update tenant list', e);
+        }
+      }
+    }
+
+    usersMap[userEmailKey] = existingUserData;
+    localStorage.setItem('smc_users', JSON.stringify(usersMap));
+
+    // Update current active user object
+    const updatedUser: AuthUser = {
+      ...user,
+      name: updatedData.name,
+      tenantName: user.role === 'tenant-admin' ? updatedData.tenantName : user.tenantName,
+      preferences: updatedData.preferences || user.preferences,
+    };
+
+    setUser(updatedUser);
+    localStorage.setItem('smc_active_user', JSON.stringify(updatedUser));
+
+    return { success: true };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

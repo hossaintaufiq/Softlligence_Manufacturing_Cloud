@@ -24,10 +24,10 @@ type InventoryItem = {
   tenantId: string;
 };
 
-type TabType = 'overview' | 'work-orders' | 'inventory';
+type TabType = 'overview' | 'work-orders' | 'inventory' | 'profile';
 
 export default function TenantDashboard() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, updateProfile } = useAuth();
   const router = useRouter();
 
   // Local state representing database queries
@@ -52,12 +52,37 @@ export default function TenantDashboard() {
   const [invUom, setInvUom] = useState('MT');
   const [invError, setInvError] = useState<string | null>(null);
 
+  // Profile Settings Form State
+  const [profileName, setProfileName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [densityPref, setDensityPref] = useState<'cozy' | 'compact'>('cozy');
+  const [landingTabPref, setLandingTabPref] = useState('overview');
+  const [tenantNamePref, setTenantNamePref] = useState('');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
   // Security guard redirect if not authorized
   useEffect(() => {
     if (!loading && (!user || user.role !== 'tenant-admin')) {
       router.replace('/login');
     }
   }, [user, loading, router]);
+
+  // Load preferences
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name || '');
+      setDensityPref(user.preferences?.density || 'cozy');
+      setLandingTabPref(user.preferences?.defaultTab || 'overview');
+      setTenantNamePref(user.tenantName || '');
+      if (user.preferences?.defaultTab) {
+        setActiveTab(user.preferences.defaultTab as TabType);
+      }
+    }
+  }, [user]);
 
   // Load tenant specific data
   const loadTenantData = () => {
@@ -79,6 +104,89 @@ export default function TenantDashboard() {
   useEffect(() => {
     loadTenantData();
   }, [user]);
+
+  // Layout density modifiers
+  const isCompact = user?.preferences?.density === 'compact';
+  const tableCellPadding = isCompact ? 'px-3.5 py-2 text-[11px]' : 'px-4 py-3.5 text-xs';
+  const tableHeaderPadding = isCompact ? 'px-3.5 py-2 text-[8px]' : 'px-4 py-3.5 text-[9px]';
+  const gridGap = isCompact ? 'gap-3.5' : 'gap-4 sm:gap-6';
+  const cardPadding = isCompact ? 'p-4' : 'p-5';
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setProfileError(null);
+    setProfileSuccess(null);
+    setIsUpdatingProfile(true);
+
+    if (!profileName.trim()) {
+      setProfileError('Display Name cannot be empty.');
+      setIsUpdatingProfile(false);
+      return;
+    }
+
+    if (!tenantNamePref.trim()) {
+      setProfileError('Company Name cannot be empty.');
+      setIsUpdatingProfile(false);
+      return;
+    }
+
+    let newPass: string | undefined = undefined;
+    if (currentPassword || newPassword || confirmPassword) {
+      if (!currentPassword) {
+        setProfileError('Please enter your current password to verify identity.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+      
+      const storedUsers = localStorage.getItem('smc_users');
+      if (storedUsers) {
+        const usersMap = JSON.parse(storedUsers);
+        const userData = usersMap[user.email.toLowerCase().trim()];
+        if (!userData || userData.hash !== currentPassword) {
+          setProfileError('Current password entered is incorrect.');
+          setIsUpdatingProfile(false);
+          return;
+        }
+      }
+
+      if (newPassword.length < 6) {
+        setProfileError('New password must be at least 6 characters long.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setProfileError('New passwords do not match.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+      newPass = newPassword;
+    }
+
+    const updatedPrefs = {
+      density: densityPref,
+      defaultTab: landingTabPref,
+    };
+
+    const res = await updateProfile({
+      name: profileName.trim(),
+      password: newPass,
+      tenantName: tenantNamePref.trim(),
+      preferences: updatedPrefs,
+    });
+
+    setIsUpdatingProfile(false);
+
+    if (res.success) {
+      setProfileSuccess('Profile settings successfully saved.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      setProfileError(res.error || 'Failed to update profile.');
+    }
+  };
 
   if (loading || !user || !user.tenantId) {
     return (
@@ -276,18 +384,42 @@ export default function TenantDashboard() {
             <span>📦</span>
             <span>Stock Balances</span>
           </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('profile');
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === 'profile'
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === 'profile' && (
+              <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <span>👤</span>
+            <span>Profile & Settings</span>
+          </button>
         </nav>
       </div>
 
       {/* Sidebar Footer User Details */}
       <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-        <div className="flex items-center justify-between mb-3.5">
+        <div 
+          onClick={() => {
+            setActiveTab('profile');
+            setIsSidebarOpen(false);
+          }}
+          className="flex items-center justify-between mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all"
+        >
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-full bg-[#FAF6EE] border border-[#C5A059]/30 flex items-center justify-center font-bold text-[10px] text-[#B48F48]">
-              {user.name.split(' ').map(n => n[0]).join('')}
+              {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </div>
             <div className="leading-tight">
-              <p className="text-[10px] font-black text-slate-900">{user.name}</p>
+              <p className="text-[10px] font-black text-slate-900 truncate w-28">{user.name}</p>
               <span className="inline-flex px-1.5 py-0.2 bg-slate-100 text-[#B48F48] rounded text-[8px] font-bold uppercase tracking-wider font-mono">
                 {user.role.split('-')[1]}
               </span>
@@ -362,9 +494,9 @@ export default function TenantDashboard() {
           {/* COMMON KPI PANEL for overview and stats reference */}
           {activeTab === 'overview' && (
             <div className="space-y-8 animate-fade-in">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className={`grid grid-cols-2 lg:grid-cols-4 ${gridGap}`}>
                 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${cardPadding} rounded-2xl shadow-sm`}>
                   <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                     Total Work Orders
                   </p>
@@ -372,7 +504,7 @@ export default function TenantDashboard() {
                   <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">OPERATIONAL HIST</p>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${cardPadding} rounded-2xl shadow-sm`}>
                   <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                     Active Orders
                   </p>
@@ -380,7 +512,7 @@ export default function TenantDashboard() {
                   <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">ON SHOP FLOOR</p>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${cardPadding} rounded-2xl shadow-sm`}>
                   <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                     Completed Orders
                   </p>
@@ -388,7 +520,7 @@ export default function TenantDashboard() {
                   <p className="text-[9px] text-slate-400 font-bold mt-1 font-mono">SHIPPED & METED</p>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${cardPadding} rounded-2xl shadow-sm`}>
                   <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                     Raw Scrap Yard
                   </p>
@@ -400,8 +532,8 @@ export default function TenantDashboard() {
               </div>
 
               {/* Sub-KPI Graph Mockups */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${gridGap}`}>
+                <div className={`bg-white border border-slate-200 ${cardPadding} rounded-2xl space-y-4 shadow-sm`}>
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">Shop floor melt yield</h3>
                   <div className="h-32 flex items-end space-x-2.5 pb-2">
                     <div className="w-full bg-[#FAF6EE] border border-[#C5A059]/25 h-[85%] rounded flex flex-col justify-end text-center pb-1"><span className="text-[9px] font-mono text-[#B48F48] font-bold">94.2%</span></div>
@@ -412,7 +544,7 @@ export default function TenantDashboard() {
                   <p className="text-[9px] text-slate-400 font-bold text-center uppercase font-mono">LAST 4 MELTING RUNS</p>
                 </div>
 
-                <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm flex flex-col justify-between">
+                <div className={`bg-white border border-slate-200 ${cardPadding} rounded-2xl space-y-4 shadow-sm flex flex-col justify-between`}>
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">Active Workspaces Telemetry</h3>
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center justify-between border-b border-slate-50 pb-2 gap-3">
@@ -450,21 +582,21 @@ export default function TenantDashboard() {
                   <table className="w-full text-left border-collapse min-w-[500px]">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200/85 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                        <th className="px-4 py-3.5">Doc No</th>
-                        <th className="px-4 py-3.5">Item Master</th>
-                        <th className="px-4 py-3.5 text-right">Planned (MT)</th>
-                        <th className="px-4 py-3.5 text-right">Completed (MT)</th>
-                        <th className="px-4 py-3.5 text-center">Status</th>
+                        <th className={tableHeaderPadding}>Doc No</th>
+                        <th className={tableHeaderPadding}>Item Master</th>
+                        <th className={`${tableHeaderPadding} text-right`}>Planned (MT)</th>
+                        <th className={`${tableHeaderPadding} text-right`}>Completed (MT)</th>
+                        <th className={`${tableHeaderPadding} text-center`}>Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                       {workOrders.map((wo) => (
                         <tr key={wo.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-4 py-3 text-indigo-600 font-mono font-bold">#{wo.docNo}</td>
-                          <td className="px-4 py-3 text-slate-950 font-bold">{wo.item}</td>
-                          <td className="px-4 py-3 text-right font-mono">{wo.qtyPlanned}</td>
-                          <td className="px-4 py-3 text-right font-mono text-slate-450">{wo.qtyCompleted || '-'}</td>
-                          <td className="px-4 py-3 text-center">
+                          <td className={`${tableCellPadding} text-indigo-600 font-mono font-bold`}>#{wo.docNo}</td>
+                          <td className={`${tableCellPadding} text-slate-950 font-bold`}>{wo.item}</td>
+                          <td className={`${tableCellPadding} text-right font-mono`}>{wo.qtyPlanned}</td>
+                          <td className={`${tableCellPadding} text-right font-mono text-slate-455`}>{wo.qtyCompleted || '-'}</td>
+                          <td className={`${tableCellPadding} text-center`}>
                             <button
                               onClick={() => cycleWoStatus(wo.id, wo.status)}
                               className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider border cursor-pointer select-none transition-all active:scale-95 ${
@@ -484,7 +616,7 @@ export default function TenantDashboard() {
                       ))}
                       {workOrders.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-[10px] text-slate-400 font-mono">
+                          <td colSpan={5} className={`${tableCellPadding} text-center text-[10px] text-slate-400 font-mono py-8`}>
                             No work orders cataloged.
                           </td>
                         </tr>
@@ -512,11 +644,11 @@ export default function TenantDashboard() {
               </div>
 
               {/* Inventory List Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${gridGap}`}>
                 {inventory.map((inv) => (
                   <div
                     key={inv.id}
-                    className="p-4 bg-white border border-slate-200/80 rounded-2xl flex flex-col justify-between shadow-xs space-y-4"
+                    className={`${cardPadding} bg-white border border-slate-200/80 rounded-2xl flex flex-col justify-between shadow-xs space-y-4`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
@@ -543,6 +675,214 @@ export default function TenantDashboard() {
                   </p>
                 )}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="space-y-6 sm:space-y-8 animate-fade-in max-w-4xl">
+              <div className="border-b border-slate-200 pb-3">
+                <h2 className="text-base font-extrabold text-slate-900">Profile & Platform Preferences</h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">Manage your credential parameters, layout aesthetics, and dashboard defaults.</p>
+              </div>
+
+              {profileError && (
+                <div className="p-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-xs font-bold rounded-xl flex items-center space-x-2 animate-shake">
+                  <span>⚠️</span>
+                  <span>{profileError}</span>
+                </div>
+              )}
+
+              {profileSuccess && (
+                <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 text-xs font-bold rounded-xl flex items-center space-x-2">
+                  <span>✨</span>
+                  <span>{profileSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateProfile} className="space-y-6 sm:space-y-8 text-slate-800">
+                
+                {/* Section 1: Account Parameters */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">👤</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Account Profile Parameters</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Corporate Email</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={user.email}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl text-xs font-semibold cursor-not-allowed"
+                      />
+                      <p className="text-[9px] text-slate-400">Security: Account identification emails cannot be modified.</p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Display Name</label>
+                      <input
+                        type="text"
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        placeholder="Sarah Jenkins"
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                      />
+                      <p className="text-[9px] text-slate-400">Used for auditing security trails and system action signatures.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Platform Aesthetics & Preferences */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">⚙️</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Layout Aesthetics & Navigation</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono block">Data Density Preference</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDensityPref('cozy')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                            densityPref === 'cozy'
+                              ? 'bg-[#FAF6EE] border-[#C5A059] text-[#B48F48] shadow-xs'
+                              : 'bg-white border-slate-200 hover:bg-slate-50/50 text-slate-600'
+                          }`}
+                        >
+                          <span>☕</span>
+                          <span>Cozy Mode</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDensityPref('compact')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                            densityPref === 'compact'
+                              ? 'bg-[#FAF6EE] border-[#C5A059] text-[#B48F48] shadow-xs'
+                              : 'bg-white border-slate-200 hover:bg-slate-50/50 text-slate-600'
+                          }`}
+                        >
+                          <span>⚡</span>
+                          <span>Compact Mode</span>
+                        </button>
+                      </div>
+                      <p className="text-[9px] text-slate-400">Compact density compresses table spacing for heavy datagrid review.</p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Default Dashboard View</label>
+                      <select
+                        value={landingTabPref}
+                        onChange={(e) => setLandingTabPref(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] text-xs font-semibold"
+                      >
+                        <option value="overview">Workspace Overview</option>
+                        <option value="work-orders">Work Orders List</option>
+                        <option value="inventory">Stock Balances</option>
+                      </select>
+                      <p className="text-[9px] text-slate-400">Controls which view opens instantly when logging into SMC.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Organization Details */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">🏢</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Organization Parameters</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Company Name</label>
+                      <input
+                        type="text"
+                        value={tenantNamePref}
+                        onChange={(e) => setTenantNamePref(e.target.value)}
+                        placeholder="e.g. Acme Steel Corp"
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Tenant Workspace Slug</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={`/${user.tenantId}`}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl text-xs font-semibold cursor-not-allowed font-mono"
+                      />
+                      <p className="text-[9px] text-slate-400">Security: Tenant slugs are routing keys and cannot be dynamically changed.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Password Credentials */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">🔐</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Password Verification & Update</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 max-w-md">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Current Password</label>
+                      <input
+                        type="password"
+                        placeholder="Required for any credential change"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">New Secret Password</label>
+                        <input
+                          type="password"
+                          placeholder="Min. 6 alphanumeric chars"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Confirm New Password</label>
+                        <input
+                          type="password"
+                          placeholder="Re-type new password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProfile}
+                    className="px-6 py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-amber-500/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center space-x-2 font-mono uppercase tracking-wider"
+                  >
+                    {isUpdatingProfile ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Saving Preferences...</span>
+                      </>
+                    ) : (
+                      <span>Save Platform Settings</span>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 

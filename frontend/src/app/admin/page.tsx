@@ -13,10 +13,10 @@ type Tenant = {
   createdAt: string;
 };
 
-type TabType = 'subscriptions' | 'infrastructure' | 'database' | 'audit';
+type TabType = 'subscriptions' | 'infrastructure' | 'database' | 'audit' | 'profile';
 
 export default function SuperAdminDashboard() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, updateProfile } = useAuth();
   const router = useRouter();
 
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -30,12 +30,35 @@ export default function SuperAdminDashboard() {
   const [planCode, setPlanCode] = useState('Growth');
   const [error, setError] = useState<string | null>(null);
 
+  // Profile Update Form State
+  const [profileName, setProfileName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [densityPref, setDensityPref] = useState<'cozy' | 'compact'>('cozy');
+  const [landingTabPref, setLandingTabPref] = useState('subscriptions');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
   // Security guard redirect if not authorized
   useEffect(() => {
     if (!loading && (!user || user.role !== 'super-admin')) {
       router.replace('/login');
     }
   }, [user, loading, router]);
+
+  // Load user profile & preferences when user is available
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name || '');
+      setDensityPref(user.preferences?.density || 'cozy');
+      setLandingTabPref(user.preferences?.defaultTab || 'subscriptions');
+      if (user.preferences?.defaultTab) {
+        setActiveTab(user.preferences.defaultTab as TabType);
+      }
+    }
+  }, [user]);
 
   // Load tenants from localStorage
   const loadTenants = () => {
@@ -48,6 +71,82 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     loadTenants();
   }, []);
+
+  // Responsive padding and spacing presets based on density preference
+  const isCompact = user?.preferences?.density === 'compact';
+  const tableCellPadding = isCompact ? 'px-4 py-2 text-[11px]' : 'px-6 py-3.5 text-xs';
+  const tableHeaderPadding = isCompact ? 'px-4 py-2.5 text-[8px]' : 'px-6 py-3.5 text-[9px]';
+  const gridGap = isCompact ? 'gap-3.5' : 'gap-4 sm:gap-6';
+  const kpiPadding = isCompact ? 'p-4' : 'p-5';
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setProfileError(null);
+    setProfileSuccess(null);
+    setIsUpdatingProfile(true);
+
+    if (!profileName.trim()) {
+      setProfileError('Display Name cannot be empty.');
+      setIsUpdatingProfile(false);
+      return;
+    }
+
+    let newPass: string | undefined = undefined;
+    if (currentPassword || newPassword || confirmPassword) {
+      if (!currentPassword) {
+        setProfileError('Please enter your current password to verify identity.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+      
+      const storedUsers = localStorage.getItem('smc_users');
+      if (storedUsers) {
+        const usersMap = JSON.parse(storedUsers);
+        const userData = usersMap[user.email.toLowerCase().trim()];
+        if (!userData || userData.hash !== currentPassword) {
+          setProfileError('Current password entered is incorrect.');
+          setIsUpdatingProfile(false);
+          return;
+        }
+      }
+
+      if (newPassword.length < 6) {
+        setProfileError('New password must be at least 6 characters long.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setProfileError('New passwords do not match.');
+        setIsUpdatingProfile(false);
+        return;
+      }
+      newPass = newPassword;
+    }
+
+    const updatedPrefs = {
+      density: densityPref,
+      defaultTab: landingTabPref,
+    };
+
+    const res = await updateProfile({
+      name: profileName.trim(),
+      password: newPass,
+      preferences: updatedPrefs,
+    });
+
+    setIsUpdatingProfile(false);
+
+    if (res.success) {
+      setProfileSuccess('Profile settings successfully saved.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      setProfileError(res.error || 'Failed to update profile.');
+    }
+  };
 
   if (loading || !user || user.role !== 'super-admin') {
     return (
@@ -219,18 +318,42 @@ export default function SuperAdminDashboard() {
             <span>📜</span>
             <span>Security Audit Logs</span>
           </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('profile');
+              setIsSidebarOpen(false);
+            }}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+              activeTab === 'profile'
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+            }`}
+          >
+            {activeTab === 'profile' && (
+              <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />
+            )}
+            <span>👤</span>
+            <span>Profile & Settings</span>
+          </button>
         </nav>
       </div>
 
       {/* Sidebar Footer User Details */}
       <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-        <div className="flex items-center justify-between mb-3.5">
+        <div 
+          onClick={() => {
+            setActiveTab('profile');
+            setIsSidebarOpen(false);
+          }}
+          className="flex items-center justify-between mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all"
+        >
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-full bg-[#FAF6EE] border border-[#C5A059]/30 flex items-center justify-center font-bold text-[10px] text-[#B48F48]">
-              SA
+              {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </div>
             <div className="leading-tight">
-              <p className="text-[10px] font-black text-slate-900">System Admin</p>
+              <p className="text-[10px] font-black text-slate-900 truncate w-28">{user.name}</p>
               <p className="text-[8px] text-slate-400 font-mono font-medium truncate w-28">
                 {user.email}
               </p>
@@ -305,9 +428,9 @@ export default function SuperAdminDashboard() {
           {activeTab === 'subscriptions' && (
             <>
               {/* KPI Panel */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 animate-fade-in">
+              <div className={`grid grid-cols-1 sm:grid-cols-3 ${gridGap} animate-fade-in`}>
                 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
                   <div>
                     <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                       Total Workspaces
@@ -317,7 +440,7 @@ export default function SuperAdminDashboard() {
                   <span className="text-xl text-[#C5A059] bg-[#FAF6EE] p-2 rounded-xl border border-[#C5A059]/10">🏢</span>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
                   <div>
                     <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                       Active Instances
@@ -327,7 +450,7 @@ export default function SuperAdminDashboard() {
                   <span className="text-xl text-emerald-600 bg-emerald-50 p-2 rounded-xl border border-emerald-500/10">🟢</span>
                 </div>
 
-                <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                <div className={`bg-white border border-slate-200/80 ${kpiPadding} rounded-2xl flex items-center justify-between shadow-sm`}>
                   <div>
                     <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">
                       Suspended Instances
@@ -358,26 +481,26 @@ export default function SuperAdminDashboard() {
                   <table className="w-full text-left border-collapse min-w-[600px]">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200/80 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                        <th className="px-6 py-3.5">Company Name</th>
-                        <th className="px-6 py-3.5">Slug URL</th>
-                        <th className="px-6 py-3.5">Billing Plan</th>
-                        <th className="px-6 py-3.5">Date Created</th>
-                        <th className="px-6 py-3.5 text-center">Status</th>
-                        <th className="px-6 py-3.5 text-right">Actions</th>
+                        <th className={tableHeaderPadding}>Company Name</th>
+                        <th className={tableHeaderPadding}>Slug URL</th>
+                        <th className={tableHeaderPadding}>Billing Plan</th>
+                        <th className={tableHeaderPadding}>Date Created</th>
+                        <th className={`${tableHeaderPadding} text-center`}>Status</th>
+                        <th className={`${tableHeaderPadding} text-right`}>Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                       {tenants.map((tenant) => (
                         <tr key={tenant.id} className="hover:bg-slate-50/30 transition-colors">
-                          <td className="px-6 py-3.5 text-slate-950 font-bold">{tenant.name}</td>
-                          <td className="px-6 py-3.5 text-[#B48F48] font-mono">/{tenant.slug}</td>
-                          <td className="px-6 py-3.5">
+                          <td className={`${tableCellPadding} text-slate-950 font-bold`}>{tenant.name}</td>
+                          <td className={`${tableCellPadding} text-[#B48F48] font-mono`}>/{tenant.slug}</td>
+                          <td className={tableCellPadding}>
                             <span className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-slate-600 font-bold font-mono">
                               {tenant.planCode}
                             </span>
                           </td>
-                          <td className="px-6 py-3.5 text-slate-400 font-mono">{tenant.createdAt}</td>
-                          <td className="px-6 py-3.5 text-center">
+                          <td className={`${tableCellPadding} text-slate-400 font-mono`}>{tenant.createdAt}</td>
+                          <td className={`${tableCellPadding} text-center`}>
                             <span
                               className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider ${
                                 tenant.status === 'active'
@@ -388,7 +511,7 @@ export default function SuperAdminDashboard() {
                               {tenant.status}
                             </span>
                           </td>
-                          <td className="px-6 py-3.5 text-right space-x-1.5 whitespace-nowrap">
+                          <td className={`${tableCellPadding} text-right space-x-1.5 whitespace-nowrap`}>
                             <button
                               onClick={() => toggleTenantStatus(tenant.id)}
                               className={`px-2 py-1 text-[10px] font-bold rounded-lg border transition-all ${
@@ -410,7 +533,7 @@ export default function SuperAdminDashboard() {
                       ))}
                       {tenants.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="px-6 py-10 text-center text-xs text-slate-400 font-mono">
+                          <td colSpan={6} className={`${tableCellPadding} text-center text-xs text-slate-400 font-mono py-10`}>
                             No corporate workspaces provisioned yet.
                           </td>
                         </tr>
@@ -526,6 +649,183 @@ export default function SuperAdminDashboard() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="space-y-6 sm:space-y-8 animate-fade-in max-w-4xl">
+              <div className="border-b border-slate-200 pb-3">
+                <h2 className="text-base font-extrabold text-slate-900">Profile & Platform Preferences</h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">Manage your credential parameters, layout aesthetics, and dashboard defaults.</p>
+              </div>
+
+              {profileError && (
+                <div className="p-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-xs font-bold rounded-xl flex items-center space-x-2 animate-shake">
+                  <span>⚠️</span>
+                  <span>{profileError}</span>
+                </div>
+              )}
+
+              {profileSuccess && (
+                <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 text-xs font-bold rounded-xl flex items-center space-x-2">
+                  <span>✨</span>
+                  <span>{profileSuccess}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateProfile} className="space-y-6 sm:space-y-8 text-slate-800">
+                
+                {/* Section 1: Account Parameters */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">👤</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Account Profile Parameters</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Administrative Email</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={user.email}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 text-slate-400 border border-slate-200 rounded-xl text-xs font-semibold cursor-not-allowed"
+                      />
+                      <p className="text-[9px] text-slate-400">Security: Account identification emails cannot be modified.</p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Display Name</label>
+                      <input
+                        type="text"
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        placeholder="System Administrator"
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                      />
+                      <p className="text-[9px] text-slate-400">Used for auditing security trails and system action signatures.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Platform Aesthetics & Preferences */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">⚙️</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Layout Aesthetics & Navigation</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono block">Data Density Preference</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDensityPref('cozy')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                            densityPref === 'cozy'
+                              ? 'bg-[#FAF6EE] border-[#C5A059] text-[#B48F48] shadow-xs'
+                              : 'bg-white border-slate-200 hover:bg-slate-50/50 text-slate-600'
+                          }`}
+                        >
+                          <span>☕</span>
+                          <span>Cozy Mode</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDensityPref('compact')}
+                          className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                            densityPref === 'compact'
+                              ? 'bg-[#FAF6EE] border-[#C5A059] text-[#B48F48] shadow-xs'
+                              : 'bg-white border-slate-200 hover:bg-slate-50/50 text-slate-600'
+                          }`}
+                        >
+                          <span>⚡</span>
+                          <span>Compact Mode</span>
+                        </button>
+                      </div>
+                      <p className="text-[9px] text-slate-400">Compact density compresses table spacing for heavy datagrid review.</p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Default Dashboard View</label>
+                      <select
+                        value={landingTabPref}
+                        onChange={(e) => setLandingTabPref(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] text-xs font-semibold"
+                      >
+                        <option value="subscriptions">Tenant Subscriptions</option>
+                        <option value="infrastructure">API Nodes Monitor</option>
+                        <option value="database">Database Telemetry</option>
+                        <option value="audit">Security Audit Logs</option>
+                      </select>
+                      <p className="text-[9px] text-slate-400">Controls which view opens instantly when logging into SMC.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Password Credentials */}
+                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
+                    <span className="text-base">🔐</span>
+                    <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Password Verification & Update</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 max-w-md">
+                      <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Current Password</label>
+                      <input
+                        type="password"
+                        placeholder="Required for any credential change"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold animate-none"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">New Secret Password</label>
+                        <input
+                          type="password"
+                          placeholder="Min. 6 alphanumeric chars"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Confirm New Password</label>
+                        <input
+                          type="password"
+                          placeholder="Re-type new password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-50/50 text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all text-xs font-semibold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProfile}
+                    className="px-6 py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-amber-500/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center space-x-2 font-mono uppercase tracking-wider"
+                  >
+                    {isUpdatingProfile ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Saving Preferences...</span>
+                      </>
+                    ) : (
+                      <span>Save Platform Settings</span>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
