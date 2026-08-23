@@ -42,7 +42,7 @@ export default function ConfigPage() {
             onChange={(e) => setNewAlert(e.target.value)}
             className="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-xs"
           />
-          <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold font-mono">ADD ALERT</button>
+          <button type="submit" className="px-4 py-2 bg-[#C5A059] text-white rounded-xl text-xs font-bold font-mono">ADD ALERT</button>
         </form>
         <div className="space-y-2">
           {alerts.map((alert, idx) => (

@@ -14,36 +14,33 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
 
   // Determine active tab based on route pathname
   let activeTab = 'overview';
-  if (pathname.includes('/scrap-management')) activeTab = 'scrap-management';
-  else if (pathname.includes('/furnace-smelting')) activeTab = 'furnace-smelting';
-  else if (pathname.includes('/casting-rolling')) activeTab = 'casting-rolling';
-  else if (pathname.includes('/sintering-plant')) activeTab = 'sintering-plant';
-  else if (pathname.includes('/sourcing-fuel')) activeTab = 'sourcing-fuel';
-  else if (pathname.includes('/material-inventory')) activeTab = 'material-inventory';
-  else if (pathname.includes('/laboratory-composition')) activeTab = 'laboratory-composition';
-  else if (pathname.includes('/weighbridge-gates')) activeTab = 'weighbridge-gates';
-  else if (pathname.includes('/invoices-expenses')) activeTab = 'invoices-expenses';
-  else if (pathname.includes('/hrms-shift-log')) activeTab = 'hrms-shift-log';
-  else if (pathname.includes('/equipment-maintenance')) activeTab = 'equipment-maintenance';
-  else if (pathname.includes('/laboratory-qa-audits')) activeTab = 'laboratory-qa-audits';
-  else if (pathname.includes('/config-parameters')) activeTab = 'config-parameters';
-  else if (pathname.includes('/profile')) activeTab = 'profile';
+  if (pathname.endsWith('/scrap')) activeTab = 'scrap';
+  else if (pathname.endsWith('/furnace')) activeTab = 'furnace';
+  else if (pathname.endsWith('/billet')) activeTab = 'billet';
+  else if (pathname.endsWith('/rolling')) activeTab = 'rolling';
+  else if (pathname.endsWith('/dispatch')) activeTab = 'dispatch';
+  else if (pathname.endsWith('/downtime')) activeTab = 'downtime';
+  else if (pathname.endsWith('/energy')) activeTab = 'energy';
+  else if (pathname.endsWith('/weighbridge')) activeTab = 'weighbridge';
+  else if (pathname.endsWith('/quality')) activeTab = 'quality';
+  else if (pathname.endsWith('/inventory')) activeTab = 'inventory';
+  else if (pathname.endsWith('/expenses')) activeTab = 'expenses';
+  else if (pathname.endsWith('/shifts')) activeTab = 'shifts';
 
   const navLinks = [
     { href: '/tenant/steel', activeKey: 'overview', text: 'Overview', icon: 'M4 6h16M4 12h16M4 18h16' },
-    { href: '/tenant/steel/scrap-management', activeKey: 'scrap-management', text: 'Scrap Management', icon: 'M20 7l-8-4-8 4m16 0l-8 4' },
-    { href: '/tenant/steel/furnace-smelting', activeKey: 'furnace-smelting', text: 'Furnace Smelting', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-    { href: '/tenant/steel/casting-rolling', activeKey: 'casting-rolling', text: 'Casting & Rolling', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' },
-    { href: '/tenant/steel/sintering-plant', activeKey: 'sintering-plant', text: 'Sintering Plant', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2' },
-    { href: '/tenant/steel/sourcing-fuel', activeKey: 'sourcing-fuel', text: 'Sourcing & Fuel', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
-    { href: '/tenant/steel/material-inventory', activeKey: 'material-inventory', text: 'Material Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4' },
-    { href: '/tenant/steel/laboratory-composition', activeKey: 'laboratory-composition', text: 'Laboratory Composition', icon: 'M9 7h6m0 10v-3m-3 3h.01' },
-    { href: '/tenant/steel/weighbridge-gates', activeKey: 'weighbridge-gates', text: 'Weighbridge Gates', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9' },
-    { href: '/tenant/steel/invoices-expenses', activeKey: 'invoices-expenses', text: 'Invoices & Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2' },
-    { href: '/tenant/steel/hrms-shift-log', activeKey: 'hrms-shift-log', text: 'HRMS & Shift Log', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7' },
-    { href: '/tenant/steel/equipment-maintenance', activeKey: 'equipment-maintenance', text: 'Equipment Maintenance', icon: 'M12 6V4m0 2a2 2 0 100 4' },
-    { href: '/tenant/steel/laboratory-qa-audits', activeKey: 'laboratory-qa-audits', text: 'Laboratory QA Audits', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944' },
-    { href: '/tenant/steel/config-parameters', activeKey: 'config-parameters', text: 'Config Parameters', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4' }
+    { href: '/tenant/steel/scrap', activeKey: 'scrap', text: 'Scrap Sourcing', icon: 'M20 7l-8-4-8 4m16 0l-8 4' },
+    { href: '/tenant/steel/furnace', activeKey: 'furnace', text: 'Furnace Log', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+    { href: '/tenant/steel/billet', activeKey: 'billet', text: 'Billet CCM', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' },
+    { href: '/tenant/steel/rolling', activeKey: 'rolling', text: 'Rolling Mill', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { href: '/tenant/steel/dispatch', activeKey: 'dispatch', text: 'Sales Dispatch', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+    { href: '/tenant/steel/downtime', activeKey: 'downtime', text: 'Downtime Tracker', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { href: '/tenant/steel/energy', activeKey: 'energy', text: 'Power & Utilities', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+    { href: '/tenant/steel/weighbridge', activeKey: 'weighbridge', text: 'Weighbridge Gate', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
+    { href: '/tenant/steel/quality', activeKey: 'quality', text: 'Quality Spectro', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+    { href: '/tenant/steel/inventory', activeKey: 'inventory', text: 'Yard Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+    { href: '/tenant/steel/expenses', activeKey: 'expenses', text: 'Ledger Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { href: '/tenant/steel/shifts', activeKey: 'shifts', text: 'HRMS Shifts', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' }
   ];
 
   const sidebarElement = (
@@ -51,14 +48,14 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
       {/* Sidebar Header */}
       <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-white to-slate-50/40 flex-shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-500/20 flex items-center justify-center shadow-xs">
-            <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <div className="w-8 h-8 rounded-xl bg-[#FAF6EE] border border-[#C5A059]/20 flex items-center justify-center shadow-xs">
+            <svg className="w-4 h-4 text-[#B48F48]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
             </svg>
           </div>
           <div className="leading-none overflow-hidden max-w-[140px]">
             <h2 className="text-xs font-black text-slate-900 truncate">{user.tenantName || 'Workspace'}</h2>
-            <p className="text-[8px] text-orange-550 font-mono tracking-wider uppercase font-extrabold mt-1">Steel Mill ERP</p>
+            <p className="text-[8px] text-[#B48F48] font-mono tracking-wider uppercase font-extrabold mt-1">Steel Mill ERP</p>
           </div>
         </div>
         <button onClick={() => setIsSidebarOpen(false)} className="block lg:hidden text-slate-400 hover:text-slate-700">✕</button>
@@ -72,10 +69,12 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             href={link.href}
             onClick={() => setIsSidebarOpen(false)}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-              activeTab === link.activeKey ? 'bg-orange-50/60 text-orange-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+              activeTab === link.activeKey 
+                ? 'bg-[#FAF6EE]/60 text-[#B48F48]' 
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
             }`}
           >
-            {activeTab === link.activeKey && <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-orange-500 rounded-r" />}
+            {activeTab === link.activeKey && <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />}
             <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
             </svg>
@@ -88,12 +87,12 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
       <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
         <Link href="/tenant/steel/profile" onClick={() => setIsSidebarOpen(false)} className="flex items-center justify-between mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-500/30 flex items-center justify-center font-bold text-[10px] text-orange-600">
+            <div className="w-8 h-8 rounded-full bg-[#FAF6EE] border border-[#C5A059]/30 flex items-center justify-center font-bold text-[10px] text-[#B48F48]">
               {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </div>
             <div className="leading-tight">
               <p className="text-[10px] font-black text-slate-900 truncate w-28">{user.name}</p>
-              <span className="inline-flex px-1.5 py-0.2 bg-slate-100 text-orange-600 rounded text-[8px] font-bold uppercase tracking-wider font-mono">Steel Admin</span>
+              <span className="inline-flex px-1.5 py-0.2 bg-slate-100 text-[#B48F48] rounded text-[8px] font-bold uppercase tracking-wider font-mono">Steel Admin</span>
             </div>
           </div>
         </Link>
@@ -106,11 +105,26 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-hidden relative">
-      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">{sidebarElement}</aside>
-      {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden" />}
-      <aside className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 transform lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>{sidebarElement}</aside>
+      
+      {/* Sidebar for desktop */}
+      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
+        {sidebarElement}
+      </aside>
 
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden" />
+      )}
+
+      {/* Sidebar for mobile */}
+      <aside className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 transform lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {sidebarElement}
+      </aside>
+
+      {/* Main Content Area */}
       <div className="flex-1 h-full flex flex-col overflow-hidden">
+        
+        {/* Header */}
         <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <button onClick={() => setIsSidebarOpen(true)} className="block lg:hidden p-1 text-slate-500 hover:bg-slate-100 rounded-lg focus:outline-none">
@@ -121,14 +135,17 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 font-mono">
               <span>SMC</span>
               <span>/</span>
-              <span className="truncate max-w-[85px]">{(user.tenantName || 'Workspace').toUpperCase()}</span>
+              <span className="truncate max-w-[85px]">{user.tenantName || 'Workspace'}</span>
               <span>/</span>
               <span className="text-slate-850 capitalize font-bold">{(activeTab || '').replace('-', ' ')}</span>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          
+          {/* Header Controls */}
+          <div className="flex items-center space-x-3">
+            {/* Profile Pill */}
             <Link href="/tenant/steel/profile" className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs">
-              <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[9px] text-orange-600 border border-slate-200">
+              <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[9px] text-[#B48F48] border border-slate-200">
                 {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <span className="text-xs font-bold hidden md:inline">{user.name}</span>
@@ -136,7 +153,10 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 bg-slate-50/50 min-h-0">{children}</main>
+        {/* Content Page Container */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/50">
+          {children}
+        </main>
       </div>
     </div>
   );

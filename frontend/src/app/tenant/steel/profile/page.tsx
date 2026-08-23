@@ -36,7 +36,7 @@ export default function SteelProfilePage() {
             placeholder="Add structural mill operational notes..."
           />
         </div>
-        <button onClick={handleSave} className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold font-mono">SAVE NOTES</button>
+        <button onClick={handleSave} className="px-4 py-2 bg-[#C5A059] text-white rounded-xl text-xs font-bold font-mono">SAVE NOTES</button>
       </div>
     </div>
   );

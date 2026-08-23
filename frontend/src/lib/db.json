@@ -1,0 +1,601 @@
+{
+  "scrap": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "supplier_name": "Metal Recyclers Corp",
+      "scrap_category": "Heavy Melting",
+      "truck_no": "TR-1024",
+      "gross_weight": 24500,
+      "tare_weight": 9500,
+      "net_received_kg": 15000,
+      "rate_per_kg": 42,
+      "total_cost": 630000
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "supplier_name": "Apex Scrap Sourcing",
+      "scrap_category": "LC Scrap",
+      "truck_no": "TR-8812",
+      "gross_weight": 22000,
+      "tare_weight": 9200,
+      "net_received_kg": 12800,
+      "rate_per_kg": 44,
+      "total_cost": 563200
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "supplier_name": "Alpha Industrial Alloys",
+      "scrap_category": "Rolling Kechi",
+      "truck_no": "TR-5034",
+      "gross_weight": 18500,
+      "tare_weight": 9000,
+      "net_received_kg": 9500,
+      "rate_per_kg": 40,
+      "total_cost": 380000
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "supplier_name": "Metro Iron & Steel",
+      "scrap_category": "Tin Bundle",
+      "truck_no": "TR-4455",
+      "gross_weight": 19000,
+      "tare_weight": 9400,
+      "net_received_kg": 9600,
+      "rate_per_kg": 38,
+      "total_cost": 364800
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "supplier_name": "Metal Recyclers Corp",
+      "scrap_category": "Plate Cutting",
+      "truck_no": "TR-9110",
+      "gross_weight": 26000,
+      "tare_weight": 9800,
+      "net_received_kg": 16200,
+      "rate_per_kg": 46,
+      "total_cost": 745200
+    }
+  ],
+  "furnace": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "furnace_id": "EAF-01",
+      "heat_no": "H-260820A",
+      "scrap_input_kg": 12000,
+      "runtime_min": 52,
+      "patching_powder_kg": 150,
+      "patching_forma_kg": 45,
+      "liquid_steel_tapped_kg": 10800,
+      "yield_pct": 90
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "furnace_id": "EAF-01",
+      "heat_no": "H-260821A",
+      "scrap_input_kg": 13000,
+      "runtime_min": 55,
+      "patching_powder_kg": 180,
+      "patching_forma_kg": 45,
+      "liquid_steel_tapped_kg": 11440,
+      "yield_pct": 88
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "furnace_id": "EAF-02",
+      "heat_no": "H-260822A",
+      "scrap_input_kg": 11500,
+      "runtime_min": 48,
+      "patching_powder_kg": 120,
+      "patching_forma_kg": 30,
+      "liquid_steel_tapped_kg": 10465,
+      "yield_pct": 91
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "furnace_id": "EAF-01",
+      "heat_no": "H-260823A",
+      "scrap_input_kg": 14000,
+      "runtime_min": 58,
+      "patching_powder_kg": 200,
+      "patching_forma_kg": 60,
+      "liquid_steel_tapped_kg": 12180,
+      "yield_pct": 87
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "furnace_id": "EAF-02",
+      "heat_no": "H-260823B",
+      "scrap_input_kg": 12500,
+      "runtime_min": 50,
+      "patching_powder_kg": 140,
+      "patching_forma_kg": 45,
+      "liquid_steel_tapped_kg": 11125,
+      "yield_pct": 89
+    }
+  ],
+  "billet": [
+    {
+      "id": 1,
+      "heat_no": "H-260820A",
+      "billet_size_section": "100x100 mm",
+      "billet_output_kg": 10500,
+      "scull_loss_kg": 150,
+      "scrap_loss_kg": 1500,
+      "billet_yield_pct": 87.5
+    },
+    {
+      "id": 2,
+      "heat_no": "H-260821A",
+      "billet_size_section": "130x130 mm",
+      "billet_output_kg": 11100,
+      "scull_loss_kg": 180,
+      "scrap_loss_kg": 1900,
+      "billet_yield_pct": 85.38
+    },
+    {
+      "id": 3,
+      "heat_no": "H-260822A",
+      "billet_size_section": "100x100 mm",
+      "billet_output_kg": 10200,
+      "scull_loss_kg": 120,
+      "scrap_loss_kg": 1300,
+      "billet_yield_pct": 88.7
+    },
+    {
+      "id": 4,
+      "heat_no": "H-260823A",
+      "billet_size_section": "130x130 mm",
+      "billet_output_kg": 11800,
+      "scull_loss_kg": 210,
+      "scrap_loss_kg": 2200,
+      "billet_yield_pct": 84.29
+    },
+    {
+      "id": 5,
+      "heat_no": "H-260823B",
+      "billet_size_section": "100x100 mm",
+      "billet_output_kg": 10800,
+      "scull_loss_kg": 160,
+      "scrap_loss_kg": 1700,
+      "billet_yield_pct": 86.4
+    }
+  ],
+  "rolling": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "billet_input_kg": 10000,
+      "rod_size": "12mm",
+      "rod_production_kg": 9600,
+      "burning_loss_kg": 200,
+      "end_cut_loss_kg": 150,
+      "miss_roll_kg": 50,
+      "rod_loss_kg": 400,
+      "rod_yield_pct": 96
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "billet_input_kg": 11000,
+      "rod_size": "16mm",
+      "rod_production_kg": 10580,
+      "burning_loss_kg": 220,
+      "end_cut_loss_kg": 140,
+      "miss_roll_kg": 60,
+      "rod_loss_kg": 420,
+      "rod_yield_pct": 96.18
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "billet_input_kg": 10000,
+      "rod_size": "20mm",
+      "rod_production_kg": 9550,
+      "burning_loss_kg": 200,
+      "end_cut_loss_kg": 160,
+      "miss_roll_kg": 90,
+      "rod_loss_kg": 450,
+      "rod_yield_pct": 95.5
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "billet_input_kg": 11500,
+      "rod_size": "12mm",
+      "rod_production_kg": 11020,
+      "burning_loss_kg": 240,
+      "end_cut_loss_kg": 180,
+      "miss_roll_kg": 60,
+      "rod_loss_kg": 480,
+      "rod_yield_pct": 95.83
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "billet_input_kg": 10500,
+      "rod_size": "25mm",
+      "rod_production_kg": 10050,
+      "burning_loss_kg": 210,
+      "end_cut_loss_kg": 160,
+      "miss_roll_kg": 80,
+      "rod_loss_kg": 450,
+      "rod_yield_pct": 95.71
+    }
+  ],
+  "dispatch": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "customer_name": "Metro Infrastructures",
+      "challan_no": "CH-77801",
+      "rod_size": "12mm",
+      "dispatch_qty_kg": 8000,
+      "rate_per_kg": 65,
+      "total_selling_price": 520000,
+      "truck_no": "TR-2005",
+      "contact_info": "info@metroinfra.com"
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "customer_name": "Bengal Housing Ltd",
+      "challan_no": "CH-77802",
+      "rod_size": "16mm",
+      "dispatch_qty_kg": 10000,
+      "rate_per_kg": 66,
+      "total_selling_price": 660000,
+      "truck_no": "TR-1025",
+      "contact_info": "+880-1712-334455"
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "customer_name": "Apex Bridges & Roads",
+      "challan_no": "CH-77803",
+      "rod_size": "20mm",
+      "dispatch_qty_kg": 9000,
+      "rate_per_kg": 68,
+      "total_selling_price": 612000,
+      "truck_no": "TR-3088",
+      "contact_info": "dispatch@apexbridges.org"
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "customer_name": "Dhaka Construction Co",
+      "challan_no": "CH-77804",
+      "rod_size": "12mm",
+      "dispatch_qty_kg": 7500,
+      "rate_per_kg": 65,
+      "total_selling_price": 487500,
+      "truck_no": "TR-5052",
+      "contact_info": "dhakaconco@dhaka.net"
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "customer_name": "Metro Infrastructures",
+      "challan_no": "CH-77805",
+      "rod_size": "25mm",
+      "dispatch_qty_kg": 9500,
+      "rate_per_kg": 69,
+      "total_selling_price": 655500,
+      "truck_no": "TR-9204",
+      "contact_info": "info@metroinfra.com"
+    }
+  ],
+  "downtime": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "section": "BILLET_LINE",
+      "breakdown_category": "Electrical",
+      "duration_min": 45,
+      "root_cause_notes": "Caster mold electromagnetic stirrer sensor failure.",
+      "resolved_by": "Engr. Shafiul Islam"
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "section": "ROLLING_LINE",
+      "breakdown_category": "Roll Change",
+      "duration_min": 90,
+      "root_cause_notes": "Scheduled changeover to 16mm rebar profiling rolls.",
+      "resolved_by": "Roll Turner Rashed"
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "section": "BILLET_LINE",
+      "breakdown_category": "Mechanical",
+      "duration_min": 30,
+      "root_cause_notes": "Tundish nozzle alignment correction.",
+      "resolved_by": "Foreman Harun"
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "section": "ROLLING_LINE",
+      "breakdown_category": "Power Outage",
+      "duration_min": 15,
+      "root_cause_notes": "Brief voltage dip, auxiliary system restart lag.",
+      "resolved_by": "Substation Crew"
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "section": "ROLLING_LINE",
+      "breakdown_category": "Mechanical",
+      "duration_min": 60,
+      "root_cause_notes": "Miss-roll shear blade replacement in finishing mill block.",
+      "resolved_by": "Engr. Karim Uddin"
+    }
+  ],
+  "energy": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "meter_reading_kw": 185200,
+      "power_consumed_kwh": 12500,
+      "gas_consumed_nm3": 2100,
+      "billet_kwh_per_ton": 595.24,
+      "rod_kwh_per_ton": 651.04,
+      "gas_per_ton": 109.38
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "meter_reading_kw": 198000,
+      "power_consumed_kwh": 12800,
+      "gas_consumed_nm3": 2250,
+      "billet_kwh_per_ton": 576.58,
+      "rod_kwh_per_ton": 604.91,
+      "gas_per_ton": 106.33
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "meter_reading_kw": 210100,
+      "power_consumed_kwh": 12100,
+      "gas_consumed_nm3": 2050,
+      "billet_kwh_per_ton": 593.14,
+      "rod_kwh_per_ton": 633.51,
+      "gas_per_ton": 107.33
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "meter_reading_kw": 224300,
+      "power_consumed_kwh": 14200,
+      "gas_consumed_nm3": 2450,
+      "billet_kwh_per_ton": 628.32,
+      "rod_kwh_per_ton": 644.28,
+      "gas_per_ton": 111.16
+    }
+  ],
+  "weighbridge": [
+    {
+      "id": 1,
+      "ticket_no": "WB-260820-001",
+      "date": "2026-08-20",
+      "vehicle_no": "TR-1024",
+      "material_type": "Incoming Scrap",
+      "gross_weight_kg": 24500,
+      "tare_weight_kg": 9500,
+      "net_weight_kg": 15000,
+      "status": "Completed"
+    },
+    {
+      "id": 2,
+      "ticket_no": "WB-260820-002",
+      "date": "2026-08-20",
+      "vehicle_no": "TR-2005",
+      "material_type": "Outgoing Finished Rods",
+      "gross_weight_kg": 16500,
+      "tare_weight_kg": 8500,
+      "net_weight_kg": 8000,
+      "status": "Completed"
+    },
+    {
+      "id": 3,
+      "ticket_no": "WB-260821-001",
+      "date": "2026-08-21",
+      "vehicle_no": "TR-8812",
+      "material_type": "Incoming Scrap",
+      "gross_weight_kg": 22000,
+      "tare_weight_kg": 9200,
+      "net_weight_kg": 12800,
+      "status": "Completed"
+    },
+    {
+      "id": 4,
+      "ticket_no": "WB-260822-001",
+      "date": "2026-08-22",
+      "vehicle_no": "TR-3088",
+      "material_type": "Outgoing Finished Rods",
+      "gross_weight_kg": 17800,
+      "tare_weight_kg": 8800,
+      "net_weight_kg": 9000,
+      "status": "Completed"
+    },
+    {
+      "id": 5,
+      "ticket_no": "WB-260823-001",
+      "date": "2026-08-23",
+      "vehicle_no": "TR-9110",
+      "material_type": "Incoming Scrap",
+      "gross_weight_kg": 26000,
+      "tare_weight_kg": 9800,
+      "net_weight_kg": 16200,
+      "status": "Completed"
+    }
+  ],
+  "quality": [
+    {
+      "id": 1,
+      "heat_no": "H-260820A",
+      "test_date": "2026-08-20",
+      "pct_c": 0.22,
+      "pct_mn": 0.85,
+      "pct_si": 0.24,
+      "pct_s": 0.035,
+      "pct_p": 0.038,
+      "pct_ce": 0.37,
+      "yield_strength_n_mm2": 520.4,
+      "tensile_strength_n_mm2": 635.8,
+      "elongation_pct": 18.5,
+      "bend_test_status": "Approved"
+    },
+    {
+      "id": 2,
+      "heat_no": "H-260821A",
+      "test_date": "2026-08-21",
+      "pct_c": 0.24,
+      "pct_mn": 0.9,
+      "pct_si": 0.26,
+      "pct_s": 0.04,
+      "pct_p": 0.042,
+      "pct_ce": 0.4,
+      "yield_strength_n_mm2": 535.2,
+      "tensile_strength_n_mm2": 650.5,
+      "elongation_pct": 17.8,
+      "bend_test_status": "Approved"
+    },
+    {
+      "id": 3,
+      "heat_no": "H-260822A",
+      "test_date": "2026-08-22",
+      "pct_c": 0.21,
+      "pct_mn": 0.82,
+      "pct_si": 0.22,
+      "pct_s": 0.03,
+      "pct_p": 0.032,
+      "pct_ce": 0.35,
+      "yield_strength_n_mm2": 512.8,
+      "tensile_strength_n_mm2": 622.3,
+      "elongation_pct": 19.2,
+      "bend_test_status": "Approved"
+    },
+    {
+      "id": 4,
+      "heat_no": "H-260823A",
+      "test_date": "2026-08-23",
+      "pct_c": 0.26,
+      "pct_mn": 0.95,
+      "pct_si": 0.28,
+      "pct_s": 0.048,
+      "pct_p": 0.049,
+      "pct_ce": 0.43,
+      "yield_strength_n_mm2": 548,
+      "tensile_strength_n_mm2": 662,
+      "elongation_pct": 16.5,
+      "bend_test_status": "Approved"
+    }
+  ],
+  "inventory": {
+    "raw_scrap_mt": 382.5,
+    "billet_yard_mt": 145.2,
+    "rebar_10mm_mt": 42,
+    "rebar_12mm_mt": 74.8,
+    "rebar_16mm_mt": 98.4,
+    "rebar_20mm_mt": 86.5,
+    "rebar_25mm_mt": 55.2,
+    "rebar_32mm_mt": 28,
+    "store_spares_qty": 1250
+  },
+  "expenses": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "category": "Spares",
+      "voucher_no": "PV-10255",
+      "description": "Bought caster mold seals and bearings.",
+      "amount": 45000,
+      "type": "Expense"
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "category": "Electricity",
+      "voucher_no": "PV-10256",
+      "description": "EAF power utility billing deposit.",
+      "amount": 820000,
+      "type": "Expense"
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "category": "Scrap Purchase",
+      "voucher_no": "SP-99120",
+      "description": "Outstanding payable to Metal Recyclers Corp for invoice #2608A.",
+      "amount": 630000,
+      "type": "Scrap Payable"
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "category": "Consumables",
+      "voucher_no": "PV-10257",
+      "description": "Bought Ladle patching powder (40 bags) & forma powder.",
+      "amount": 35000,
+      "type": "Expense"
+    },
+    {
+      "id": 5,
+      "date": "2026-08-23",
+      "category": "Others",
+      "voucher_no": "CR-88204",
+      "description": "Receivable invoice generated for Metro Infrastructures challan CH-77805.",
+      "amount": 655500,
+      "type": "Customer Receivable"
+    }
+  ],
+  "shifts": [
+    {
+      "id": 1,
+      "date": "2026-08-20",
+      "shift": "Shift A",
+      "furnace_master": "Kabir Ahmed",
+      "roll_turner": "Rashedul Bari",
+      "operators_present": 24,
+      "attendance_log": "100% core attendance, minor roll change delayed shift handover by 10 mins."
+    },
+    {
+      "id": 2,
+      "date": "2026-08-21",
+      "shift": "Shift B",
+      "furnace_master": "Zahirul Haque",
+      "roll_turner": "Jamil Hossain",
+      "operators_present": 22,
+      "attendance_log": "2 absences covered. Ladle crane routine maintenance completed without downtime."
+    },
+    {
+      "id": 3,
+      "date": "2026-08-22",
+      "shift": "Shift C",
+      "furnace_master": "Ataur Rahman",
+      "roll_turner": "Rashedul Bari",
+      "operators_present": 23,
+      "attendance_log": "Night shift operations normal, tapped 1 heat of standard Grade 60 alloy."
+    },
+    {
+      "id": 4,
+      "date": "2026-08-23",
+      "shift": "Shift A",
+      "furnace_master": "Kabir Ahmed",
+      "roll_turner": "Rashedul Bari",
+      "operators_present": 25,
+      "attendance_log": "Fully operational shift, EAF-01 and CCM-02 running simultaneously."
+    }
+  ]
+}
