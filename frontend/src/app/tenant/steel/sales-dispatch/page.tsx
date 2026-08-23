@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -100,15 +101,7 @@ export default function SalesDispatchPage() {
     const rows = filteredData.map(r => [
       r.date, r.customer_name, r.order_no, r.challan_no, r.vehicle_no, r.dispatch_qty_kg, r.rate_per_kg, r.total_sales_value, r.payment_status
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `sales_dispatch_ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'sales_dispatch_ledger');
   };
 
   const addModalRow = () => {
@@ -226,7 +219,7 @@ export default function SalesDispatchPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -103,15 +104,7 @@ export default function LedgerExpensesPage() {
     const rows = filteredData.map(r => [
       r.date, r.voucher_no, r.expense_head, r.amount, r.paid_to, r.payment_mode, r.remarks, r.approved_by
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `factory_ledger_expenses.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'factory_ledger_expenses');
   };
 
   const addModalRow = () => {
@@ -222,7 +215,7 @@ export default function LedgerExpensesPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

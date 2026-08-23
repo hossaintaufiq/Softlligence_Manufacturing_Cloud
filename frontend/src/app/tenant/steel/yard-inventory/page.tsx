@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -103,15 +104,7 @@ export default function YardInventoryPage() {
     const rows = filteredData.map(r => [
       r.item_code, r.item_description, r.item_category, r.uom, r.physical_stock, r.allocated_qty, r.available_qty, r.yard_bay_no, r.min_safety_stock
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `yard_inventory_ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'yard_inventory_ledger');
   };
 
   const addModalRow = () => {
@@ -228,7 +221,7 @@ export default function YardInventoryPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

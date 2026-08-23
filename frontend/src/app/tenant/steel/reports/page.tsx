@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -260,15 +261,7 @@ export default function ReportsAndAnalyticsPage() {
       rows = reportData.map((r: any) => [r.category, r.melt_shop_min, r.rolling_mill_min, r.incidents]);
     }
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, filename);
   };
 
   // PDF Trigger
@@ -302,7 +295,7 @@ export default function ReportsAndAnalyticsPage() {
             onClick={handleExportExcel}
             className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet CSV
+            Export Excel
           </button>
           <button 
             onClick={handlePrintPDF}

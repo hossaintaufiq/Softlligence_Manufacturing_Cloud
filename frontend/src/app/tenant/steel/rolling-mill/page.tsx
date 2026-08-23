@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -98,15 +99,7 @@ export default function RollingMillPage() {
     const rows = filteredData.map(r => [
       r.date, r.billet_input_kg, r.rod_size, r.rod_production_kg, r.rod_loss_kg, r.rod_yield_pct, r.rod_stock_kg
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `rolling_mill_production.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'rolling_mill_production');
   };
 
   const addModalRow = () => {
@@ -217,7 +210,7 @@ export default function RollingMillPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -95,15 +96,7 @@ export default function BilletCCMPage() {
     const rows = filteredData.map(r => [
       r.date, r.heat_no, r.billet_size_section, r.billet_output_kg, r.scull_loss_kg, r.billet_yield_pct, r.billet_stock_kg
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ccm_billet_ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'ccm_billet_ledger');
   };
 
   const addModalRow = () => {
@@ -211,7 +204,7 @@ export default function BilletCCMPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -93,15 +94,7 @@ export default function DowntimeTrackerPage() {
     const rows = filteredData.map(r => [
       r.date, r.billet_breakdown_min, r.rolling_breakdown_min, r.breakdown_category, r.root_cause_notes, r.shift_code, r.action_taken
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `downtime_breakdown_logs.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'downtime_breakdown_logs');
   };
 
   const addModalRow = () => {
@@ -212,7 +205,7 @@ export default function DowntimeTrackerPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

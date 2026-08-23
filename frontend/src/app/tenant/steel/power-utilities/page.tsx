@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -102,15 +103,7 @@ export default function PowerUtilitiesPage() {
     const rows = filteredData.map(r => [
       r.date, r.total_production_kg, r.power_consumption_kw, r.gas_consumption_nm3, r.peak_demand_kva, r.power_cost, r.gas_cost, r.sec_kwh_kg, r.sec_nm3_kg
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `utility_power_logs.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'utility_power_logs');
   };
 
   const addModalRow = () => {
@@ -222,7 +215,7 @@ export default function PowerUtilitiesPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

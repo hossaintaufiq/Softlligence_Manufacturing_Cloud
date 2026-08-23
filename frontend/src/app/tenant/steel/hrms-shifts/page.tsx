@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -100,15 +101,7 @@ export default function HRMSShiftsPage() {
     const rows = filteredData.map(r => [
       r.date, r.shift_no, r.supervisor_name, r.shift_charge_engineer, r.operator_count, r.helper_count, r.total_manpower, r.logged_output_kg, r.safety_incident_logged
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `hrms_production_shifts.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'hrms_production_shifts');
   };
 
   const addModalRow = () => {
@@ -224,7 +217,7 @@ export default function HRMSShiftsPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

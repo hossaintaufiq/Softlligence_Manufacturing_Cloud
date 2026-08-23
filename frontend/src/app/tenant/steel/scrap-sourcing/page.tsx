@@ -1,4 +1,5 @@
 'use client';
+import { exportToExcel } from '@/lib/excelExport';
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -85,11 +86,20 @@ export default function ScrapSourcingPage() {
           val = parseFloat(editValue);
           if (isNaN(val)) val = row[field];
         }
-        const rcv = field === 'scrap_rcv_kg' ? val : row.scrap_rcv_kg;
+        const gross = field === 'gross_weight' ? val : row.gross_weight;
+        const tare = field === 'value_tare' ? val : row.value_tare;
+        const rcv = (field === 'gross_weight' || field === 'value_tare') 
+          ? Math.max(0, gross - tare) 
+          : (field === 'scrap_rcv_kg' ? val : row.scrap_rcv_kg);
         const rate = field === 'rate_per_kg' ? val : row.rate_per_kg;
         const cost = rcv * rate;
 
-        return { ...row, [field]: val, total_cost: cost };
+        return { 
+          ...row, 
+          [field]: val, 
+          scrap_rcv_kg: rcv,
+          total_cost: cost 
+        };
       }
       return row;
     });
@@ -103,15 +113,7 @@ export default function ScrapSourcingPage() {
     const rows = filteredData.map(r => [
       r.date, r.supplier_name, r.scrap_category, r.scrap_rcv_kg, r.truck_no, r.gross_weight, r.value_tare, r.rate_per_kg, r.total_cost, r.yard_location
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `scrap_procurement_ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(headers, rows, 'scrap_procurement_ledger');
   };
 
   const addModalRow = () => {
@@ -231,7 +233,7 @@ export default function ScrapSourcingPage() {
             onClick={handleExportCSV}
             className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
           >
-            Export Sheet
+            Export Excel
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
