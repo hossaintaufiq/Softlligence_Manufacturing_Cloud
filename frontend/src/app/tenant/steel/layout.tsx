@@ -5,6 +5,18 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
+interface NavLinkItem {
+  href: string;
+  activeKey: string;
+  text: string;
+  icon: string;
+}
+
+interface NavSection {
+  title: string;
+  links: NavLinkItem[];
+}
+
 export default function SteelLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
@@ -14,33 +26,54 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
 
   // Determine active tab based on route pathname
   let activeTab = 'overview';
-  if (pathname.endsWith('/scrap')) activeTab = 'scrap';
-  else if (pathname.endsWith('/furnace')) activeTab = 'furnace';
-  else if (pathname.endsWith('/billet')) activeTab = 'billet';
-  else if (pathname.endsWith('/rolling')) activeTab = 'rolling';
-  else if (pathname.endsWith('/dispatch')) activeTab = 'dispatch';
-  else if (pathname.endsWith('/downtime')) activeTab = 'downtime';
-  else if (pathname.endsWith('/energy')) activeTab = 'energy';
-  else if (pathname.endsWith('/weighbridge')) activeTab = 'weighbridge';
-  else if (pathname.endsWith('/quality')) activeTab = 'quality';
-  else if (pathname.endsWith('/inventory')) activeTab = 'inventory';
-  else if (pathname.endsWith('/expenses')) activeTab = 'expenses';
-  else if (pathname.endsWith('/shifts')) activeTab = 'shifts';
+  if (pathname.endsWith('/overview')) activeTab = 'overview';
+  else if (pathname.endsWith('/weighbridge-gate')) activeTab = 'weighbridge-gate';
+  else if (pathname.endsWith('/scrap-sourcing')) activeTab = 'scrap-sourcing';
+  else if (pathname.endsWith('/furnace-log')) activeTab = 'furnace-log';
+  else if (pathname.endsWith('/billet-ccm')) activeTab = 'billet-ccm';
+  else if (pathname.endsWith('/rolling-mill')) activeTab = 'rolling-mill';
+  else if (pathname.endsWith('/downtime-tracker')) activeTab = 'downtime-tracker';
+  else if (pathname.endsWith('/quality-spectro')) activeTab = 'quality-spectro';
+  else if (pathname.endsWith('/sales-dispatch')) activeTab = 'sales-dispatch';
+  else if (pathname.endsWith('/yard-inventory')) activeTab = 'yard-inventory';
+  else if (pathname.endsWith('/power-utilities')) activeTab = 'power-utilities';
+  else if (pathname.endsWith('/ledger-expenses')) activeTab = 'ledger-expenses';
+  else if (pathname.endsWith('/hrms-shifts')) activeTab = 'hrms-shifts';
 
-  const navLinks = [
-    { href: '/tenant/steel', activeKey: 'overview', text: 'Overview', icon: 'M4 6h16M4 12h16M4 18h16' },
-    { href: '/tenant/steel/scrap', activeKey: 'scrap', text: 'Scrap Sourcing', icon: 'M20 7l-8-4-8 4m16 0l-8 4' },
-    { href: '/tenant/steel/furnace', activeKey: 'furnace', text: 'Furnace Log', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-    { href: '/tenant/steel/billet', activeKey: 'billet', text: 'Billet CCM', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' },
-    { href: '/tenant/steel/rolling', activeKey: 'rolling', text: 'Rolling Mill', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { href: '/tenant/steel/dispatch', activeKey: 'dispatch', text: 'Sales Dispatch', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
-    { href: '/tenant/steel/downtime', activeKey: 'downtime', text: 'Downtime Tracker', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/tenant/steel/energy', activeKey: 'energy', text: 'Power & Utilities', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-    { href: '/tenant/steel/weighbridge', activeKey: 'weighbridge', text: 'Weighbridge Gate', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
-    { href: '/tenant/steel/quality', activeKey: 'quality', text: 'Quality Spectro', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
-    { href: '/tenant/steel/inventory', activeKey: 'inventory', text: 'Yard Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-    { href: '/tenant/steel/expenses', activeKey: 'expenses', text: 'Ledger Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { href: '/tenant/steel/shifts', activeKey: 'shifts', text: 'HRMS Shifts', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' }
+  const menuSections: NavSection[] = [
+    {
+      title: 'Operations & Overview',
+      links: [
+        { href: '/tenant/steel/overview', activeKey: 'overview', text: 'Overview Dashboard', icon: 'M4 6h16M4 12h16M4 18h16' },
+        { href: '/tenant/steel/weighbridge-gate', activeKey: 'weighbridge-gate', text: 'Weighbridge Gate', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' }
+      ]
+    },
+    {
+      title: 'Production Line',
+      links: [
+        { href: '/tenant/steel/scrap-sourcing', activeKey: 'scrap-sourcing', text: 'Scrap Sourcing', icon: 'M20 7l-8-4-8 4m16 0l-8 4' },
+        { href: '/tenant/steel/furnace-log', activeKey: 'furnace-log', text: 'Furnace Log', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+        { href: '/tenant/steel/billet-ccm', activeKey: 'billet-ccm', text: 'Billet CCM', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2' },
+        { href: '/tenant/steel/rolling-mill', activeKey: 'rolling-mill', text: 'Rolling Mill', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+        { href: '/tenant/steel/downtime-tracker', activeKey: 'downtime-tracker', text: 'Downtime Tracker', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
+      ]
+    },
+    {
+      title: 'Quality & Logistics',
+      links: [
+        { href: '/tenant/steel/quality-spectro', activeKey: 'quality-spectro', text: 'Quality Spectro', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+        { href: '/tenant/steel/sales-dispatch', activeKey: 'sales-dispatch', text: 'Sales Dispatch', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+        { href: '/tenant/steel/yard-inventory', activeKey: 'yard-inventory', text: 'Yard Inventory', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' }
+      ]
+    },
+    {
+      title: 'Utilities & Finance',
+      links: [
+        { href: '/tenant/steel/power-utilities', activeKey: 'power-utilities', text: 'Power & Utilities', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+        { href: '/tenant/steel/ledger-expenses', activeKey: 'ledger-expenses', text: 'Ledger Expenses', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { href: '/tenant/steel/hrms-shifts', activeKey: 'hrms-shifts', text: 'HRMS Shifts', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' }
+      ]
+    }
   ];
 
   const sidebarElement = (
@@ -53,33 +86,42 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
             </svg>
           </div>
-          <div className="leading-none overflow-hidden max-w-[140px]">
-            <h2 className="text-xs font-black text-slate-900 truncate">{user.tenantName || 'Workspace'}</h2>
-            <p className="text-[8px] text-[#B48F48] font-mono tracking-wider uppercase font-extrabold mt-1">Steel Mill ERP</p>
+          <div className="leading-none overflow-hidden max-w-[145px]">
+            <h2 className="text-xs font-black text-slate-900 truncate">Hi-Tech Steel</h2>
+            <p className="text-[8px] text-[#B48F48] font-mono tracking-wider uppercase font-extrabold mt-1">Production MIS</p>
           </div>
         </div>
         <button onClick={() => setIsSidebarOpen(false)} className="block lg:hidden text-slate-400 hover:text-slate-700">✕</button>
       </div>
 
-      {/* Navigation Loop */}
-      <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
-        {navLinks.map((link, idx) => (
-          <Link
-            key={idx}
-            href={link.href}
-            onClick={() => setIsSidebarOpen(false)}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
-              activeTab === link.activeKey 
-                ? 'bg-[#FAF6EE]/60 text-[#B48F48]' 
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-            }`}
-          >
-            {activeTab === link.activeKey && <div className="absolute left-0 top-2.5 w-1.5 h-5 bg-[#C5A059] rounded-r" />}
-            <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
-            </svg>
-            <span>{link.text}</span>
-          </Link>
+      {/* Grouped Sidebar Sections */}
+      <nav className="p-3.5 space-y-4 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
+        {menuSections.map((section, sIdx) => (
+          <div key={sIdx} className="space-y-1">
+            <h4 className="px-3 text-[9px] uppercase tracking-widest font-extrabold text-slate-400 font-mono">
+              {section.title}
+            </h4>
+            <div className="space-y-0.5">
+              {section.links.map((link, idx) => (
+                <Link
+                  key={idx}
+                  href={link.href}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-bold transition-all relative ${
+                    activeTab === link.activeKey 
+                      ? 'bg-[#FAF6EE]/60 text-[#B48F48]' 
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+                  }`}
+                >
+                  {activeTab === link.activeKey && <div className="absolute left-0 top-2 w-1 h-4 bg-[#C5A059] rounded-r" />}
+                  <svg className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-800 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
+                  </svg>
+                  <span className="truncate">{link.text}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
