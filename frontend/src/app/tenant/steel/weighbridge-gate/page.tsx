@@ -397,8 +397,8 @@ export default function WeighbridgeGatePage() {
 
       {/* Multi-Row Quick Modal Entry */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
-          <div className="bg-white border border-slate-200/85 p-7 rounded-3xl w-full max-w-4xl shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 p-4 md:p-6">
+          <div className="bg-white border border-slate-250 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[90vh]">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono">Quick Multi-Row Weighments</h3>
               <p className="text-[10px] text-slate-450 mt-1">Simultaneously log multiple incoming scrap trucks and finished rebar dispatches.</p>
@@ -411,89 +411,91 @@ export default function WeighbridgeGatePage() {
             )}
 
             <form onSubmit={handleMultiRowSubmit} className="space-y-4 flex-1 overflow-y-auto min-h-0">
-              <div className="space-y-3">
-                {modalRows.map((row, idx) => (
-                  <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
-                    <div className="w-32 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Ticket No</label>
-                      <input 
-                        type="text" 
-                        value={row.ticket_no}
-                        onChange={(e) => handleModalRowChange(idx, 'ticket_no', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
-                      />
+              <div className="overflow-x-auto pb-3">
+                <div className="space-y-3 min-w-[950px] pr-2">
+                  {modalRows.map((row, idx) => (
+                    <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
+                      <div className="w-32 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Ticket No</label>
+                        <input 
+                          type="text" 
+                          value={row.ticket_no}
+                          onChange={(e) => handleModalRowChange(idx, 'ticket_no', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                        />
+                      </div>
+                      <div className="w-40 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Date & Time</label>
+                        <input 
+                          type="datetime-local" 
+                          value={row.date_time}
+                          onChange={(e) => handleModalRowChange(idx, 'date_time', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                        />
+                      </div>
+                      <div className="w-28 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Vehicle Number</label>
+                        <input 
+                          type="text" 
+                          placeholder="TR-1234"
+                          value={row.vehicle_no}
+                          onChange={(e) => handleModalRowChange(idx, 'vehicle_no', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Party Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="Party/Vendor Name"
+                          value={row.party_name}
+                          onChange={(e) => handleModalRowChange(idx, 'party_name', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none font-mono"
+                        />
+                      </div>
+                      <div className="w-36 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Type</label>
+                        <select 
+                          value={row.material_type}
+                          onChange={(e) => handleModalRowChange(idx, 'material_type', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                        >
+                          <option value="Raw Scrap Inward">Raw Scrap Inward</option>
+                          <option value="Finished Rod Outward">Finished Rod Outward</option>
+                        </select>
+                      </div>
+                      <div className="w-20 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Gross (kg)</label>
+                        <input 
+                          type="number" 
+                          placeholder="24000"
+                          value={row.gross_weight_kg}
+                          onChange={(e) => handleModalRowChange(idx, 'gross_weight_kg', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                        />
+                      </div>
+                      <div className="w-20 space-y-1">
+                        <label className="text-[8px] font-bold font-mono text-slate-400">Tare (kg)</label>
+                        <input 
+                          type="number" 
+                          placeholder="9000"
+                          value={row.tare_weight_kg}
+                          onChange={(e) => handleModalRowChange(idx, 'tare_weight_kg', e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                        />
+                      </div>
+                      {modalRows.length > 1 && (
+                        <button 
+                          type="button" 
+                          onClick={() => removeModalRow(idx)}
+                          className="text-red-500 hover:text-red-750 pb-2.5 font-bold cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
-                    <div className="w-40 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Date & Time</label>
-                      <input 
-                        type="datetime-local" 
-                        value={row.date_time}
-                        onChange={(e) => handleModalRowChange(idx, 'date_time', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
-                      />
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Vehicle Number</label>
-                      <input 
-                        type="text" 
-                        placeholder="TR-1234"
-                        value={row.vehicle_no}
-                        onChange={(e) => handleModalRowChange(idx, 'vehicle_no', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
-                      />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Party Name</label>
-                      <input 
-                        type="text" 
-                        placeholder="Party/Vendor Name"
-                        value={row.party_name}
-                        onChange={(e) => handleModalRowChange(idx, 'party_name', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none font-mono"
-                      />
-                    </div>
-                    <div className="w-36 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Type</label>
-                      <select 
-                        value={row.material_type}
-                        onChange={(e) => handleModalRowChange(idx, 'material_type', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      >
-                        <option value="Raw Scrap Inward">Raw Scrap Inward</option>
-                        <option value="Finished Rod Outward">Finished Rod Outward</option>
-                      </select>
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Gross (kg)</label>
-                      <input 
-                        type="number" 
-                        placeholder="24000"
-                        value={row.gross_weight_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'gross_weight_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Tare (kg)</label>
-                      <input 
-                        type="number" 
-                        placeholder="9000"
-                        value={row.tare_weight_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'tare_weight_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    {modalRows.length > 1 && (
-                      <button 
-                        type="button" 
-                        onClick={() => removeModalRow(idx)}
-                        className="text-red-500 hover:text-red-750 pb-2.5 font-bold cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               <div className="pt-3 flex justify-between">

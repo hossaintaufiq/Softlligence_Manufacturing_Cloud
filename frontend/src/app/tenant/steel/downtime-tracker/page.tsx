@@ -350,8 +350,8 @@ export default function DowntimeTrackerPage() {
 
       {/* Multi-Row Quick Modal Entry */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
-          <div className="bg-white border border-slate-200/85 p-7 rounded-3xl w-full max-w-4xl shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 p-4 md:p-6">
+          <div className="bg-white border border-slate-250 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[90vh]">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono">Quick Downtime Log</h3>
               <p className="text-[10px] text-slate-450 mt-1">Simultaneously log plant area breakdown durations and maintenance reports.</p>
@@ -364,7 +364,8 @@ export default function DowntimeTrackerPage() {
             )}
 
             <form onSubmit={handleMultiRowSubmit} className="space-y-4 flex-1 overflow-y-auto min-h-0">
-              <div className="space-y-3">
+              <div className="overflow-x-auto pb-3">
+                <div className="space-y-3 min-w-[950px] pr-2">
                 {modalRows.map((row, idx) => (
                   <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
                     <div className="w-28 space-y-1">
@@ -448,6 +449,7 @@ export default function DowntimeTrackerPage() {
                     )}
                   </div>
                 ))}
+                </div>
               </div>
 
               <div className="pt-3 flex justify-between">

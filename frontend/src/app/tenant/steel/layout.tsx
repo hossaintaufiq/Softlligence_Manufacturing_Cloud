@@ -27,6 +27,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
   // Determine active tab based on route pathname
   let activeTab = 'overview';
   if (pathname.endsWith('/overview')) activeTab = 'overview';
+  else if (pathname.endsWith('/reports')) activeTab = 'reports';
   else if (pathname.endsWith('/weighbridge-gate')) activeTab = 'weighbridge-gate';
   else if (pathname.endsWith('/scrap-sourcing')) activeTab = 'scrap-sourcing';
   else if (pathname.endsWith('/furnace-log')) activeTab = 'furnace-log';
@@ -45,6 +46,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
       title: 'Operations & Overview',
       links: [
         { href: '/tenant/steel/overview', activeKey: 'overview', text: 'Overview Dashboard', icon: 'M4 6h16M4 12h16M4 18h16' },
+        { href: '/tenant/steel/reports', activeKey: 'reports', text: 'Reports & Analytics', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
         { href: '/tenant/steel/weighbridge-gate', activeKey: 'weighbridge-gate', text: 'Weighbridge Gate', icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' }
       ]
     },

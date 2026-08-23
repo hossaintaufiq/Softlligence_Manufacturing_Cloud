@@ -9,25 +9,29 @@ export default function OverviewDashboard() {
   const scrapData = [
     { date: '2026-08-20', supplier_name: 'Metal Recyclers Corp', scrap_category: 'LC Scrap', scrap_rcv_kg: 15000, truck_no: 'TR-1024' },
     { date: '2026-08-21', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'Rolling Kechi', scrap_rcv_kg: 12800, truck_no: 'TR-8812' },
-    { date: '2026-08-22', supplier_name: 'Alpha Alloys', scrap_category: 'Plate Cutting', scrap_rcv_kg: 9500, truck_no: 'TR-5034' }
+    { date: '2026-08-22', supplier_name: 'Alpha Alloys', scrap_category: 'Plate Cutting', scrap_rcv_kg: 9500, truck_no: 'TR-5034' },
+    { date: '2026-08-23', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'LC Scrap', scrap_rcv_kg: 16500, truck_no: 'TR-2041' }
   ];
 
   const billetData = [
-    { date: '2026-08-20', billet_size_section: '100x100mm x 6m', billet_output_kg: 10500, scull_loss_kg: 1500, heat_no: 'H-260820A' },
-    { date: '2026-08-21', billet_size_section: '130x130mm x 6m', billet_output_kg: 11100, scull_loss_kg: 1900, heat_no: 'H-260821A' },
-    { date: '2026-08-22', billet_size_section: '100x100mm x 6m', billet_output_kg: 10200, scull_loss_kg: 1300, heat_no: 'H-260822A' }
+    { date: '2026-08-20', billet_output_kg: 10500 },
+    { date: '2026-08-21', billet_output_kg: 11100 },
+    { date: '2026-08-22', billet_output_kg: 10200 },
+    { date: '2026-08-23', billet_output_kg: 11000 }
   ];
 
   const rollingData = [
-    { date: '2026-08-20', billet_input_kg: 10000, rod_size: '12MM', rod_production_kg: 9600, rod_loss_kg: 400 },
-    { date: '2026-08-21', billet_input_kg: 11000, rod_size: '16MM', rod_production_kg: 10580, rod_loss_kg: 420 },
-    { date: '2026-08-22', billet_input_kg: 10000, rod_size: '20MM', rod_production_kg: 9550, rod_loss_kg: 450 }
+    { date: '2026-08-20', rod_production_kg: 9600 },
+    { date: '2026-08-21', rod_production_kg: 10580 },
+    { date: '2026-08-22', rod_production_kg: 9550 },
+    { date: '2026-08-23', rod_production_kg: 10100 }
   ];
 
   const dispatchData = [
-    { date: '2026-08-20', customer_name: 'Metro Infrastructures', order_no: 'ORD-502', challan_no: 'CH-260820A', vehicle_no: 'TR-2005', dispatch_qty_kg: 8000, rod_size: '12MM' },
-    { date: '2026-08-21', customer_name: 'Bengal Housing Ltd', order_no: 'ORD-503', challan_no: 'CH-260821A', vehicle_no: 'TR-1049', dispatch_qty_kg: 12000, rod_size: '16MM' },
-    { date: '2026-08-22', customer_name: 'Sikder Builders', order_no: 'ORD-504', challan_no: 'CH-260822A', vehicle_no: 'TR-7720', dispatch_qty_kg: 9500, rod_size: '20MM' }
+    { date: '2026-08-20', customer_name: 'Metro Infrastructures', dispatch_qty_kg: 8000, total_sales_value: 736000, payment_status: 'Paid', rod_size: '12MM', challan_no: 'CH-20A' },
+    { date: '2026-08-21', customer_name: 'Bengal Housing Ltd', dispatch_qty_kg: 12000, total_sales_value: 1128000, payment_status: 'Partial', rod_size: '16MM', challan_no: 'CH-21A' },
+    { date: '2026-08-22', customer_name: 'Sikder Builders', dispatch_qty_kg: 9500, total_sales_value: 874000, payment_status: 'Pending', rod_size: '20MM', challan_no: 'CH-22A' },
+    { date: '2026-08-23', customer_name: 'Metro Infrastructures', dispatch_qty_kg: 10000, total_sales_value: 930000, payment_status: 'Paid', rod_size: '12MM', challan_no: 'CH-23A' }
   ];
 
   const downtimeData = [
@@ -54,18 +58,17 @@ export default function OverviewDashboard() {
     ? (totalPowerKwh / parseFloat(totalRebarMt)).toFixed(1)
     : '0';
 
-  // Melt Shop vs Rolling Mill breakdown minutes
+  // Melt Shop vs Rolling Mill downtime minutes
   const meltShopDowntime = downtimeData.reduce((sum, d) => sum + d.billet_breakdown_min, 0);
   const rollingMillDowntime = downtimeData.reduce((sum, d) => sum + d.rolling_breakdown_min, 0);
   const totalDowntime = meltShopDowntime + rollingMillDowntime;
 
   const topDeliveries = [...dispatchData]
     .sort((a, b) => b.dispatch_qty_kg - a.dispatch_qty_kg)
-    .slice(0, 5);
+    .slice(0, 4);
 
   const scrapInwardFeed = [...scrapData]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+    .slice(0, 4);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in text-slate-800">
@@ -134,6 +137,86 @@ export default function OverviewDashboard() {
           <div>
             <h3 className="text-2xl font-extrabold text-slate-900 font-mono leading-none">{totalDispatchMt} MT</h3>
             <p className="text-[9px] text-slate-400 font-bold font-mono mt-2.5">CHALLANS SIGNED & CLEARED</p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* NEW: Production & Operational Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Chart 1: Daily Production & Dispatch Trends */}
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Daily Casting vs. Re-Rolling (MT)</h3>
+            <div className="flex space-x-3 text-[9px] font-mono font-bold">
+              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-[#C5A059] rounded-sm"></span> <span>Billet Cast</span></span>
+              <span className="flex items-center space-x-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span> <span>Finished Rod</span></span>
+            </div>
+          </div>
+          <svg className="w-full h-48" viewBox="0 0 400 120" preserveAspectRatio="none">
+            {/* Grid Lines */}
+            <line x1="0" y1="20" x2="400" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="0" y1="60" x2="400" y2="60" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="0" y1="100" x2="400" y2="100" stroke="#f1f5f9" strokeWidth="1" />
+            
+            {/* Area under line 1 (Billet Cast) */}
+            <path d="M 0,120 L 50,75 L 150,65 L 250,85 L 350,60 Z" fill="url(#billetGrad)" />
+            {/* Line 1 (Billet Cast) */}
+            <path d="M 0,120 L 50,75 L 150,65 L 250,85 L 350,60" fill="none" stroke="#C5A059" strokeWidth="2.5" strokeLinecap="round" />
+            
+            {/* Line 2 (Finished Rod) */}
+            <path d="M 0,120 L 50,85 L 150,70 L 250,90 L 350,75" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
+            
+            {/* Definition of Gradients */}
+            <defs>
+              <linearGradient id="billetGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#C5A059" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#C5A059" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="flex justify-between text-[8px] font-bold text-slate-400 font-mono px-1">
+            <span>AUG 20 (10.5 MT)</span>
+            <span>AUG 21 (11.1 MT)</span>
+            <span>AUG 22 (10.2 MT)</span>
+            <span>AUG 23 (11.0 MT)</span>
+          </div>
+        </div>
+
+        {/* Chart 2: Monthly Summary Comparison */}
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs space-y-4">
+          <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono border-b border-slate-100 pb-3">Monthly Consolidated Intake & Output (MT)</h3>
+          <div className="flex items-end justify-between h-44 pt-4 px-2">
+            
+            {/* Column 1: Scrap */}
+            <div className="flex flex-col items-center flex-1 space-y-2">
+              <span className="text-[10px] font-bold font-mono text-slate-900">{totalScrapMt}t</span>
+              <div className="w-8 bg-slate-300 rounded-t-lg transition-all hover:bg-slate-400" style={{ height: '78px' }} />
+              <span className="text-[8px] font-bold font-mono text-slate-400 uppercase">Scrap Intake</span>
+            </div>
+
+            {/* Column 2: Billets */}
+            <div className="flex flex-col items-center flex-1 space-y-2">
+              <span className="text-[10px] font-bold font-mono text-slate-900">{totalBilletMt}t</span>
+              <div className="w-8 bg-[#C5A059] rounded-t-lg transition-all hover:bg-[#B48F48]" style={{ height: '62px' }} />
+              <span className="text-[8px] font-bold font-mono text-slate-400 uppercase">Billets Cast</span>
+            </div>
+
+            {/* Column 3: Rods */}
+            <div className="flex flex-col items-center flex-1 space-y-2">
+              <span className="text-[10px] font-bold font-mono text-slate-900">{totalRebarMt}t</span>
+              <div className="w-8 bg-emerald-500 rounded-t-lg transition-all hover:bg-emerald-600" style={{ height: '58px' }} />
+              <span className="text-[8px] font-bold font-mono text-slate-400 uppercase">Rods Rolled</span>
+            </div>
+
+            {/* Column 4: Dispatch */}
+            <div className="flex flex-col items-center flex-1 space-y-2">
+              <span className="text-[10px] font-bold font-mono text-slate-900">{totalDispatchMt}t</span>
+              <div className="w-8 bg-indigo-500 rounded-t-lg transition-all hover:bg-indigo-650" style={{ height: '56px' }} />
+              <span className="text-[8px] font-bold font-mono text-slate-400 uppercase">Dispatch Out</span>
+            </div>
+
           </div>
         </div>
 
@@ -213,7 +296,7 @@ export default function OverviewDashboard() {
                 <div key={idx} className="flex justify-between items-center pb-2.5 border-b border-slate-50 last:border-0 last:pb-0">
                   <div>
                     <p className="font-bold text-slate-900">{s.supplier_name}</p>
-                    <p className="text-[9px] text-slate-440 font-mono">{s.scrap_category} • Truck: {s.truck_no}</p>
+                    <p className="text-[9px] text-slate-440 font-mono">Truck: {s.truck_no}</p>
                   </div>
                   <span className="font-mono font-bold text-[#B48F48] bg-[#FAF6EE] px-2 py-0.5 rounded border border-[#C5A059]/20">
                     {(s.scrap_rcv_kg / 1000).toFixed(1)} MT
