@@ -200,8 +200,8 @@ export default function InventoryPage() {
 
       {/* Edit Dialog Modal */}
       {isEditOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-lg shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-lg shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Adjust Yard Inventory Ledger</h3>
               <p className="text-[10px] text-slate-450  mt-1">Manual overrides for physical stock auditing. Saves balances immediately.</p>
@@ -272,7 +272,7 @@ export default function InventoryPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Save Adjustments
                 </button>

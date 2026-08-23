@@ -275,8 +275,8 @@ export default function QualityPage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-lg shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-lg shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Record Spectrometry & Physical Test</h3>
               <p className="text-[10px] text-slate-450  mt-1">Logs chemical carbon equivalence indices and structural approvals for safety compliance.</p>
@@ -291,22 +291,22 @@ export default function QualityPage() {
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Heat Number</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Heat Number</label>
                   <input 
                     type="text" 
                     placeholder="e.g. H-260823A (Must exist)"
                     value={form.heat_no}
                     onChange={(e) => setForm({ ...form, heat_no: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Test Date</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Test Date</label>
                   <input 
                     type="date" 
                     value={form.test_date}
                     onChange={(e) => setForm({ ...form, test_date: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
@@ -358,11 +358,11 @@ export default function QualityPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">180° Bend Test approval</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">180° Bend Test approval</label>
                 <select 
                   value={form.bend_test_status}
                   onChange={(e) => setForm({ ...form, bend_test_status: e.target.value as any })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 >
                   {statuses.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                 </select>
@@ -378,7 +378,7 @@ export default function QualityPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Save QA Report
                 </button>

@@ -277,8 +277,8 @@ export default function DowntimePage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Log Line Breakdown Incident</h3>
               <p className="text-[10px] text-slate-450  mt-1">Add details of mechanical, electrical failures or roll changes.</p>
@@ -293,43 +293,43 @@ export default function DowntimePage() {
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Date</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Date</label>
                   <input 
                     type="date" 
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Duration (min)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Duration (min)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 30"
                     value={form.duration_min}
                     onChange={(e) => setForm({ ...form, duration_min: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Line Section</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Line Section</label>
                   <select 
                     value={form.section}
                     onChange={(e) => setForm({ ...form, section: e.target.value as any })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   >
                     {sections.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Category</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Category</label>
                   <select 
                     value={form.breakdown_category}
                     onChange={(e) => setForm({ ...form, breakdown_category: e.target.value as any })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   >
                     {categories.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
                   </select>
@@ -337,18 +337,18 @@ export default function DowntimePage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Resolved By</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Resolved By</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Engr. Latif / Shift B crew"
                   value={form.resolved_by}
                   onChange={(e) => setForm({ ...form, resolved_by: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Root Cause & Maintenance Notes</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Root Cause & Maintenance Notes</label>
                 <textarea 
                   placeholder="Describe failure symptoms and repair operations..."
                   value={form.root_cause_notes}
@@ -367,7 +367,7 @@ export default function DowntimePage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Log Breakdown
                 </button>

@@ -286,8 +286,8 @@ export default function DispatchPage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs print:hidden">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 print:hidden">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Create Dispatch Challan</h3>
               <p className="text-[10px] text-slate-450  mt-1">Generates challans and decreases corresponding Rebar diameter yard inventory.</p>
@@ -302,91 +302,91 @@ export default function DispatchPage() {
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Dispatch Date</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Dispatch Date</label>
                   <input 
                     type="date" 
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Challan Number</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Challan Number</label>
                   <input 
                     type="text" 
                     placeholder="CH-77850"
                     value={form.challan_no}
                     onChange={(e) => setForm({ ...form, challan_no: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Customer Name</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Customer Name</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Bengal Construction Ltd"
                   value={form.customer_name}
                   onChange={(e) => setForm({ ...form, customer_name: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Rod Size Diameter</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Rod Size Diameter</label>
                   <select 
                     value={form.rod_size}
                     onChange={(e) => setForm({ ...form, rod_size: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   >
                     {rodSizes.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Price (৳/kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Price (৳/kg)</label>
                   <input 
                     type="number" 
                     placeholder="65"
                     value={form.rate_per_kg}
                     onChange={(e) => setForm({ ...form, rate_per_kg: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Dispatch Qty (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Dispatch Qty (kg)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 8000"
                     value={form.dispatch_qty_kg}
                     onChange={(e) => setForm({ ...form, dispatch_qty_kg: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Delivery Truck License</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Delivery Truck License</label>
                   <input 
                     type="text" 
                     placeholder="Dhaka Metro-1234"
                     value={form.truck_no}
                     onChange={(e) => setForm({ ...form, truck_no: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Contact / Shipping Info</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Contact / Shipping Info</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Engineer Zahir (+880-1700-112233)"
                   value={form.contact_info}
                   onChange={(e) => setForm({ ...form, contact_info: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
@@ -400,7 +400,7 @@ export default function DispatchPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Save Dispatch Challan
                 </button>
@@ -412,7 +412,7 @@ export default function DispatchPage() {
 
       {/* Printable Challan Modal overlay */}
       {activeChallan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60  backdrop-blur-xs print:relative print:bg-white print:inset-auto print:z-auto print:flex-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 print:relative print:bg-white print:inset-auto print:z-auto print:flex-none">
           <div className="bg-white text-black p-8 rounded-2xl w-full max-w-2xl shadow-2xl space-y-6 border border-slate-200 print:border-none print:shadow-none print:p-0">
             
             {/* Action Bar (Hidden on print) */}

@@ -235,8 +235,8 @@ export default function EnergyPage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Log Daily Energy Meter</h3>
               <p className="text-[10px] text-slate-450  mt-1">Saves meter telemetry and calculates production consumption ratios automatically.</p>
@@ -250,45 +250,45 @@ export default function EnergyPage() {
 
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Date</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Date</label>
                 <input 
                   type="date" 
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Substation Meter Reading (kW)</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Substation Meter Reading (kW)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 235000"
                   value={form.meter_reading_kw}
                   onChange={(e) => setForm({ ...form, meter_reading_kw: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Daily Power Consumed (kWh)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Daily Power Consumed (kWh)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 13500"
                     value={form.power_consumed_kwh}
                     onChange={(e) => setForm({ ...form, power_consumed_kwh: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Daily Gas Consumed (Nm³)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Daily Gas Consumed (Nm³)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 2100"
                     value={form.gas_consumed_nm3}
                     onChange={(e) => setForm({ ...form, gas_consumed_nm3: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
@@ -303,7 +303,7 @@ export default function EnergyPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Log Telemetry
                 </button>

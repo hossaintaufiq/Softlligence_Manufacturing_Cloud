@@ -280,8 +280,8 @@ export default function RollingPage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Log Rolling Mill Run</h3>
               <p className="text-[10px] text-slate-450  mt-1">Logs production outputs and triggers Billet Yard decrement and Rebar Yard increment.</p>
@@ -296,20 +296,20 @@ export default function RollingPage() {
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Date</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Date</label>
                   <input 
                     type="date" 
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Rod Size (dia)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Rod Size (dia)</label>
                   <select 
                     value={form.rod_size}
                     onChange={(e) => setForm({ ...form, rod_size: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   >
                     {rodSizes.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                   </select>
@@ -318,30 +318,30 @@ export default function RollingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Billet Input (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Billet Input (kg)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 10000"
                     value={form.billet_input_kg}
                     onChange={(e) => setForm({ ...form, billet_input_kg: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Rod Production (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Rod Production (kg)</label>
                   <input 
                     type="number" 
                     placeholder="e.g. 9600"
                     value={form.rod_production_kg}
                     onChange={(e) => setForm({ ...form, rod_production_kg: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3.5">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Burning (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Burning (kg)</label>
                   <input 
                     type="number" 
                     placeholder="200"
@@ -351,7 +351,7 @@ export default function RollingPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Tail-Cut (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Tail-Cut (kg)</label>
                   <input 
                     type="number" 
                     placeholder="150"
@@ -361,7 +361,7 @@ export default function RollingPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Miss-Roll (kg)</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Miss-Roll (kg)</label>
                   <input 
                     type="number" 
                     placeholder="50"
@@ -382,7 +382,7 @@ export default function RollingPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Save Rolling Run
                 </button>

@@ -256,8 +256,8 @@ export default function ShiftsPage() {
 
       {/* Add Dialog Modal */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40  backdrop-blur-xs">
-          <div className="bg-white  border border-slate-200  p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40">
+          <div className="bg-white/95 border border-slate-200/85 p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900  uppercase tracking-wider font-mono">Log Shift Handover</h3>
               <p className="text-[10px] text-slate-450  mt-1">Logs furnace control masters, roll setups, and operator attendance roster.</p>
@@ -272,20 +272,20 @@ export default function ShiftsPage() {
             <form onSubmit={handleFormSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Date</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Date</label>
                   <input 
                     type="date" 
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Shift Name</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Shift Name</label>
                   <select 
                     value={form.shift}
                     onChange={(e) => setForm({ ...form, shift: e.target.value as any })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   >
                     {shifts.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                   </select>
@@ -294,45 +294,45 @@ export default function ShiftsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Furnace Master</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Furnace Master</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Kabir Ahmed"
                     value={form.furnace_master}
                     onChange={(e) => setForm({ ...form, furnace_master: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Roll Turner</label>
+                  <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Roll Turner</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Rashedul Bari"
                     value={form.roll_turner}
                     onChange={(e) => setForm({ ...form, roll_turner: e.target.value })}
-                    className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                    className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Operators Present</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Operators Present</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 24"
                   value={form.operators_present}
                   onChange={(e) => setForm({ ...form, operators_present: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-wider font-extrabold text-slate-450 ">Shift Notes / Handover log</label>
+                <label className="text-[9px] uppercase tracking-widest font-extrabold text-slate-500 font-mono">Shift Notes / Handover log</label>
                 <textarea 
                   placeholder="Describe heat achievements, roll changeovers, mechanical issues logged..."
                   value={form.attendance_log}
                   onChange={(e) => setForm({ ...form, attendance_log: e.target.value })}
-                  className="w-full bg-slate-50  border border-slate-200  text-xs px-2.5 py-1.5 rounded-lg focus:outline-none h-18"
+                  className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 focus:border-[#B48F48] font-medium placeholder-slate-400 h-18"
                 />
               </div>
 
@@ -346,7 +346,7 @@ export default function ShiftsPage() {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Log Shift Handover
                 </button>
