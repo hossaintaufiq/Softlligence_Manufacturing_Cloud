@@ -79,6 +79,9 @@ export default function LedgerExpensesPage() {
   // Safe Math Evaluator
   const evaluateMath = (val: string): number | string => {
     let clean = val.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+      return clean;
+    }
     if (clean.startsWith('=')) {
       clean = clean.substring(1).trim();
     }
@@ -170,12 +173,16 @@ export default function LedgerExpensesPage() {
   };
 
   const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
+    if (editingCell) {
+      saveInlineEdit(editingCell.id, editingCell.field, editingCell.isCustom, editValue);
+    }
     setEditingCell({ id, field, isCustom });
     setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: string, isCustom = false) => {
-    const evaluated = evaluateMath(editValue);
+  const saveInlineEdit = (id: number, field: string, isCustom = false, forcedValue?: string) => {
+    const valToSave = forcedValue !== undefined ? forcedValue : editValue;
+    const evaluated = evaluateMath(valToSave);
     const updated = data.map(row => {
       if (row.id === id) {
         if (isCustom) {
@@ -385,7 +392,26 @@ export default function LedgerExpensesPage() {
                   <td className={cellPadding}>
                     <div className="relative w-full h-7 flex items-center">
                       {editingCell?.id === row.id && editingCell?.field === 'date' ? (
-                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        <input 
+                          type="date" 
+                          value={editValue} 
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditValue(val);
+                            if (val && val.length === 10) {
+                              saveInlineEdit(row.id, 'date', false, val);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              saveInlineEdit(row.id, 'date', false, editValue);
+                            } else if (e.key === 'Escape') {
+                              setEditingCell(null);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" 
+                          autoFocus 
+                        />
                       ) : (
                         <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
                       )}
@@ -449,16 +475,18 @@ export default function LedgerExpensesPage() {
 
                   {/* Payment Mode select */}
                   <td className={cellPadding}>
-                    <select
-                      value={row.payment_mode}
-                      onChange={(e) => {
-                        const updated = data.map(r => r.id === row.id ? { ...r, payment_mode: e.target.value as any } : r);
-                        saveToStorage(updated);
-                      }}
-                      className="bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-amber-650 font-bold"
-                    >
-                      {paymentModes.map((m, i) => <option key={i} value={m}>{m}</option>)}
-                    </select>
+                    <div className="relative w-full h-7 flex items-center">
+                      <select
+                        value={row.payment_mode}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, payment_mode: e.target.value as any } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-amber-650 font-bold truncate"
+                      >
+                        {paymentModes.map((m, i) => <option key={i} value={m}>{m}</option>)}
+                      </select>
+                    </div>
                   </td>
 
                   {/* Dynamic Columns */}

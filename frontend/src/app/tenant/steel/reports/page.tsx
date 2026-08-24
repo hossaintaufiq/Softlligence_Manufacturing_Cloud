@@ -190,7 +190,7 @@ export default function ReportsAndAnalyticsPage() {
       const totalBillet = billet.reduce((sum, b) => sum + (b.billet_output_kg || 0), 0) / 1000;
       const totalRod = rolling.reduce((sum, r) => sum + (r.rod_production_kg || 0), 0) / 1000;
       const totalDispatch = dispatch.reduce((sum, d) => sum + (d.dispatch_qty_kg || 0), 0) / 1000;
-      const totalExp = expenses.reduce((sum, e) => sum + (e.amount || e.expenses || 0), 0);
+      const totalExp = expenses.reduce((sum, e) => sum + (e.amount_bdt || e.amount || e.expenses || 0), 0);
 
       return [{
         month: 'August 2026',
@@ -274,7 +274,8 @@ export default function ReportsAndAnalyticsPage() {
     // 6. Billet Casting Heat Log
     if (activeReportType === 'billet-casting') {
       return billet.map(b => {
-        const matchingHeat = furnaceLogs.find(f => f.heat_no === b.heat_no) || { furnace_no: 'N/A', scrap_input_kg: b.billet_output_kg + b.scull_loss_kg, runtime_min: 0 };
+        const bHeat = (b.heat_no || '').toLowerCase().trim();
+        const matchingHeat = furnaceLogs.find(f => (f.heat_no || '').toLowerCase().trim() === bHeat) || { furnace_no: 'N/A', scrap_input_kg: b.billet_output_kg + b.scull_loss_kg, runtime_min: 0 };
         const scrapInputMt = (matchingHeat.scrap_input_kg || 0) / 1000;
         const billetOutputMt = (b.billet_output_kg || 0) / 1000;
         return {

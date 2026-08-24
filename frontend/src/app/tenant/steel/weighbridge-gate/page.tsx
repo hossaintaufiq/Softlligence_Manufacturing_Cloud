@@ -81,6 +81,9 @@ export default function WeighbridgeGatePage() {
   // Safe Math Evaluator
   const evaluateMath = (val: string): number | string => {
     let clean = val.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+      return clean;
+    }
     if (clean.startsWith('=')) {
       clean = clean.substring(1).trim();
     }
@@ -124,9 +127,10 @@ export default function WeighbridgeGatePage() {
   // Add Row Directly Inline
   const handleAddRow = () => {
     const nextNum = Math.floor(100 + Math.random() * 900);
+    const yymmdd = new Date().toISOString().slice(2, 10).replace(/-/g, '');
     const newRow: WeighbridgeRow = {
       id: Date.now(),
-      ticket_no: `WB-2608-${nextNum}`,
+      ticket_no: `WB-${yymmdd}-${nextNum}`,
       date_time: new Date().toISOString().slice(0, 10) + ' 10:00',
       vehicle_no: 'TR-' + nextNum,
       party_name: 'New Metal Vendor',
@@ -178,12 +182,16 @@ export default function WeighbridgeGatePage() {
   };
 
   const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
+    if (editingCell) {
+      saveInlineEdit(editingCell.id, editingCell.field, editingCell.isCustom, editValue);
+    }
     setEditingCell({ id, field, isCustom });
     setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: string, isCustom = false) => {
-    const evaluated = evaluateMath(editValue);
+  const saveInlineEdit = (id: number, field: string, isCustom = false, forcedValue?: string) => {
+    const valToSave = forcedValue !== undefined ? forcedValue : editValue;
+    const evaluated = evaluateMath(valToSave);
     const updated = data.map(row => {
       if (row.id === id) {
         if (isCustom) {
@@ -442,16 +450,18 @@ export default function WeighbridgeGatePage() {
 
                   {/* Material Type select */}
                   <td className={cellPadding}>
-                    <select
-                      value={row.material_type}
-                      onChange={(e) => {
-                        const updated = data.map(r => r.id === row.id ? { ...r, material_type: e.target.value as any } : r);
-                        saveToStorage(updated);
-                      }}
-                      className="bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans font-bold"
-                    >
-                      {materialTypes.map((m, i) => <option key={i} value={m}>{m}</option>)}
-                    </select>
+                    <div className="relative w-full h-7 flex items-center">
+                      <select
+                        value={row.material_type}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, material_type: e.target.value as any } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans font-bold truncate text-[#B48F48]"
+                      >
+                        {materialTypes.map((m, i) => <option key={i} value={m}>{m}</option>)}
+                      </select>
+                    </div>
                   </td>
 
                   {/* Gross Weight */}

@@ -90,6 +90,9 @@ export default function QualitySpectroPage() {
   // Safe Math Evaluator
   const evaluateMath = (val: string): number | string => {
     let clean = val.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+      return clean;
+    }
     if (clean.startsWith('=')) {
       clean = clean.substring(1).trim();
     }
@@ -194,12 +197,16 @@ export default function QualitySpectroPage() {
   };
 
   const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
+    if (editingCell) {
+      saveInlineEdit(editingCell.id, editingCell.field, editingCell.isCustom, editValue);
+    }
     setEditingCell({ id, field, isCustom });
     setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: string, isCustom = false) => {
-    const evaluated = evaluateMath(editValue);
+  const saveInlineEdit = (id: number, field: string, isCustom = false, forcedValue?: string) => {
+    const valToSave = forcedValue !== undefined ? forcedValue : editValue;
+    const evaluated = evaluateMath(valToSave);
     const updated = data.map(row => {
       if (row.id === id) {
         if (isCustom) {
@@ -438,30 +445,34 @@ export default function QualitySpectroPage() {
 
                   {/* Rod Size select */}
                   <td className={cellPadding}>
-                    <select
-                      value={row.rod_size}
-                      onChange={(e) => {
-                        const updated = data.map(r => r.id === row.id ? { ...r, rod_size: e.target.value } : r);
-                        saveToStorage(updated);
-                      }}
-                      className="bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-[#B48F48]"
-                    >
-                      {sizes.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                    </select>
+                    <div className="relative w-full h-7 flex items-center">
+                      <select
+                        value={row.rod_size}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, rod_size: e.target.value } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-[#B48F48] truncate font-bold"
+                      >
+                        {sizes.map((s, i) => <option key={i} value={s}>{s}</option>)}
+                      </select>
+                    </div>
                   </td>
 
                   {/* Grade select */}
                   <td className={cellPadding}>
-                    <select
-                      value={row.grade}
-                      onChange={(e) => {
-                        const updated = data.map(r => r.id === row.id ? { ...r, grade: e.target.value } : r);
-                        saveToStorage(updated);
-                      }}
-                      className="bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-indigo-650"
-                    >
-                      {grades.map((g, i) => <option key={i} value={g}>{g}</option>)}
-                    </select>
+                    <div className="relative w-full h-7 flex items-center">
+                      <select
+                        value={row.grade}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, grade: e.target.value } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-indigo-650 truncate font-bold"
+                      >
+                        {grades.map((g, i) => <option key={i} value={g}>{g}</option>)}
+                      </select>
+                    </div>
                   </td>
 
                   {/* Heat No */}
@@ -479,7 +490,26 @@ export default function QualitySpectroPage() {
                   <td className={cellPadding}>
                     <div className="relative w-full h-7 flex items-center">
                       {editingCell?.id === row.id && editingCell?.field === 'testing_date' ? (
-                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'testing_date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'testing_date')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        <input 
+                          type="date" 
+                          value={editValue} 
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditValue(val);
+                            if (val && val.length === 10) {
+                              saveInlineEdit(row.id, 'testing_date', false, val);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              saveInlineEdit(row.id, 'testing_date', false, editValue);
+                            } else if (e.key === 'Escape') {
+                              setEditingCell(null);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" 
+                          autoFocus 
+                        />
                       ) : (
                         <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'testing_date', row.testing_date)}>{row.testing_date}</span>
                       )}
