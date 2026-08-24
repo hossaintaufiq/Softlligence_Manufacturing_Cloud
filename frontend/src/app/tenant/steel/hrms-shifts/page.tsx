@@ -32,7 +32,7 @@ export default function HRMSShiftsPage() {
   const [search, setSearch] = useState('');
   const [shiftFilter, setShiftFilter] = useState('');
   const [sortField, setSortField] = useState<keyof ShiftRow>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Visible Columns Toggle
   const [visibleCols, setVisibleCols] = useState({

@@ -42,7 +42,7 @@ export default function QualitySpectroPage() {
   const [search, setSearch] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
   const [sortField, setSortField] = useState<keyof QualityRow>('sample_id');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Cell Editing
   const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);

@@ -31,7 +31,7 @@ export default function PowerUtilitiesPage() {
   // Sheet States
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof PowerRow>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Visible Columns Toggle
   const [visibleCols, setVisibleCols] = useState({

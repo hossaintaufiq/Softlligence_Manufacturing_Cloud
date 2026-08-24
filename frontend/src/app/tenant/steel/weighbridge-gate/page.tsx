@@ -35,7 +35,7 @@ export default function WeighbridgeGatePage() {
   const [search, setSearch] = useState('');
   const [materialFilter, setMaterialFilter] = useState('');
   const [sortField, setSortField] = useState<keyof WeighbridgeRow>('ticket_no');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Cell Editing
   const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);

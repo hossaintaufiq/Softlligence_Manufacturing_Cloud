@@ -33,7 +33,7 @@ export default function LedgerExpensesPage() {
   const [search, setSearch] = useState('');
   const [modeFilter, setModeFilter] = useState('');
   const [sortField, setSortField] = useState<keyof ExpenseRow>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Cell Editing
   const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);

@@ -36,7 +36,7 @@ export default function ScrapSourcingPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortField, setSortField] = useState<keyof ScrapRow>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Cell Editing
   const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);

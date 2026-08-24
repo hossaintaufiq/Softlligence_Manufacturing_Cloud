@@ -79,10 +79,10 @@ export default function ReportsAndAnalyticsPage() {
   const [endDate, setEndDate] = useState<string>('2026-08-31');
   const [viewMode, setViewMode] = useState<'table' | 'charts'>('table');
 
-  // Active generation states - only update when user clicks "Generate Report"
-  const [activeReportType, setActiveReportType] = useState<string>('daily-production');
-  const [activeStartDate, setActiveStartDate] = useState<string>('2026-08-01');
-  const [activeEndDate, setActiveEndDate] = useState<string>('2026-08-31');
+  // Active generation states - automatically derived from selection state
+  const activeReportType = selectedReportType;
+  const activeStartDate = startDate;
+  const activeEndDate = endDate;
 
   const cellPadding = isCompact ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2.5 text-xs';
 
@@ -126,12 +126,7 @@ export default function ReportsAndAnalyticsPage() {
     }
   };
 
-  // Generate Report Action
-  const handleGenerateReport = () => {
-    setActiveReportType(selectedReportType);
-    setActiveStartDate(startDate);
-    setActiveEndDate(endDate);
-  };
+
 
   // Date Filtering Helper
   const filterByDates = (itemDate: string) => {
@@ -391,7 +386,7 @@ export default function ReportsAndAnalyticsPage() {
     }
 
     return [];
-  }, [activeReportType, activeStartDate, activeEndDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData]);
+  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData]);
 
   // Export to Excel
   const handleExportExcel = () => {
@@ -513,7 +508,7 @@ export default function ReportsAndAnalyticsPage() {
       </div>
 
       {/* Filtering Control Bar (Hidden in print) */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs print:hidden">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs print:hidden">
         
         {/* Date Range Select */}
         <div className="space-y-1.5 col-span-1">
@@ -569,16 +564,6 @@ export default function ReportsAndAnalyticsPage() {
               SVG Chart
             </button>
           </div>
-        </div>
-
-        {/* Generate Report Button */}
-        <div className="flex items-end">
-          <button
-            onClick={handleGenerateReport}
-            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer text-center"
-          >
-            Generate Report
-          </button>
         </div>
 
       </div>

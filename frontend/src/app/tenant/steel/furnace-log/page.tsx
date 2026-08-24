@@ -39,7 +39,7 @@ export default function FurnaceLogPage() {
   const [search, setSearch] = useState('');
   const [furnaceFilter, setFurnaceFilter] = useState('');
   const [sortField, setSortField] = useState<keyof FurnaceRow>('heat_no');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   // Cell Editing
   const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);
