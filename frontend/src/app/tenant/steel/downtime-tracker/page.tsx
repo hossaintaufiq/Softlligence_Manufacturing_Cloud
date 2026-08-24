@@ -101,7 +101,7 @@ export default function DowntimeTrackerPage() {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDir('desc');
+      setSortDir('asc');
     }
   };
 
@@ -342,37 +342,37 @@ export default function DowntimeTrackerPage() {
       {/* Full-Screen Sheet Grid Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1100px]">
+          <table className="w-full text-left border-collapse min-w-[1100px] table-fixed">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-450 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
+                <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
                   Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
                 </th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-28 ${cellPadding}`}>
                   Ticket No <button onClick={() => handleFillDown('ticket_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-40 ${cellPadding}`}>
                   Equipment <button onClick={() => handleFillDown('equipment')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding}`}>Breakdown Category</th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-44 ${cellPadding}`}>Breakdown Category</th>
+                <th className={`w-52 ${cellPadding}`}>
                   Root Cause Notes <button onClick={() => handleFillDown('root_cause_notes')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding}`}>Shift Code</th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-24 ${cellPadding}`}>Shift Code</th>
+                <th className={`w-44 ${cellPadding}`}>
                   Action Taken <button onClick={() => handleFillDown('action_taken')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Melt Shop (Min) <button onClick={() => handleFillDown('billet_breakdown_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Rolling Mill (Min) <button onClick={() => handleFillDown('rolling_breakdown_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`${cellPadding} text-slate-600 bg-amber-50/30`}>
+                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
                     {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                 ))}
@@ -393,30 +393,36 @@ export default function DowntimeTrackerPage() {
                   </td>
 
                   {/* Date */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'date', row.date)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'date' ? (
-                      <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.date}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'date' ? (
+                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Ticket No */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'ticket_no', row.ticket_no)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'ticket_no' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'ticket_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'ticket_no')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900">{row.ticket_no}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'ticket_no' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'ticket_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'ticket_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 font-bold" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'ticket_no', row.ticket_no)}>{row.ticket_no}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Equipment */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'equipment', row.equipment)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'equipment' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'equipment')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'equipment')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.equipment}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'equipment' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'equipment')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'equipment')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'equipment', row.equipment)}>{row.equipment}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Category Select */}
@@ -434,12 +440,14 @@ export default function DowntimeTrackerPage() {
                   </td>
 
                   {/* Root Cause Notes */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'root_cause_notes', row.root_cause_notes)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'root_cause_notes' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'root_cause_notes')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'root_cause_notes')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate max-w-[200px] select-none" title={row.root_cause_notes}>{row.root_cause_notes || 'Add root cause'}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'root_cause_notes' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'root_cause_notes')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'root_cause_notes')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none" title={row.root_cause_notes} onClick={() => startEdit(row.id, 'root_cause_notes', row.root_cause_notes)}>{row.root_cause_notes || 'Add root cause'}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Shift Code select */}
@@ -457,40 +465,48 @@ export default function DowntimeTrackerPage() {
                   </td>
 
                   {/* Action Taken */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'action_taken', row.action_taken)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'action_taken' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'action_taken')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'action_taken')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate max-w-[200px] select-none" title={row.action_taken}>{row.action_taken || 'Add action taken'}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'action_taken' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'action_taken')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'action_taken')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none" title={row.action_taken} onClick={() => startEdit(row.id, 'action_taken', row.action_taken)}>{row.action_taken || 'Add action taken'}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Billet Breakdown Min */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'billet_breakdown_min', row.billet_breakdown_min)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'billet_breakdown_min' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_breakdown_min')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-rose-650">{row.billet_breakdown_min} min</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'billet_breakdown_min' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 text-rose-650" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-rose-650" onClick={() => startEdit(row.id, 'billet_breakdown_min', row.billet_breakdown_min)}>{row.billet_breakdown_min} min</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Rolling Breakdown Min */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'rolling_breakdown_min', row.rolling_breakdown_min)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'rolling_breakdown_min' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'rolling_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'rolling_breakdown_min')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-indigo-650">{row.rolling_breakdown_min} min</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'rolling_breakdown_min' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'rolling_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'rolling_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 text-indigo-650" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-indigo-650" onClick={() => startEdit(row.id, 'rolling_breakdown_min', row.rolling_breakdown_min)}>{row.rolling_breakdown_min} min</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Dynamic Columns */}
                   {customCols.map(col => (
-                    <td key={col} className={`${cellPadding} bg-amber-50/10`} onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>
-                      {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none">{row.customValues?.[col] || ''}</span>
-                      )}
+                    <td key={col} className={`${cellPadding} bg-amber-50/10`}>
+                      <div className="relative w-full h-7 flex items-center">
+                        {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
+                        )}
+                      </div>
                     </td>
                   ))}
 
@@ -502,7 +518,7 @@ export default function DowntimeTrackerPage() {
             <tfoot>
               <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200 text-xs">
                 <td className={cellPadding} colSpan={8}>Totals</td>
-                <td className={`${cellPadding} text-right font-bold text-rose-650`}>{totalBilletDown} mins</td>
+                <td className={`${cellPadding} text-right font-bold text-rose-655`}>{totalBilletDown} mins</td>
                 <td className={`${cellPadding} text-right font-bold text-indigo-650`}>{totalRollingDown} mins</td>
                 <td colSpan={customCols.length}></td>
               </tr>

@@ -105,7 +105,7 @@ export default function FurnaceLogPage() {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDir('desc');
+      setSortDir('asc');
     }
   };
 
@@ -363,46 +363,46 @@ export default function FurnaceLogPage() {
       {/* Full-Screen Sheet Grid Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1350px]">
+          <table className="w-full text-left border-collapse min-w-[1350px] table-fixed">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
+                <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
                   Heat No {sortField === 'heat_no' && (sortDir === 'asc' ? '▲' : '▼')}
                 </th>
-                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>Date</th>
-                <th className={`${cellPadding}`}>Furnace No</th>
-                <th className={`${cellPadding}`}>Shift ID</th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>Date</th>
+                <th className={`w-32 ${cellPadding}`}>Furnace No</th>
+                <th className={`w-24 ${cellPadding}`}>Shift ID</th>
+                <th className={`w-32 ${cellPadding} text-right`}>
                   Scrap Input (KG) <button onClick={() => handleFillDown('scrap_input_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Runtime (Min) <button onClick={() => handleFillDown('runtime_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Powder (KG) <button onClick={() => handleFillDown('used_patching_powder_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Forma (Qty) <button onClick={() => handleFillDown('used_patching_forma_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Temp (°C) <button onClick={() => handleFillDown('tapping_temp_c')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-32 ${cellPadding} text-right`}>
                   Steel Tapped (KG) <button onClick={() => handleFillDown('liquid_steel_tapped_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right text-rose-500`}>Scrap Loss (KG)</th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-32 ${cellPadding} text-right text-rose-500`}>Scrap Loss (KG)</th>
+                <th className={`w-32 ${cellPadding} text-right`}>
                   Power (kWh) <button onClick={() => handleFillDown('power_consumed_kwh')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>Yield%</th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-24 ${cellPadding} text-right`}>Yield%</th>
+                <th className={`w-36 ${cellPadding}`}>
                   Master Name <button onClick={() => handleFillDown('furnace_master')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`${cellPadding} text-slate-600 bg-amber-50/30`}>
+                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
                     {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                 ))}
@@ -429,21 +429,25 @@ export default function FurnaceLogPage() {
                     </td>
 
                     {/* Heat No */}
-                    <td className={cellPadding} onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="h-7 w-24 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900">{row.heat_no}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center">
+                        {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>{row.heat_no}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Date */}
-                    <td className={cellPadding} onClick={() => startEdit(row.id, 'date', row.date)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'date' ? (
-                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.date}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center">
+                        {editingCell?.id === row.id && editingCell?.field === 'date' ? (
+                          <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Furnace No Select */}
@@ -475,57 +479,69 @@ export default function FurnaceLogPage() {
                     </td>
 
                     {/* Scrap Input */}
-                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'scrap_input_kg', row.scrap_input_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'scrap_input_kg' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'scrap_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'scrap_input_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.scrap_input_kg.toLocaleString()}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'scrap_input_kg' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'scrap_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'scrap_input_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-semibold" onClick={() => startEdit(row.id, 'scrap_input_kg', row.scrap_input_kg)}>{row.scrap_input_kg.toLocaleString()}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Runtime (Min) */}
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'runtime_min', row.runtime_min)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'runtime_min' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'runtime_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'runtime_min')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.runtime_min} min</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'runtime_min' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'runtime_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'runtime_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'runtime_min', row.runtime_min)}>{row.runtime_min} min</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Powder KG */}
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_powder_kg', row.used_patching_powder_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_powder_kg' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_powder_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_powder_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.used_patching_powder_kg.toLocaleString()}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'used_patching_powder_kg' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_powder_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_powder_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'used_patching_powder_kg', row.used_patching_powder_kg)}>{row.used_patching_powder_kg.toLocaleString()}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Forma Qty */}
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_forma_kg', row.used_patching_forma_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_forma_kg' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_forma_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_forma_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.used_patching_forma_kg}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'used_patching_forma_kg' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_forma_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_forma_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'used_patching_forma_kg', row.used_patching_forma_kg)}>{row.used_patching_forma_kg}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Tapping Temp */}
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'tapping_temp_c', row.tapping_temp_c)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'tapping_temp_c' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tapping_temp_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tapping_temp_c')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.tapping_temp_c}°C</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'tapping_temp_c' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tapping_temp_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tapping_temp_c')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'tapping_temp_c', row.tapping_temp_c)}>{row.tapping_temp_c}°C</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Steel Tapped KG */}
-                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'liquid_steel_tapped_kg', row.liquid_steel_tapped_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'liquid_steel_tapped_kg' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.liquid_steel_tapped_kg.toLocaleString()}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'liquid_steel_tapped_kg' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-semibold" onClick={() => startEdit(row.id, 'liquid_steel_tapped_kg', row.liquid_steel_tapped_kg)}>{row.liquid_steel_tapped_kg.toLocaleString()}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Scrap Loss KG (Calculated) */}
@@ -534,12 +550,14 @@ export default function FurnaceLogPage() {
                     </td>
 
                     {/* Power kwh */}
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'power_consumed_kwh', row.power_consumed_kwh)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'power_consumed_kwh' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'power_consumed_kwh')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'power_consumed_kwh')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.power_consumed_kwh.toLocaleString()} kWh</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                        {editingCell?.id === row.id && editingCell?.field === 'power_consumed_kwh' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'power_consumed_kwh')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'power_consumed_kwh')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'power_consumed_kwh', row.power_consumed_kwh)}>{row.power_consumed_kwh.toLocaleString()} kWh</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Yield % */}
@@ -548,22 +566,26 @@ export default function FurnaceLogPage() {
                     </td>
 
                     {/* Master Name */}
-                    <td className={cellPadding} onClick={() => startEdit(row.id, 'furnace_master', row.furnace_master)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'furnace_master' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_master')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_master')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.furnace_master}</span>
-                      )}
+                    <td className={cellPadding}>
+                      <div className="relative w-full h-7 flex items-center">
+                        {editingCell?.id === row.id && editingCell?.field === 'furnace_master' ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_master')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_master')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'furnace_master', row.furnace_master)}>{row.furnace_master}</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Dynamic Columns */}
                     {customCols.map(col => (
-                      <td key={col} className={`${cellPadding} bg-amber-50/10`} onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>
-                        {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                        ) : (
-                          <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none">{row.customValues?.[col] || ''}</span>
-                        )}
+                      <td key={col} className={`${cellPadding} bg-amber-50/10`}>
+                        <div className="relative w-full h-7 flex items-center">
+                          {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
+                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          ) : (
+                            <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
+                          )}
+                        </div>
                       </td>
                     ))}
 

@@ -109,7 +109,7 @@ export default function QualitySpectroPage() {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDir('desc');
+      setSortDir('asc');
     }
   };
 
@@ -360,52 +360,52 @@ export default function QualitySpectroPage() {
       {/* Full-Screen Sheet Grid Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1350px]">
+          <table className="w-full text-left border-collapse min-w-[1350px] table-fixed">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('sample_id')}>
+                <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('sample_id')}>
                   Sample ID {sortField === 'sample_id' && (sortDir === 'asc' ? '▲' : '▼')}
                 </th>
-                <th className={`${cellPadding}`}>Rebar Size</th>
-                <th className={`${cellPadding}`}>Steel Grade</th>
-                <th className={`${cellPadding}`}>
+                <th className={`w-28 ${cellPadding}`}>Rebar Size</th>
+                <th className={`w-28 ${cellPadding}`}>Steel Grade</th>
+                <th className={`w-32 ${cellPadding}`}>
                   Heat No <button onClick={() => handleFillDown('heat_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding}`}>Date</th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-32 ${cellPadding}`}>Date</th>
+                <th className={`w-24 ${cellPadding} text-right`}>
                   %C <button onClick={() => handleFillDown('pct_c')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-24 ${cellPadding} text-right`}>
                   %Mn <button onClick={() => handleFillDown('pct_mn')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-24 ${cellPadding} text-right`}>
                   %Si <button onClick={() => handleFillDown('pct_si')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-24 ${cellPadding} text-right`}>
                   %S <button onClick={() => handleFillDown('pct_s')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-24 ${cellPadding} text-right`}>
                   %P <button onClick={() => handleFillDown('pct_p')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right text-rose-500`}>%CE</th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-24 ${cellPadding} text-right text-rose-500`}>%CE</th>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Yield Strength (N/mm²) <button onClick={() => handleFillDown('yield_strength_n_mm2')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Tensile (N/mm²) <button onClick={() => handleFillDown('tensile_strength_n_mm2')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-28 ${cellPadding} text-right`}>
                   Elongation % <button onClick={() => handleFillDown('elongation_pct')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
-                <th className={`${cellPadding}`}>Bend Test</th>
-                <th className={`${cellPadding} text-right`}>
+                <th className={`w-32 ${cellPadding}`}>Bend Test</th>
+                <th className={`w-32 ${cellPadding} text-right`}>
                   Nominal Mass (kg/m) <button onClick={() => handleFillDown('nominal_mass_g_m')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                 </th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`${cellPadding} text-slate-600 bg-amber-50/30`}>
+                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
                     {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                 ))}
@@ -426,12 +426,14 @@ export default function QualitySpectroPage() {
                   </td>
 
                   {/* Sample ID */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'sample_id', row.sample_id)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'sample_id' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'sample_id')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'sample_id')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900">{row.sample_id}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'sample_id' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'sample_id')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'sample_id')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 font-bold" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'sample_id', row.sample_id)}>{row.sample_id}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Rod Size select */}
@@ -463,98 +465,118 @@ export default function QualitySpectroPage() {
                   </td>
 
                   {/* Heat No */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="h-7 w-24 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.heat_no}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>{row.heat_no}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Testing Date */}
-                  <td className={cellPadding} onClick={() => startEdit(row.id, 'testing_date', row.testing_date)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'testing_date' ? (
-                      <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'testing_date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'testing_date')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.testing_date}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center">
+                      {editingCell?.id === row.id && editingCell?.field === 'testing_date' ? (
+                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'testing_date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'testing_date')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'testing_date', row.testing_date)}>{row.testing_date}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %C */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'pct_c', row.pct_c)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'pct_c' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_c')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.pct_c}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'pct_c' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_c')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'pct_c', row.pct_c)}>{row.pct_c}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %Mn */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'pct_mn', row.pct_mn)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'pct_mn' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_mn')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_mn')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.pct_mn}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'pct_mn' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_mn')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_mn')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'pct_mn', row.pct_mn)}>{row.pct_mn}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %Si */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'pct_si', row.pct_si)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'pct_si' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_si')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_si')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.pct_si}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'pct_si' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_si')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_si')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'pct_si', row.pct_si)}>{row.pct_si}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %S */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'pct_s', row.pct_s)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'pct_s' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_s')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_s')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.pct_s}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'pct_s' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_s')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_s')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'pct_s', row.pct_s)}>{row.pct_s}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %P */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'pct_p', row.pct_p)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'pct_p' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_p')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_p')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.pct_p}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'pct_p' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'pct_p')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'pct_p')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'pct_p', row.pct_p)}>{row.pct_p}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* %CE (Calculated) */}
-                  <td className={`${cellPadding} text-right font-bold text-rose-650 bg-rose-50/20`}>
+                  <td className={`${cellPadding} text-right font-bold text-rose-655 bg-rose-50/20`}>
                     <span className="h-7 flex items-center justify-end px-1 select-none">{row.pct_ce}%</span>
                   </td>
 
                   {/* Yield strength */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'yield_strength_n_mm2', row.yield_strength_n_mm2)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'yield_strength_n_mm2' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'yield_strength_n_mm2')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'yield_strength_n_mm2')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.yield_strength_n_mm2}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'yield_strength_n_mm2' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'yield_strength_n_mm2')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'yield_strength_n_mm2')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'yield_strength_n_mm2', row.yield_strength_n_mm2)}>{row.yield_strength_n_mm2}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Tensile strength */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'tensile_strength_n_mm2', row.tensile_strength_n_mm2)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'tensile_strength_n_mm2' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tensile_strength_n_mm2')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tensile_strength_n_mm2')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.tensile_strength_n_mm2}</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'tensile_strength_n_mm2' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tensile_strength_n_mm2')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tensile_strength_n_mm2')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'tensile_strength_n_mm2', row.tensile_strength_n_mm2)}>{row.tensile_strength_n_mm2}</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Elongation */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'elongation_pct', row.elongation_pct)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'elongation_pct' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'elongation_pct')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'elongation_pct')} className="h-7 w-16 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.elongation_pct}%</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'elongation_pct' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'elongation_pct')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'elongation_pct')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'elongation_pct', row.elongation_pct)}>{row.elongation_pct}%</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Bend Test Select */}
@@ -572,22 +594,26 @@ export default function QualitySpectroPage() {
                   </td>
 
                   {/* Nominal Mass */}
-                  <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'nominal_mass_g_m', row.nominal_mass_g_m)}>
-                    {editingCell?.id === row.id && editingCell?.field === 'nominal_mass_g_m' ? (
-                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'nominal_mass_g_m')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'nominal_mass_g_m')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                    ) : (
-                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.nominal_mass_g_m} kg/m</span>
-                    )}
+                  <td className={cellPadding}>
+                    <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      {editingCell?.id === row.id && editingCell?.field === 'nominal_mass_g_m' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'nominal_mass_g_m')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'nominal_mass_g_m')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                      ) : (
+                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'nominal_mass_g_m', row.nominal_mass_g_m)}>{row.nominal_mass_g_m} kg/m</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Dynamic Columns */}
                   {customCols.map(col => (
-                    <td key={col} className={`${cellPadding} bg-amber-50/10`} onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>
-                      {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
-                      ) : (
-                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none">{row.customValues?.[col] || ''}</span>
-                      )}
+                    <td key={col} className={`${cellPadding} bg-amber-50/10`}>
+                      <div className="relative w-full h-7 flex items-center">
+                        {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                        ) : (
+                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
+                        )}
+                      </div>
                     </td>
                   ))}
 
