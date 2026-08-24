@@ -148,20 +148,10 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-hidden relative">
+    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-auto relative min-w-[1280px]">
       
-      {/* Sidebar for desktop */}
-      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
-        {sidebarElement}
-      </aside>
-
-      {/* Backdrop for mobile */}
-      {isSidebarOpen && (
-        <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden" />
-      )}
-
-      {/* Sidebar for mobile */}
-      <aside className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 transform lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar - Always visible in desktop layout */}
+      <aside className="flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
         {sidebarElement}
       </aside>
 
@@ -171,11 +161,6 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
         {/* Header */}
         <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <button onClick={() => setIsSidebarOpen(true)} className="block lg:hidden p-1 text-slate-500 hover:bg-slate-100 rounded-lg focus:outline-none">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
             <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 font-mono">
               <span>SMC</span>
               <span>/</span>

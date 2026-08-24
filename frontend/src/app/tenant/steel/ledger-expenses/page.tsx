@@ -1,72 +1,97 @@
 'use client';
 import { exportToExcel } from '@/lib/excelExport';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 interface ExpenseRow {
   id: number;
   date: string;
-  voucher_no: string;
   expense_head: string;
-  amount: number;
+  particular_details: string;
+  voucher_no: string;
+  amount_bdt: number;
   paid_to: string;
-  payment_mode: 'Cash' | 'Bank Transfer' | 'Cheque' | 'Mobile Banking';
-  remarks: string;
-  approved_by: string;
+  payment_mode: 'Cash' | 'Bank Transfer' | 'Cheque' | 'Mobile Money';
+  customValues?: Record<string, string>;
 }
+
+const STORAGE_KEY = 'steel_erp_expenses';
+
+const initialExpenses: ExpenseRow[] = [
+  { id: 1, date: '2026-08-20', expense_head: 'Refractory Consumables', particular_details: 'Purchase of furnace patching powder', voucher_no: 'VOU-7712', amount_bdt: 45000, paid_to: 'Refractory Supplies Ltd', payment_mode: 'Bank Transfer' },
+  { id: 2, date: '2026-08-21', expense_head: 'Factory Consumables', particular_details: 'CCM dummy bar pins and guide rollers', voucher_no: 'VOU-7713', amount_bdt: 12500, paid_to: 'Local Spares Workshop', payment_mode: 'Cash' },
+  { id: 3, date: '2026-08-22', expense_head: 'Melting Auxiliary', particular_details: 'Furnace carbon electrodes delivery', voucher_no: 'VOU-7714', amount_bdt: 180000, paid_to: 'Carbon Electrodes Bangladesh', payment_mode: 'Cheque' }
+];
 
 export default function LedgerExpensesPage() {
   const { user } = useAuth();
   const isCompact = user?.preferences?.density === 'compact';
 
-  // Local state with seed data
-  const [data, setData] = useState<ExpenseRow[]>([
-    { id: 1, date: '2026-08-20', voucher_no: 'EXP-260820-01', expense_head: 'Furnace Refractory Consumables', amount: 154000, paid_to: 'Refractory Solutions Ltd', payment_mode: 'Bank Transfer', remarks: 'Patching powder shipment payment', approved_by: 'B. H. Chowdhury' },
-    { id: 2, date: '2026-08-21', voucher_no: 'EXP-260821-01', expense_head: 'Electricity Utilities Billing', amount: 170400, paid_to: 'DPDC Power Authority', payment_mode: 'Bank Transfer', remarks: 'Daily factory power charge clearance', approved_by: 'B. H. Chowdhury' },
-    { id: 3, date: '2026-08-22', voucher_no: 'EXP-260822-01', expense_head: 'Office Stationary & Spares', amount: 12500, paid_to: 'Karim Stationery Store', payment_mode: 'Cash', remarks: 'Control room paper and logbooks purchase', approved_by: 'Masum Billah' }
-  ]);
-
-  // Sheet States
+  const [data, setData] = useState<ExpenseRow[]>([]);
+  const [customCols, setCustomCols] = useState<string[]>([]);
   const [search, setSearch] = useState('');
-  const [headFilter, setHeadFilter] = useState('');
+  const [modeFilter, setModeFilter] = useState('');
   const [sortField, setSortField] = useState<keyof ExpenseRow>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  // Visible Columns Toggle
-  const [visibleCols, setVisibleCols] = useState({
-    date: true,
-    voucher_no: true,
-    expense_head: true,
-    amount: true,
-    paid_to: true,
-    payment_mode: true,
-    remarks: true,
-    approved_by: true
-  });
-  const [showColMenu, setShowColMenu] = useState(false);
-
-  // Inline Cell Editing State
-  const [editingCell, setEditingCell] = useState<{ id: number; field: keyof ExpenseRow } | null>(null);
+  // Cell Editing
+  const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);
   const [editValue, setEditValue] = useState('');
 
-  // Multi-Row Modal Entry
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalRows, setModalRows] = useState<any[]>([
-    { date: new Date().toISOString().split('T')[0], voucher_no: '', expense_head: 'Furnace Refractory Consumables', amount: '', paid_to: '', payment_mode: 'Cash', remarks: '', approved_by: user?.name || 'Manager' }
-  ]);
-  const [validationError, setValidationError] = useState('');
+  // Custom Modal Dialog box
+  const [dialog, setDialog] = useState<{
+    type: 'confirm' | 'prompt';
+    title: string;
+    message: string;
+    value?: string;
+    onConfirm: (val?: string) => void;
+  } | null>(null);
 
-  const cellPadding = isCompact ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2.5 text-xs';
-  const expenseHeads = [
-    'Furnace Refractory Consumables',
-    'Electricity Utilities Billing',
-    'Gas Utility Bill',
-    'Office Stationary & Spares',
-    'HR Salaries & Overtime',
-    'Unloading Labor Wages',
-    'Others'
-  ];
+  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-1.5 text-xs';
+  const paymentModes = ['Cash', 'Bank Transfer', 'Cheque', 'Mobile Money'];
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        setData(JSON.parse(stored));
+      } catch {
+        setData(initialExpenses);
+      }
+    } else {
+      setData(initialExpenses);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialExpenses));
+    }
+
+    const storedCols = localStorage.getItem(`${STORAGE_KEY}_cols`);
+    if (storedCols) {
+      try { setCustomCols(JSON.parse(storedCols)); } catch {}
+    }
+  }, []);
+
+  const saveToStorage = (updated: ExpenseRow[], cols = customCols) => {
+    setData(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(`${STORAGE_KEY}_cols`, JSON.stringify(cols));
+  };
+
+  // Safe Math Evaluator
+  const evaluateMath = (val: string): number | string => {
+    let clean = val.trim();
+    if (clean.startsWith('=')) {
+      clean = clean.substring(1).trim();
+    }
+    if (/^[0-9.+\-*/()\s]+$/.test(clean)) {
+      try {
+        const result = new Function(`return (${clean})`)();
+        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+          return parseFloat(result.toFixed(2));
+        }
+      } catch {}
+    }
+    return val;
+  };
 
   const handleSort = (field: keyof ExpenseRow) => {
     if (sortField === field) {
@@ -77,94 +102,122 @@ export default function LedgerExpensesPage() {
     }
   };
 
-  const startEdit = (id: number, field: keyof ExpenseRow, currentVal: any) => {
-    setEditingCell({ id, field });
+  // Add Dynamic Column via Custom Modal Dialog
+  const handleAddColumn = () => {
+    setDialog({
+      type: 'prompt',
+      title: 'Add Custom Column',
+      message: 'Enter the header name for your new dynamic column:',
+      value: '',
+      onConfirm: (val) => {
+        if (val && val.trim()) {
+          const updatedCols = [...customCols, val.trim()];
+          setCustomCols(updatedCols);
+          saveToStorage(data, updatedCols);
+        }
+      }
+    });
+  };
+
+  // Add Row Directly Inline
+  const handleAddRow = () => {
+    const nextNum = Math.floor(100 + Math.random() * 900);
+    const newRow: ExpenseRow = {
+      id: Date.now(),
+      date: new Date().toISOString().split('T')[0],
+      expense_head: 'Consumables',
+      particular_details: 'Local workshop spares purchase',
+      voucher_no: `VOU-${nextNum}`,
+      amount_bdt: 0,
+      paid_to: 'Local Supplier',
+      payment_mode: 'Cash',
+      customValues: {}
+    };
+    saveToStorage([...data, newRow]);
+  };
+
+  // Delete Row via Custom Modal Confirm Dialog
+  const handleDeleteRow = (id: number) => {
+    setDialog({
+      type: 'confirm',
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to permanently delete this expense ledger record?',
+      onConfirm: () => {
+        saveToStorage(data.filter(r => r.id !== id));
+      }
+    });
+  };
+
+  // Excel Copy Down (Fill Down)
+  const handleFillDown = (field: string, isCustom = false) => {
+    if (data.length <= 1) return;
+    const firstVal = isCustom 
+      ? (data[0].customValues?.[field] || '') 
+      : data[0][field as keyof ExpenseRow];
+
+    const updated = data.map((row, idx) => {
+      if (idx === 0) return row;
+      if (isCustom) {
+        return {
+          ...row,
+          customValues: { ...(row.customValues || {}), [field]: String(firstVal) }
+        };
+      } else {
+        return { ...row, [field]: firstVal };
+      }
+    });
+    saveToStorage(updated);
+  };
+
+  const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
+    setEditingCell({ id, field, isCustom });
     setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: keyof ExpenseRow) => {
-    const updatedRows = data.map(row => {
+  const saveInlineEdit = (id: number, field: string, isCustom = false) => {
+    const evaluated = evaluateMath(editValue);
+    const updated = data.map(row => {
       if (row.id === id) {
-        let val: any = editValue;
-        if (field === 'amount') {
-          val = parseFloat(editValue);
-          if (isNaN(val)) val = row[field];
+        if (isCustom) {
+          return {
+            ...row,
+            customValues: { ...(row.customValues || {}), [field]: String(evaluated) }
+          };
+        } else {
+          let val: any = evaluated;
+          if (field === 'amount_bdt') {
+            val = Number(evaluated);
+            if (isNaN(val)) val = row[field as keyof ExpenseRow] || 0;
+          }
+          return { ...row, [field]: val };
         }
-        return { ...row, [field]: val };
       }
       return row;
     });
 
-    setData(updatedRows);
+    saveToStorage(updated);
     setEditingCell(null);
   };
 
-  const handleExportCSV = () => {
-    const headers = ['Date', 'Voucher No', 'Expense Head', 'Amount (৳)', 'Paid To', 'Payment Mode', 'Remarks', 'Approved By'];
+  const handleExportExcel = () => {
+    const customHeaders = customCols;
+    const headers = ['Date', 'Expense Head (Consumable Group)', 'Particulars Details', 'Voucher Number', 'Amount (BDT)', 'Paid To Name', 'Payment Mode', ...customHeaders];
+    
     const rows = filteredData.map(r => [
-      r.date, r.voucher_no, r.expense_head, r.amount, r.paid_to, r.payment_mode, r.remarks, r.approved_by
+      r.date, r.expense_head, r.particular_details, r.voucher_no, r.amount_bdt, r.paid_to, r.payment_mode,
+      ...(customCols.map(col => r.customValues?.[col] || ''))
     ]);
-    exportToExcel(headers, rows, 'factory_ledger_expenses');
-  };
-
-  const addModalRow = () => {
-    const nextVoucher = `EXP-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(10 + Math.random() * 90)}`;
-    setModalRows([
-      ...modalRows,
-      { date: new Date().toISOString().split('T')[0], voucher_no: nextVoucher, expense_head: 'Furnace Refractory Consumables', amount: '', paid_to: '', payment_mode: 'Cash', remarks: '', approved_by: user?.name || 'Manager' }
-    ]);
-  };
-
-  const removeModalRow = (idx: number) => {
-    setModalRows(modalRows.filter((_, i) => i !== idx));
-  };
-
-  const handleModalRowChange = (idx: number, field: string, val: string) => {
-    const updated = [...modalRows];
-    updated[idx][field] = val;
-    setModalRows(updated);
-  };
-
-  const handleMultiRowSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError('');
-
-    for (let i = 0; i < modalRows.length; i++) {
-      const row = modalRows[i];
-      const amt = parseFloat(row.amount);
-
-      if (!row.date) return setValidationError(`Row ${i + 1}: Date is required.`);
-      if (!row.voucher_no.trim()) return setValidationError(`Row ${i + 1}: Voucher number is required.`);
-      if (!row.paid_to.trim()) return setValidationError(`Row ${i + 1}: Paid To recipient is required.`);
-      if (isNaN(amt) || amt <= 0) return setValidationError(`Row ${i + 1}: Expense amount must be positive.`);
-    }
-
-    const newEntries = modalRows.map((row, index) => {
-      return {
-        id: data.length + index + 1,
-        date: row.date,
-        voucher_no: row.voucher_no,
-        expense_head: row.expense_head,
-        amount: parseFloat(row.amount),
-        paid_to: row.paid_to,
-        payment_mode: row.payment_mode,
-        remarks: row.remarks || 'N/A',
-        approved_by: row.approved_by
-      };
-    });
-
-    setData([...data, ...newEntries]);
-    setIsModalOpen(false);
-    setModalRows([{ date: new Date().toISOString().split('T')[0], voucher_no: '', expense_head: 'Furnace Refractory Consumables', amount: '', paid_to: '', payment_mode: 'Cash', remarks: '', approved_by: user?.name || 'Manager' }]);
+    exportToExcel(headers, rows, 'ledger_expenses');
   };
 
   const filteredData = data
     .filter(row => {
-      const matchesSearch = row.paid_to.toLowerCase().includes(search.toLowerCase()) ||
+      const matchesSearch = row.expense_head.toLowerCase().includes(search.toLowerCase()) ||
+                            row.particular_details.toLowerCase().includes(search.toLowerCase()) ||
                             row.voucher_no.toLowerCase().includes(search.toLowerCase()) ||
-                            row.remarks.toLowerCase().includes(search.toLowerCase());
-      const matchesHead = headFilter ? row.expense_head === headFilter : true;
-      return matchesSearch && matchesHead;
+                            row.paid_to.toLowerCase().includes(search.toLowerCase());
+      const matchesMode = modeFilter ? row.payment_mode === modeFilter : true;
+      return matchesSearch && matchesMode;
     })
     .sort((a, b) => {
       let valA = a[sortField];
@@ -181,47 +234,83 @@ export default function LedgerExpensesPage() {
       }
     });
 
+  // Summaries
+  const totalAmount = filteredData.reduce((sum, r) => sum + r.amount_bdt, 0);
+
   return (
     <div className="space-y-6 animate-fade-in text-slate-800">
       
+      {/* Custom Modal Dialog Box */}
+      {dialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
+            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+              {dialog.title}
+            </h3>
+            <p className="text-xs text-slate-655 font-sans leading-relaxed">
+              {dialog.message}
+            </p>
+            {dialog.type === 'prompt' && (
+              <input 
+                type="text" 
+                value={dialog.value || ''}
+                onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                placeholder="Type dynamic column name..."
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    dialog.onConfirm(dialog.value);
+                    setDialog(null);
+                  }
+                }}
+              />
+            )}
+            <div className="flex justify-end space-x-2 pt-2">
+              <button 
+                onClick={() => setDialog(null)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  dialog.onConfirm(dialog.value);
+                  setDialog(null);
+                }}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Title Bar */}
       <div className="flex justify-between items-center border-b border-slate-200 pb-3">
         <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Ledger Expenditures & Expenses</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs factory cash vouchers, utility settlements, consumable purchases, and supervisor signature approvals.</p>
+          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Factory Ledger Expenses</h2>
+          <p className="text-[11px] text-slate-500 mt-0.5">Logs factory cash vouchers, consumable spares payments, utilities bills, auxiliary expenses, and transaction logs.</p>
         </div>
         <div className="flex space-x-2">
           <button 
-            onClick={() => setShowColMenu(!showColMenu)}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all relative cursor-pointer"
+            onClick={handleAddColumn}
+            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
           >
-            Column visibility ⚙️
-            {showColMenu && (
-              <div className="absolute right-0 top-10 z-30 bg-white border border-slate-250 p-3 rounded-xl shadow-xl w-48 text-left space-y-1.5 font-sans font-normal text-xs text-slate-700">
-                {Object.keys(visibleCols).map(col => (
-                  <label key={col} className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={visibleCols[col as keyof typeof visibleCols]} 
-                      onChange={() => setVisibleCols({ ...visibleCols, [col]: !visibleCols[col as keyof typeof visibleCols] })}
-                    />
-                    <span className="capitalize">{col.replace('_', ' ')}</span>
-                  </label>
-                ))}
-              </div>
-            )}
+            + Add Column
           </button>
           <button 
-            onClick={handleExportCSV}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
+            onClick={handleExportExcel}
+            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
           >
             Export Excel
           </button>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleAddRow}
             className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            + Multi-Row Log Entry
+            + Add Row
           </button>
         </div>
       </div>
@@ -230,176 +319,162 @@ export default function LedgerExpensesPage() {
       <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
         <input 
           type="text" 
-          placeholder="Search by Paid To, Remarks, or Voucher No..." 
+          placeholder="Filter by Head, Voucher, Details, or Payee..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
         />
         <select 
-          value={headFilter}
-          onChange={(e) => setHeadFilter(e.target.value)}
+          value={modeFilter}
+          onChange={(e) => setModeFilter(e.target.value)}
           className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
         >
-          <option value="">All Expense Heads</option>
-          {expenseHeads.map((h, idx) => <option key={idx} value={h}>{h}</option>)}
+          <option value="">All Payment Modes</option>
+          {paymentModes.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
         </select>
       </div>
 
       {/* Full-Screen Sheet Grid Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[950px]">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-450">
-                {visibleCols.date && (
-                  <th className={`sticky left-0 bg-slate-50 z-10 border-r border-slate-100 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
-                    Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
+              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+                <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
+                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
+                  Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className={`${cellPadding}`}>
+                  Expense Head (Consumable Group) <button onClick={() => handleFillDown('expense_head')} title="Fill Down First Row Value" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding}`}>
+                  Particulars Details <button onClick={() => handleFillDown('particular_details')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding}`}>Voucher No</th>
+                <th className={`${cellPadding} text-right`}>
+                  Amount (BDT) <button onClick={() => handleFillDown('amount_bdt')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding}`}>
+                  Paid To <button onClick={() => handleFillDown('paid_to')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding}`}>Payment Mode</th>
+
+                {/* Dynamic Columns */}
+                {customCols.map(col => (
+                  <th key={col} className={`${cellPadding} text-slate-600 bg-amber-50/30`}>
+                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
-                )}
-                {visibleCols.voucher_no && <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('voucher_no')}>Voucher No</th>}
-                {visibleCols.expense_head && <th className={`${cellPadding}`}>Expense Head</th>}
-                {visibleCols.amount && <th className={`${cellPadding} text-right`}>Amount (৳)</th>}
-                {visibleCols.paid_to && <th className={`${cellPadding}`}>Paid To</th>}
-                {visibleCols.payment_mode && <th className={`${cellPadding}`}>Payment Mode</th>}
-                {visibleCols.remarks && <th className={`${cellPadding}`}>Remarks</th>}
-                {visibleCols.approved_by && <th className={`${cellPadding}`}>Approved By</th>}
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono">
+            <tbody className="divide-y divide-slate-100 font-mono text-xs">
               {filteredData.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/40 transition-colors">
-                  {visibleCols.date && (
-                    <td className={`sticky left-0 bg-white group-hover:bg-slate-50 z-10 border-r border-slate-150 ${cellPadding} font-bold text-slate-900`}>
-                      {row.date}
-                    </td>
-                  )}
-                  {visibleCols.voucher_no && <td className={`${cellPadding} font-semibold`}>{row.voucher_no}</td>}
-                  {visibleCols.expense_head && (
-                    <td className={cellPadding}>
-                      <span className="px-2 py-0.5 text-[9px] font-bold border rounded-full bg-slate-50 text-slate-700 border-slate-250/20">
-                        {row.expense_head}
-                      </span>
-                    </td>
-                  )}
-                  {visibleCols.amount && (
-                    <td className={`${cellPadding} text-right font-bold text-rose-650`} onClick={() => startEdit(row.id, 'amount', row.amount)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'amount' ? (
-                        <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'amount')} className="bg-slate-50 border border-slate-200 text-right w-24 p-0.5 rounded text-xs focus:outline-none font-mono" autoFocus />
+                <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-9">
+                  
+                  {/* Delete Button */}
+                  <td className="text-center py-1">
+                    <button 
+                      onClick={() => handleDeleteRow(row.id)}
+                      className="text-red-500 hover:text-red-750 font-bold text-xs"
+                    >
+                      ✕
+                    </button>
+                  </td>
+
+                  {/* Date */}
+                  <td className={cellPadding} onClick={() => startEdit(row.id, 'date', row.date)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'date' ? (
+                      <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.date}</span>
+                    )}
+                  </td>
+
+                  {/* Expense Head Free text */}
+                  <td className={cellPadding} onClick={() => startEdit(row.id, 'expense_head', row.expense_head)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'expense_head' ? (
+                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'expense_head')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'expense_head')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block font-bold text-slate-800 select-none">{row.expense_head}</span>
+                    )}
+                  </td>
+
+                  {/* Particulars Details */}
+                  <td className={cellPadding} onClick={() => startEdit(row.id, 'particular_details', row.particular_details)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'particular_details' ? (
+                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'particular_details')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'particular_details')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate max-w-[200px] select-none" title={row.particular_details}>{row.particular_details}</span>
+                    )}
+                  </td>
+
+                  {/* Voucher No */}
+                  <td className={cellPadding} onClick={() => startEdit(row.id, 'voucher_no', row.voucher_no)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'voucher_no' ? (
+                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'voucher_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'voucher_no')} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.voucher_no}</span>
+                    )}
+                  </td>
+
+                  {/* Amount BDT */}
+                  <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'amount_bdt', row.amount_bdt)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'amount_bdt' ? (
+                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'amount_bdt')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'amount_bdt')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">৳{row.amount_bdt.toLocaleString()}</span>
+                    )}
+                  </td>
+
+                  {/* Paid To */}
+                  <td className={cellPadding} onClick={() => startEdit(row.id, 'paid_to', row.paid_to)}>
+                    {editingCell?.id === row.id && editingCell?.field === 'paid_to' ? (
+                      <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'paid_to')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'paid_to')} className="h-7 w-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                    ) : (
+                      <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.paid_to}</span>
+                    )}
+                  </td>
+
+                  {/* Payment Mode select */}
+                  <td className={cellPadding}>
+                    <select
+                      value={row.payment_mode}
+                      onChange={(e) => {
+                        const updated = data.map(r => r.id === row.id ? { ...r, payment_mode: e.target.value as any } : r);
+                        saveToStorage(updated);
+                      }}
+                      className="bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-amber-650 font-bold"
+                    >
+                      {paymentModes.map((m, i) => <option key={i} value={m}>{m}</option>)}
+                    </select>
+                  </td>
+
+                  {/* Dynamic Columns */}
+                  {customCols.map(col => (
+                    <td key={col} className={`${cellPadding} bg-amber-50/10`} onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>
+                      {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
                       ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">৳{row.amount.toLocaleString()}</span>
+                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none">{row.customValues?.[col] || ''}</span>
                       )}
                     </td>
-                  )}
-                  {visibleCols.paid_to && (
-                    <td className={cellPadding} onClick={() => startEdit(row.id, 'paid_to', row.paid_to)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'paid_to' ? (
-                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'paid_to')} className="bg-slate-50 border border-slate-200 p-0.5 rounded text-xs focus:outline-none" autoFocus />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.paid_to}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.payment_mode && <td className={cellPadding}>{row.payment_mode}</td>}
-                  {visibleCols.remarks && <td className={`${cellPadding} text-slate-500 max-w-[200px] truncate`}>{row.remarks}</td>}
-                  {visibleCols.approved_by && <td className={`${cellPadding} italic text-slate-500`}>{row.approved_by}</td>}
+                  ))}
+
                 </tr>
               ))}
             </tbody>
+
+            {/* Table Summary Footer */}
+            <tfoot>
+              <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200 text-xs">
+                <td className={cellPadding} colSpan={5}>Total Expenses</td>
+                <td className={`${cellPadding} text-right font-black text-rose-600`}>৳{totalAmount.toLocaleString()}</td>
+                <td colSpan={2 + customCols.length}></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
-
-      {/* Multi-Row Quick Modal Entry */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 p-4 md:p-6">
-          <div className="bg-white border border-slate-250 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[90vh]">
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono">Create Expense Vouchers</h3>
-              <p className="text-[10px] text-slate-450 mt-1">Simultaneously log multiple expense entries, cash claims, and operational bills.</p>
-            </div>
-
-            {validationError && (
-              <div className="bg-rose-50 text-rose-800 p-3 rounded-xl border border-rose-100 text-[10px] font-bold font-mono">
-                🚨 Error: {validationError}
-              </div>
-            )}
-
-            <form onSubmit={handleMultiRowSubmit} className="space-y-4 flex-1 overflow-y-auto min-h-0">
-              <div className="overflow-x-auto pb-3">
-                <div className="space-y-3 min-w-[950px] pr-2">
-                {modalRows.map((row, idx) => (
-                  <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Date</label>
-                      <input type="date" value={row.date} onChange={(e) => handleModalRowChange(idx, 'date', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Voucher No</label>
-                      <input type="text" placeholder="EXP-260823-XX" value={row.voucher_no} onChange={(e) => handleModalRowChange(idx, 'voucher_no', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none font-mono" />
-                    </div>
-                    <div className="w-48 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Expense Head</label>
-                      <select value={row.expense_head} onChange={(e) => handleModalRowChange(idx, 'expense_head', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none">
-                        {expenseHeads.map((h, i) => <option key={i} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="w-24 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Amount (৳)</label>
-                      <input type="number" placeholder="5000" value={row.amount} onChange={(e) => handleModalRowChange(idx, 'amount', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none font-mono" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Paid To</label>
-                      <input type="text" placeholder="Recipient Name" value={row.paid_to} onChange={(e) => handleModalRowChange(idx, 'paid_to', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Mode</label>
-                      <select value={row.payment_mode} onChange={(e) => handleModalRowChange(idx, 'payment_mode', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none">
-                        <option value="Cash">Cash</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Cheque">Cheque</option>
-                        <option value="Mobile Banking">Mobile Banking</option>
-                      </select>
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Remarks</label>
-                      <input type="text" placeholder="Remarks..." value={row.remarks} onChange={(e) => handleModalRowChange(idx, 'remarks', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
-                    </div>
-                    {modalRows.length > 1 && (
-                      <button type="button" onClick={() => removeModalRow(idx)} className="text-red-500 hover:text-red-750 pb-2.5 font-bold cursor-pointer">✕</button>
-                    )}
-                  </div>
-                ))}
-                </div>
-              </div>
-
-              <div className="pt-3 flex justify-between">
-                <button 
-                  type="button" 
-                  onClick={addModalRow}
-                  className="px-3.5 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer"
-                >
-                  + Add Row
-                </button>
-                <div className="flex space-x-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4.5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    Save Expense Vouchers
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );

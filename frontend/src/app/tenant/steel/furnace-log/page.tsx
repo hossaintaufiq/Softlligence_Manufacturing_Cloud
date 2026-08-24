@@ -1,7 +1,7 @@
 'use client';
 import { exportToExcel } from '@/lib/excelExport';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 interface FurnaceRow {
@@ -19,57 +19,86 @@ interface FurnaceRow {
   shift_id: string;
   furnace_master: string;
   yield_pct: number;
+  customValues?: Record<string, string>;
 }
+
+const STORAGE_KEY = 'steel_erp_furnace';
+
+const initialFurnaceLogs: FurnaceRow[] = [
+  { id: 1, date: '2026-08-20', furnace_no: 'Furnace 01', heat_no: 'H-260820A', scrap_input_kg: 12000, runtime_min: 52, used_patching_powder_kg: 150, used_patching_forma_kg: 1, tapping_temp_c: 1540, liquid_steel_tapped_kg: 10800, power_consumed_kwh: 7200, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 90.0 },
+  { id: 2, date: '2026-08-21', furnace_no: 'Furnace 01', heat_no: 'H-260821A', scrap_input_kg: 13000, runtime_min: 55, used_patching_powder_kg: 180, used_patching_forma_kg: 1, tapping_temp_c: 1560, liquid_steel_tapped_kg: 11440, power_consumed_kwh: 7800, shift_id: 'B', furnace_master: 'Zahirul Haque', yield_pct: 88.0 },
+  { id: 3, date: '2026-08-22', furnace_no: 'Furnace 02', heat_no: 'H-260822A', scrap_input_kg: 11500, runtime_min: 48, used_patching_powder_kg: 120, used_patching_forma_kg: 0, tapping_temp_c: 1550, liquid_steel_tapped_kg: 10465, power_consumed_kwh: 6900, shift_id: 'C', furnace_master: 'Ataur Rahman', yield_pct: 91.0 }
+];
 
 export default function FurnaceLogPage() {
   const { user } = useAuth();
   const isCompact = user?.preferences?.density === 'compact';
 
-  // Local state with seed data
-  const [data, setData] = useState<FurnaceRow[]>([
-    { id: 1, date: '2026-08-20', furnace_no: 'Furnace 01', heat_no: 'H-260820A', scrap_input_kg: 12000, runtime_min: 52, used_patching_powder_kg: 150, used_patching_forma_kg: 1, tapping_temp_c: 1540, liquid_steel_tapped_kg: 10800, power_consumed_kwh: 7200, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 90.0 },
-    { id: 2, date: '2026-08-21', furnace_no: 'Furnace 01', heat_no: 'H-260821A', scrap_input_kg: 13000, runtime_min: 55, used_patching_powder_kg: 180, used_patching_forma_kg: 1, tapping_temp_c: 1560, liquid_steel_tapped_kg: 11440, power_consumed_kwh: 7800, shift_id: 'B', furnace_master: 'Zahirul Haque', yield_pct: 88.0 },
-    { id: 3, date: '2026-08-22', furnace_no: 'Furnace 02', heat_no: 'H-260822A', scrap_input_kg: 11500, runtime_min: 48, used_patching_powder_kg: 120, used_patching_forma_kg: 0, tapping_temp_c: 1550, liquid_steel_tapped_kg: 10465, power_consumed_kwh: 6900, shift_id: 'C', furnace_master: 'Ataur Rahman', yield_pct: 91.0 }
-  ]);
-
-  // Sheet States
+  const [data, setData] = useState<FurnaceRow[]>([]);
+  const [customCols, setCustomCols] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [furnaceFilter, setFurnaceFilter] = useState('');
   const [sortField, setSortField] = useState<keyof FurnaceRow>('heat_no');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  // Visible Columns Toggle
-  const [visibleCols, setVisibleCols] = useState({
-    date: true,
-    furnace_no: true,
-    heat_no: true,
-    scrap_input_kg: true,
-    runtime_min: true,
-    used_patching_powder_kg: true,
-    used_patching_forma_kg: true,
-    tapping_temp_c: true,
-    liquid_steel_tapped_kg: true,
-    power_consumed_kwh: true,
-    shift_id: true,
-    furnace_master: true,
-    yield_pct: true
-  });
-  const [showColMenu, setShowColMenu] = useState(false);
-
-  // Inline Cell Editing State
-  const [editingCell, setEditingCell] = useState<{ id: number; field: keyof FurnaceRow } | null>(null);
+  // Cell Editing
+  const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);
   const [editValue, setEditValue] = useState('');
 
-  // Multi-Row Modal Entry
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalRows, setModalRows] = useState<any[]>([
-    { date: new Date().toISOString().split('T')[0], furnace_no: 'Furnace 01', heat_no: '', scrap_input_kg: '', runtime_min: '', used_patching_powder_kg: '', used_patching_forma_kg: '', tapping_temp_c: '1550', liquid_steel_tapped_kg: '', power_consumed_kwh: '', shift_id: 'A', furnace_master: '' }
-  ]);
-  const [validationError, setValidationError] = useState('');
+  // Custom Modal Dialog box
+  const [dialog, setDialog] = useState<{
+    type: 'confirm' | 'prompt';
+    title: string;
+    message: string;
+    value?: string;
+    onConfirm: (val?: string) => void;
+  } | null>(null);
 
-  const cellPadding = isCompact ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2.5 text-xs';
+  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-1.5 text-xs';
   const furnaces = ['Furnace 01', 'Furnace 02', 'Ladle Furnace LF-01'];
   const shifts = ['A', 'B', 'C', 'General'];
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        setData(JSON.parse(stored));
+      } catch {
+        setData(initialFurnaceLogs);
+      }
+    } else {
+      setData(initialFurnaceLogs);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialFurnaceLogs));
+    }
+
+    const storedCols = localStorage.getItem(`${STORAGE_KEY}_cols`);
+    if (storedCols) {
+      try { setCustomCols(JSON.parse(storedCols)); } catch {}
+    }
+  }, []);
+
+  const saveToStorage = (updated: FurnaceRow[], cols = customCols) => {
+    setData(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(`${STORAGE_KEY}_cols`, JSON.stringify(cols));
+  };
+
+  // Safe Math Evaluator
+  const evaluateMath = (val: string): number | string => {
+    let clean = val.trim();
+    if (clean.startsWith('=')) {
+      clean = clean.substring(1).trim();
+    }
+    if (/^[0-9.+\-*/()\s]+$/.test(clean)) {
+      try {
+        const result = new Function(`return (${clean})`)();
+        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+          return parseFloat(result.toFixed(2));
+        }
+      } catch {}
+    }
+    return val;
+  };
 
   const handleSort = (field: keyof FurnaceRow) => {
     if (sortField === field) {
@@ -80,106 +109,126 @@ export default function FurnaceLogPage() {
     }
   };
 
-  const startEdit = (id: number, field: keyof FurnaceRow, currentVal: any) => {
-    setEditingCell({ id, field });
+  // Add Dynamic Column via Custom Modal Dialog
+  const handleAddColumn = () => {
+    setDialog({
+      type: 'prompt',
+      title: 'Add Custom Column',
+      message: 'Enter the header name for your new dynamic column:',
+      value: '',
+      onConfirm: (val) => {
+        if (val && val.trim()) {
+          const updatedCols = [...customCols, val.trim()];
+          setCustomCols(updatedCols);
+          saveToStorage(data, updatedCols);
+        }
+      }
+    });
+  };
+
+  // Add Row Directly Inline
+  const handleAddRow = () => {
+    const nextLetter = String.fromCharCode(65 + (data.length % 26));
+    const newRow: FurnaceRow = {
+      id: Date.now(),
+      date: new Date().toISOString().split('T')[0],
+      furnace_no: 'Furnace 01',
+      heat_no: `H-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}${nextLetter}`,
+      scrap_input_kg: 0,
+      runtime_min: 0,
+      used_patching_powder_kg: 0,
+      used_patching_forma_kg: 0,
+      tapping_temp_c: 1550,
+      liquid_steel_tapped_kg: 0,
+      power_consumed_kwh: 0,
+      shift_id: 'A',
+      furnace_master: 'Supervisor',
+      yield_pct: 0,
+      customValues: {}
+    };
+    saveToStorage([...data, newRow]);
+  };
+
+  // Delete Row via Custom Modal Confirm Dialog
+  const handleDeleteRow = (id: number) => {
+    setDialog({
+      type: 'confirm',
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to permanently delete this furnace log record?',
+      onConfirm: () => {
+        saveToStorage(data.filter(r => r.id !== id));
+      }
+    });
+  };
+
+  // Excel Copy Down (Fill Down)
+  const handleFillDown = (field: string, isCustom = false) => {
+    if (data.length <= 1) return;
+    const firstVal = isCustom 
+      ? (data[0].customValues?.[field] || '') 
+      : data[0][field as keyof FurnaceRow];
+
+    const updated = data.map((row, idx) => {
+      if (idx === 0) return row;
+      if (isCustom) {
+        return {
+          ...row,
+          customValues: { ...(row.customValues || {}), [field]: String(firstVal) }
+        };
+      } else {
+        const baseRow = { ...row, [field]: firstVal };
+        const input = Number(baseRow.scrap_input_kg);
+        const tapped = Number(baseRow.liquid_steel_tapped_kg);
+        baseRow.yield_pct = input > 0 ? parseFloat(((tapped / input) * 100).toFixed(2)) : 0;
+        return baseRow;
+      }
+    });
+    saveToStorage(updated);
+  };
+
+  const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
+    setEditingCell({ id, field, isCustom });
     setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: keyof FurnaceRow) => {
-    const updatedRows = data.map(row => {
+  const saveInlineEdit = (id: number, field: string, isCustom = false) => {
+    const evaluated = evaluateMath(editValue);
+    const updated = data.map(row => {
       if (row.id === id) {
-        let val: any = editValue;
-        if (field === 'scrap_input_kg' || field === 'runtime_min' || field === 'used_patching_powder_kg' || field === 'used_patching_forma_kg' || field === 'tapping_temp_c' || field === 'liquid_steel_tapped_kg' || field === 'power_consumed_kwh') {
-          val = parseFloat(editValue);
-          if (isNaN(val)) val = row[field];
+        if (isCustom) {
+          return {
+            ...row,
+            customValues: { ...(row.customValues || {}), [field]: String(evaluated) }
+          };
+        } else {
+          let val: any = evaluated;
+          if (field === 'scrap_input_kg' || field === 'runtime_min' || field === 'used_patching_powder_kg' || field === 'used_patching_forma_kg' || field === 'tapping_temp_c' || field === 'liquid_steel_tapped_kg' || field === 'power_consumed_kwh') {
+            val = Number(evaluated);
+            if (isNaN(val)) val = row[field as keyof FurnaceRow] || 0;
+          }
+          const baseRow = { ...row, [field]: val };
+          const input = Number(baseRow.scrap_input_kg);
+          const tapped = Number(baseRow.liquid_steel_tapped_kg);
+          baseRow.yield_pct = input > 0 ? parseFloat(((tapped / input) * 100).toFixed(2)) : 0;
+          return baseRow;
         }
-        const tapped = field === 'liquid_steel_tapped_kg' ? val : row.liquid_steel_tapped_kg;
-        const input = field === 'scrap_input_kg' ? val : row.scrap_input_kg;
-        const yield_pct = parseFloat(((tapped / input) * 100).toFixed(2));
-
-        return { ...row, [field]: val, yield_pct };
       }
       return row;
     });
 
-    setData(updatedRows);
+    saveToStorage(updated);
     setEditingCell(null);
   };
 
-  const handleExportCSV = () => {
-    const headers = ['Date', 'Furnace No', 'Heat No', 'Scrap Input (kg)', 'Runtime (Min)', 'Patching Powder (kg)', 'Patching Forma (kg)', 'Tapping Temp (°C)', 'Steel Tapped (kg)', 'Power (kWh)', 'Shift', 'Furnace Master', 'Yield %'];
+  const handleExportExcel = () => {
+    const customHeaders = customCols;
+    const headers = ['Heat No', 'Date', 'Furnace No', 'Shift ID', 'Scrap Input (KG)', 'Runtime (Min)', 'Powder (KG)', 'Forma (Qty)', 'Temp (°C)', 'Steel Tapped (KG)', 'Scrap Loss (KG)', 'Power (kWh)', 'Yield (%)', ...customHeaders];
+    
     const rows = filteredData.map(r => [
-      r.date, r.furnace_no, r.heat_no, r.scrap_input_kg, r.runtime_min, r.used_patching_powder_kg, r.used_patching_forma_kg, r.tapping_temp_c, r.liquid_steel_tapped_kg, r.power_consumed_kwh, r.shift_id, r.furnace_master, r.yield_pct
+      r.heat_no, r.date, r.furnace_no, r.shift_id, r.scrap_input_kg, r.runtime_min, r.used_patching_powder_kg, r.used_patching_forma_kg, r.tapping_temp_c, r.liquid_steel_tapped_kg, Math.max(0, r.scrap_input_kg - r.liquid_steel_tapped_kg), r.power_consumed_kwh, r.yield_pct,
+      ...(customCols.map(col => r.customValues?.[col] || ''))
     ]);
     exportToExcel(headers, rows, 'furnace_melt_logs');
-  };
-
-  const addModalRow = () => {
-    const nextHeat = `H-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}${String.fromCharCode(65 + (modalRows.length % 26))}`;
-    setModalRows([
-      ...modalRows,
-      { date: new Date().toISOString().split('T')[0], furnace_no: 'Furnace 01', heat_no: nextHeat, scrap_input_kg: '', runtime_min: '', used_patching_powder_kg: '', used_patching_forma_kg: '', tapping_temp_c: '1550', liquid_steel_tapped_kg: '', power_consumed_kwh: '', shift_id: 'A', furnace_master: '' }
-    ]);
-  };
-
-  const removeModalRow = (idx: number) => {
-    setModalRows(modalRows.filter((_, i) => i !== idx));
-  };
-
-  const handleModalRowChange = (idx: number, field: string, val: string) => {
-    const updated = [...modalRows];
-    updated[idx][field] = val;
-    setModalRows(updated);
-  };
-
-  const handleMultiRowSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError('');
-
-    for (let i = 0; i < modalRows.length; i++) {
-      const row = modalRows[i];
-      const input = parseFloat(row.scrap_input_kg);
-      const runtime = parseFloat(row.runtime_min);
-      const tapped = parseFloat(row.liquid_steel_tapped_kg);
-      const kwh = parseFloat(row.power_consumed_kwh);
-      const powder = parseFloat(row.used_patching_powder_kg);
-      const forma = parseFloat(row.used_patching_forma_kg);
-
-      if (!row.date) return setValidationError(`Row ${i + 1}: Date is required.`);
-      if (!row.heat_no.trim()) return setValidationError(`Row ${i + 1}: Heat Number is required.`);
-      if (!row.furnace_master.trim()) return setValidationError(`Row ${i + 1}: Furnace Master Name is required.`);
-      if (isNaN(input) || input <= 0) return setValidationError(`Row ${i + 1}: Scrap input must be positive.`);
-      if (isNaN(runtime) || runtime <= 0) return setValidationError(`Row ${i + 1}: Runtime must be positive.`);
-      if (isNaN(tapped) || tapped <= 0) return setValidationError(`Row ${i + 1}: Liquid steel tapped must be positive.`);
-      if (isNaN(kwh) || kwh <= 0) return setValidationError(`Row ${i + 1}: Power consumed must be positive.`);
-      if (isNaN(powder) || powder < 0) return setValidationError(`Row ${i + 1}: Patching powder must be non-negative.`);
-      if (isNaN(forma) || forma < 0) return setValidationError(`Row ${i + 1}: Patching forma must be non-negative.`);
-    }
-
-    const newEntries = modalRows.map((row, index) => {
-      const input = parseFloat(row.scrap_input_kg);
-      const tapped = parseFloat(row.liquid_steel_tapped_kg);
-      return {
-        id: data.length + index + 1,
-        date: row.date,
-        furnace_no: row.furnace_no,
-        heat_no: row.heat_no,
-        scrap_input_kg: input,
-        runtime_min: parseFloat(row.runtime_min),
-        used_patching_powder_kg: parseFloat(row.used_patching_powder_kg),
-        used_patching_forma_kg: parseFloat(row.used_patching_forma_kg),
-        tapping_temp_c: parseFloat(row.tapping_temp_c),
-        liquid_steel_tapped_kg: tapped,
-        power_consumed_kwh: parseFloat(row.power_consumed_kwh),
-        shift_id: row.shift_id,
-        furnace_master: row.furnace_master,
-        yield_pct: parseFloat(((tapped / input) * 100).toFixed(2))
-      };
-    });
-
-    setData([...data, ...newEntries]);
-    setIsModalOpen(false);
-    setModalRows([{ date: new Date().toISOString().split('T')[0], furnace_no: 'Furnace 01', heat_no: '', scrap_input_kg: '', runtime_min: '', used_patching_powder_kg: '', used_patching_forma_kg: '', tapping_temp_c: '1550', liquid_steel_tapped_kg: '', power_consumed_kwh: '', shift_id: 'A', furnace_master: '' }]);
   };
 
   const filteredData = data
@@ -204,9 +253,63 @@ export default function FurnaceLogPage() {
       }
     });
 
+  // Summaries
+  const totalInput = filteredData.reduce((sum, r) => sum + r.scrap_input_kg, 0);
+  const totalTapped = filteredData.reduce((sum, r) => sum + r.liquid_steel_tapped_kg, 0);
+  const totalLoss = Math.max(0, totalInput - totalTapped);
+  const totalPower = filteredData.reduce((sum, r) => sum + r.power_consumed_kwh, 0);
+  const avgYield = totalInput > 0 ? parseFloat(((totalTapped / totalInput) * 100).toFixed(2)) : 0;
+
   return (
     <div className="space-y-6 animate-fade-in text-slate-800">
       
+      {/* Custom Modal Dialog Box */}
+      {dialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
+            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+              {dialog.title}
+            </h3>
+            <p className="text-xs text-slate-655 font-sans leading-relaxed">
+              {dialog.message}
+            </p>
+            {dialog.type === 'prompt' && (
+              <input 
+                type="text" 
+                value={dialog.value || ''}
+                onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                placeholder="Type dynamic column name..."
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    dialog.onConfirm(dialog.value);
+                    setDialog(null);
+                  }
+                }}
+              />
+            )}
+            <div className="flex justify-end space-x-2 pt-2">
+              <button 
+                onClick={() => setDialog(null)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  dialog.onConfirm(dialog.value);
+                  setDialog(null);
+                }}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Title Bar */}
       <div className="flex justify-between items-center border-b border-slate-200 pb-3">
         <div>
@@ -215,36 +318,22 @@ export default function FurnaceLogPage() {
         </div>
         <div className="flex space-x-2">
           <button 
-            onClick={() => setShowColMenu(!showColMenu)}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all relative cursor-pointer"
+            onClick={handleAddColumn}
+            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
           >
-            Column visibility ⚙️
-            {showColMenu && (
-              <div className="absolute right-0 top-10 z-30 bg-white border border-slate-250 p-3 rounded-xl shadow-xl w-48 text-left space-y-1.5 font-sans font-normal text-xs text-slate-700">
-                {Object.keys(visibleCols).map(col => (
-                  <label key={col} className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={visibleCols[col as keyof typeof visibleCols]} 
-                      onChange={() => setVisibleCols({ ...visibleCols, [col]: !visibleCols[col as keyof typeof visibleCols] })}
-                    />
-                    <span className="capitalize">{col.replace('_', ' ')}</span>
-                  </label>
-                ))}
-              </div>
-            )}
+            + Add Column
           </button>
           <button 
-            onClick={handleExportCSV}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
+            onClick={handleExportExcel}
+            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
           >
             Export Excel
           </button>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleAddRow}
             className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            + Multi-Row Log Entry
+            + Add Row
           </button>
         </div>
       </div>
@@ -260,7 +349,10 @@ export default function FurnaceLogPage() {
         />
         <select 
           value={furnaceFilter}
-          onChange={(e) => setFurnaceFilter(e.target.value)}
+          onChange={(e) => {
+            setSearch('');
+            setFurnaceFilter(e.target.value);
+          }}
           className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
         >
           <option value="">All Furnaces</option>
@@ -271,342 +363,231 @@ export default function FurnaceLogPage() {
       {/* Full-Screen Sheet Grid Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1250px]">
+          <table className="w-full text-left border-collapse min-w-[1350px]">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-450">
-                {visibleCols.heat_no && (
-                  <th className={`sticky left-0 bg-slate-50 z-10 border-r border-slate-100 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
-                    Heat No {sortField === 'heat_no' && (sortDir === 'asc' ? '▲' : '▼')}
+              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+                <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
+                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
+                  Heat No {sortField === 'heat_no' && (sortDir === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>Date</th>
+                <th className={`${cellPadding}`}>Furnace No</th>
+                <th className={`${cellPadding}`}>Shift ID</th>
+                <th className={`${cellPadding} text-right`}>
+                  Scrap Input (KG) <button onClick={() => handleFillDown('scrap_input_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>
+                  Runtime (Min) <button onClick={() => handleFillDown('runtime_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>
+                  Powder (KG) <button onClick={() => handleFillDown('used_patching_powder_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>
+                  Forma (Qty) <button onClick={() => handleFillDown('used_patching_forma_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>
+                  Temp (°C) <button onClick={() => handleFillDown('tapping_temp_c')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>
+                  Steel Tapped (KG) <button onClick={() => handleFillDown('liquid_steel_tapped_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right text-rose-500`}>Scrap Loss (KG)</th>
+                <th className={`${cellPadding} text-right`}>
+                  Power (kWh) <button onClick={() => handleFillDown('power_consumed_kwh')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+                <th className={`${cellPadding} text-right`}>Yield%</th>
+                <th className={`${cellPadding}`}>
+                  Master Name <button onClick={() => handleFillDown('furnace_master')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                </th>
+
+                {/* Dynamic Columns */}
+                {customCols.map(col => (
+                  <th key={col} className={`${cellPadding} text-slate-600 bg-amber-50/30`}>
+                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
-                )}
-                {visibleCols.date && <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>Date</th>}
-                {visibleCols.furnace_no && <th className={`${cellPadding}`}>Furnace No</th>}
-                {visibleCols.scrap_input_kg && <th className={`${cellPadding} text-right`}>Scrap Input (KG)</th>}
-                {visibleCols.runtime_min && <th className={`${cellPadding} text-right`}>Runtime (Min)</th>}
-                {visibleCols.used_patching_powder_kg && <th className={`${cellPadding} text-right`}>Powder (KG)</th>}
-                {visibleCols.used_patching_forma_kg && <th className={`${cellPadding} text-right`}>Forma (Qty)</th>}
-                {visibleCols.tapping_temp_c && <th className={`${cellPadding} text-right`}>Temp (°C)</th>}
-                {visibleCols.liquid_steel_tapped_kg && <th className={`${cellPadding} text-right`}>Steel Tapped (KG)</th>}
-                {visibleCols.power_consumed_kwh && <th className={`${cellPadding} text-right`}>Power (kWh)</th>}
-                {visibleCols.shift_id && <th className={`${cellPadding}`}>Shift ID</th>}
-                {visibleCols.furnace_master && <th className={`${cellPadding}`}>Furnace Master</th>}
-                {visibleCols.yield_pct && <th className={`${cellPadding} text-right`}>Yield%</th>}
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono">
+            <tbody className="divide-y divide-slate-100 font-mono text-xs">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="text-center py-8 text-xs text-slate-400 font-mono">No records found.</td>
+                  <td colSpan={15 + customCols.length} className="text-center py-8 text-slate-400">No records found.</td>
                 </tr>
-              ) : filteredData.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/40 transition-colors">
-                  {visibleCols.heat_no && (
-                    <td className={`sticky left-0 bg-white group-hover:bg-slate-50 z-10 border-r border-slate-150 ${cellPadding} font-bold text-slate-900`}>
-                      {row.heat_no}
-                    </td>
-                  )}
-                  {visibleCols.date && <td className={cellPadding}>{row.date}</td>}
-                  {visibleCols.furnace_no && <td className={cellPadding}>{row.furnace_no}</td>}
-                  {visibleCols.scrap_input_kg && (
-                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'scrap_input_kg', row.scrap_input_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'scrap_input_kg' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'scrap_input_kg')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.scrap_input_kg.toLocaleString()}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.runtime_min && (
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'runtime_min', row.runtime_min)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'runtime_min' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'runtime_min')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.runtime_min} mins</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.used_patching_powder_kg && (
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_powder_kg', row.used_patching_powder_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_powder_kg' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'used_patching_powder_kg')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.used_patching_powder_kg.toLocaleString()}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.used_patching_forma_kg && (
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_forma_kg', row.used_patching_forma_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_forma_kg' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'used_patching_forma_kg')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.used_patching_forma_kg}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.tapping_temp_c && (
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'tapping_temp_c', row.tapping_temp_c)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'tapping_temp_c' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'tapping_temp_c')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.tapping_temp_c}°C</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.liquid_steel_tapped_kg && (
-                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'liquid_steel_tapped_kg', row.liquid_steel_tapped_kg)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'liquid_steel_tapped_kg' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'liquid_steel_tapped_kg')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.liquid_steel_tapped_kg.toLocaleString()}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.power_consumed_kwh && (
-                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'power_consumed_kwh', row.power_consumed_kwh)}>
-                      {editingCell?.id === row.id && editingCell?.field === 'power_consumed_kwh' ? (
-                        <input 
-                          type="number" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'power_consumed_kwh')}
-                          className="bg-slate-50 border border-slate-200 text-right text-xs p-0.5 rounded w-20 focus:outline-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="cursor-pointer hover:bg-slate-100 px-1 py-0.5 rounded">{row.power_consumed_kwh.toLocaleString()}</span>
-                      )}
-                    </td>
-                  )}
-                  {visibleCols.shift_id && <td className={cellPadding}>{row.shift_id}</td>}
-                  {visibleCols.furnace_master && <td className={cellPadding}>{row.furnace_master}</td>}
-                  {visibleCols.yield_pct && (
-                    <td className={`${cellPadding} text-right font-black text-rose-600`}>
-                      {row.yield_pct}%
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Multi-Row Quick Modal Entry */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 p-4 md:p-6">
-          <div className="bg-white border border-slate-250 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[90vh]">
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono">Record Furnace Heats</h3>
-              <p className="text-[10px] text-slate-450 mt-1">Simultaneously log EAF/LF heats, charged weights, powder logs, tapping parameters, and team supervisors.</p>
-            </div>
-
-            {validationError && (
-              <div className="bg-rose-50 text-rose-800 p-3 rounded-xl border border-rose-100 text-[10px] font-bold font-mono">
-                🚨 Error: {validationError}
-              </div>
-            )}
-
-            <form onSubmit={handleMultiRowSubmit} className="space-y-4 flex-1 overflow-y-auto min-h-0">
-              <div className="overflow-x-auto pb-3">
-                <div className="space-y-3 min-w-[950px] pr-2">
-                {modalRows.map((row, idx) => (
-                  <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Date</label>
-                      <input 
-                        type="date" 
-                        value={row.date}
-                        onChange={(e) => handleModalRowChange(idx, 'date', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Furnace No</label>
-                      <select 
-                        value={row.furnace_no}
-                        onChange={(e) => handleModalRowChange(idx, 'furnace_no', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      >
-                        {furnaces.map((f, i) => <option key={i} value={f}>{f}</option>)}
-                      </select>
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Heat No</label>
-                      <input 
-                        type="text" 
-                        placeholder="H-2608A"
-                        value={row.heat_no}
-                        onChange={(e) => handleModalRowChange(idx, 'heat_no', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none font-mono"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Input (kg)</label>
-                      <input 
-                        type="number" 
-                        value={row.scrap_input_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'scrap_input_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Runtime (min)</label>
-                      <input 
-                        type="number" 
-                        value={row.runtime_min}
-                        onChange={(e) => handleModalRowChange(idx, 'runtime_min', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Powder (kg)</label>
-                      <input 
-                        type="number" 
-                        value={row.used_patching_powder_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'used_patching_powder_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Forma (qty)</label>
-                      <input 
-                        type="number" 
-                        value={row.used_patching_forma_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'used_patching_forma_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Tapping Temp</label>
-                      <input 
-                        type="number" 
-                        value={row.tapping_temp_c}
-                        onChange={(e) => handleModalRowChange(idx, 'tapping_temp_c', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-24 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Tapped (kg)</label>
-                      <input 
-                        type="number" 
-                        value={row.liquid_steel_tapped_kg}
-                        onChange={(e) => handleModalRowChange(idx, 'liquid_steel_tapped_kg', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Power (kWh)</label>
-                      <input 
-                        type="number" 
-                        value={row.power_consumed_kwh}
-                        onChange={(e) => handleModalRowChange(idx, 'power_consumed_kwh', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Shift</label>
-                      <select 
-                        value={row.shift_id}
-                        onChange={(e) => handleModalRowChange(idx, 'shift_id', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
-                      >
-                        {shifts.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div className="w-28 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Master Name</label>
-                      <input 
-                        type="text" 
-                        placeholder="Kabir Ahmed"
-                        value={row.furnace_master}
-                        onChange={(e) => handleModalRowChange(idx, 'furnace_master', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none font-mono"
-                      />
-                    </div>
-                    {modalRows.length > 1 && (
+              ) : filteredData.map((row) => {
+                const scrapLoss = Math.max(0, row.scrap_input_kg - row.liquid_steel_tapped_kg);
+                return (
+                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-9">
+                    
+                    {/* Delete Action */}
+                    <td className="text-center py-1">
                       <button 
-                        type="button" 
-                        onClick={() => removeModalRow(idx)}
-                        className="text-red-500 hover:text-red-750 pb-2.5 font-bold cursor-pointer"
+                        onClick={() => handleDeleteRow(row.id)}
+                        className="text-red-500 hover:text-red-750 font-bold text-xs"
                       >
                         ✕
                       </button>
-                    )}
-                  </div>
-                ))}
-                </div>
-              </div>
+                    </td>
 
-              <div className="pt-3 flex justify-between">
-                <button 
-                  type="button" 
-                  onClick={addModalRow}
-                  className="px-3.5 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer"
-                >
-                  + Add Row
-                </button>
-                <div className="flex space-x-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4.5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    Save Heats Logs
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+                    {/* Heat No */}
+                    <td className={cellPadding} onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="h-7 w-24 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900">{row.heat_no}</span>
+                      )}
+                    </td>
+
+                    {/* Date */}
+                    <td className={cellPadding} onClick={() => startEdit(row.id, 'date', row.date)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'date' ? (
+                        <input type="date" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'date')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.date}</span>
+                      )}
+                    </td>
+
+                    {/* Furnace No Select */}
+                    <td className={cellPadding}>
+                      <select 
+                        value={row.furnace_no}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, furnace_no: e.target.value } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="bg-transparent border-0 focus:outline-none font-sans py-0.5 font-bold"
+                      >
+                        {furnaces.map((f, i) => <option key={i} value={f}>{f}</option>)}
+                      </select>
+                    </td>
+
+                    {/* Shift ID Select */}
+                    <td className={cellPadding}>
+                      <select 
+                        value={row.shift_id}
+                        onChange={(e) => {
+                          const updated = data.map(r => r.id === row.id ? { ...r, shift_id: e.target.value } : r);
+                          saveToStorage(updated);
+                        }}
+                        className="bg-transparent border-0 focus:outline-none font-sans py-0.5 font-bold text-indigo-650"
+                      >
+                        {shifts.map((s, i) => <option key={i} value={s}>{s}</option>)}
+                      </select>
+                    </td>
+
+                    {/* Scrap Input */}
+                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'scrap_input_kg', row.scrap_input_kg)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'scrap_input_kg' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'scrap_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'scrap_input_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.scrap_input_kg.toLocaleString()}</span>
+                      )}
+                    </td>
+
+                    {/* Runtime (Min) */}
+                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'runtime_min', row.runtime_min)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'runtime_min' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'runtime_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'runtime_min')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.runtime_min} min</span>
+                      )}
+                    </td>
+
+                    {/* Powder KG */}
+                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_powder_kg', row.used_patching_powder_kg)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_powder_kg' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_powder_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_powder_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.used_patching_powder_kg.toLocaleString()}</span>
+                      )}
+                    </td>
+
+                    {/* Forma Qty */}
+                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'used_patching_forma_kg', row.used_patching_forma_kg)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'used_patching_forma_kg' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_forma_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_forma_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.used_patching_forma_kg}</span>
+                      )}
+                    </td>
+
+                    {/* Tapping Temp */}
+                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'tapping_temp_c', row.tapping_temp_c)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'tapping_temp_c' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tapping_temp_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tapping_temp_c')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.tapping_temp_c}°C</span>
+                      )}
+                    </td>
+
+                    {/* Steel Tapped KG */}
+                    <td className={`${cellPadding} text-right font-semibold`} onClick={() => startEdit(row.id, 'liquid_steel_tapped_kg', row.liquid_steel_tapped_kg)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'liquid_steel_tapped_kg' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.liquid_steel_tapped_kg.toLocaleString()}</span>
+                      )}
+                    </td>
+
+                    {/* Scrap Loss KG (Calculated) */}
+                    <td className={`${cellPadding} text-right text-rose-650 font-bold bg-rose-50/20`}>
+                      <span className="h-7 flex items-center justify-end px-1 select-none">{scrapLoss.toLocaleString()}</span>
+                    </td>
+
+                    {/* Power kwh */}
+                    <td className={`${cellPadding} text-right`} onClick={() => startEdit(row.id, 'power_consumed_kwh', row.power_consumed_kwh)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'power_consumed_kwh' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'power_consumed_kwh')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'power_consumed_kwh')} className="h-7 w-20 text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.power_consumed_kwh.toLocaleString()} kWh</span>
+                      )}
+                    </td>
+
+                    {/* Yield % */}
+                    <td className={`${cellPadding} text-right font-black text-rose-600`}>
+                      <span className="h-7 flex items-center justify-end px-1 select-none">{row.yield_pct}%</span>
+                    </td>
+
+                    {/* Master Name */}
+                    <td className={cellPadding} onClick={() => startEdit(row.id, 'furnace_master', row.furnace_master)}>
+                      {editingCell?.id === row.id && editingCell?.field === 'furnace_master' ? (
+                        <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_master')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_master')} className="h-7 w-28 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                      ) : (
+                        <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none">{row.furnace_master}</span>
+                      )}
+                    </td>
+
+                    {/* Dynamic Columns */}
+                    {customCols.map(col => (
+                      <td key={col} className={`${cellPadding} bg-amber-50/10`} onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>
+                        {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="h-7 w-20 bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans" autoFocus />
+                        ) : (
+                          <span className="h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none">{row.customValues?.[col] || ''}</span>
+                        )}
+                      </td>
+                    ))}
+
+                  </tr>
+                );
+              })}
+            </tbody>
+
+            {/* Table Summary Footer */}
+            <tfoot>
+              <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200 text-xs">
+                <td className={cellPadding} colSpan={5}>Totals & Averages</td>
+                <td className={`${cellPadding} text-right font-bold`}>{totalInput.toLocaleString()} kg</td>
+                <td colSpan={4}></td>
+                <td className={`${cellPadding} text-right font-bold text-emerald-600`}>{totalTapped.toLocaleString()} kg</td>
+                <td className={`${cellPadding} text-right font-bold text-rose-655 bg-rose-50/20`}>{totalLoss.toLocaleString()} kg</td>
+                <td className={`${cellPadding} text-right font-bold`}>{totalPower.toLocaleString()} kWh</td>
+                <td className={`${cellPadding} text-right font-black text-[#B48F48]`}>{avgYield}%</td>
+                <td colSpan={1 + customCols.length}></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-      )}
+      </div>
 
     </div>
   );

@@ -13,6 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  width: "1280",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Softlligence Manufacturing Cloud",
   description: "Enterprise multi-tenant manufacturing cloud MIS/ERP.",
