@@ -1,8 +1,7 @@
 'use client';
-import { exportToExcel } from '@/lib/excelExport';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import React, { useState, useEffect, useMemo } from 'react';
+import { exportToExcel } from '@/lib/excelExport';
 
 interface FurnaceRow {
   id: number;
@@ -11,52 +10,56 @@ interface FurnaceRow {
   heat_no: string;
   scrap_input_kg: number;
   runtime_min: number;
-  used_patching_powder_kg: number;
-  used_patching_forma_kg: number;
+  used_patching_powder_kg?: number;
+  used_patching_forma_kg?: number;
   tapping_temp_c: number;
   liquid_steel_tapped_kg: number;
   power_consumed_kwh: number;
   shift_id: string;
   furnace_master: string;
   yield_pct: number;
-  customValues?: Record<string, string>;
+  fe_si_alloy_kg?: number;
+  fe_mn_alloy_kg?: number;
 }
 
 const STORAGE_KEY = 'steel_erp_furnace';
 
 const initialFurnaceLogs: FurnaceRow[] = [
-  { id: 1, date: '2026-08-20', furnace_no: 'Furnace 01', heat_no: 'H-260820A', scrap_input_kg: 12000, runtime_min: 52, used_patching_powder_kg: 150, used_patching_forma_kg: 1, tapping_temp_c: 1540, liquid_steel_tapped_kg: 10800, power_consumed_kwh: 7200, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 90.0 },
-  { id: 2, date: '2026-08-21', furnace_no: 'Furnace 01', heat_no: 'H-260821A', scrap_input_kg: 13000, runtime_min: 55, used_patching_powder_kg: 180, used_patching_forma_kg: 1, tapping_temp_c: 1560, liquid_steel_tapped_kg: 11440, power_consumed_kwh: 7800, shift_id: 'B', furnace_master: 'Zahirul Haque', yield_pct: 88.0 },
-  { id: 3, date: '2026-08-22', furnace_no: 'Furnace 02', heat_no: 'H-260822A', scrap_input_kg: 11500, runtime_min: 48, used_patching_powder_kg: 120, used_patching_forma_kg: 0, tapping_temp_c: 1550, liquid_steel_tapped_kg: 10465, power_consumed_kwh: 6900, shift_id: 'C', furnace_master: 'Ataur Rahman', yield_pct: 91.0 }
+  { id: 1, date: '2026-08-20', furnace_no: 'Furnace 01', heat_no: 'H-260820A', scrap_input_kg: 21500, runtime_min: 140, used_patching_powder_kg: 150, used_patching_forma_kg: 1, tapping_temp_c: 1610, liquid_steel_tapped_kg: 19900, power_consumed_kwh: 11400, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 92.56, fe_si_alloy_kg: 45, fe_mn_alloy_kg: 60 },
+  { id: 2, date: '2026-08-21', furnace_no: 'Furnace 02', heat_no: 'H-260821A', scrap_input_kg: 20000, runtime_min: 135, used_patching_powder_kg: 120, used_patching_forma_kg: 0, tapping_temp_c: 1618, liquid_steel_tapped_kg: 18560, power_consumed_kwh: 10600, shift_id: 'B', furnace_master: 'Zahirul Haque', yield_pct: 92.80, fe_si_alloy_kg: 40, fe_mn_alloy_kg: 55 },
+  { id: 3, date: '2026-08-22', furnace_no: 'Furnace 01', heat_no: 'H-260822A', scrap_input_kg: 16000, runtime_min: 115, used_patching_powder_kg: 100, used_patching_forma_kg: 0, tapping_temp_c: 1595, liquid_steel_tapped_kg: 14800, power_consumed_kwh: 8500, shift_id: 'C', furnace_master: 'Ataur Rahman', yield_pct: 92.50, fe_si_alloy_kg: 35, fe_mn_alloy_kg: 45 },
+  { id: 4, date: '2026-08-23', furnace_no: 'Furnace 02', heat_no: 'H-260823A', scrap_input_kg: 25500, runtime_min: 150, used_patching_powder_kg: 180, used_patching_forma_kg: 1, tapping_temp_c: 1620, liquid_steel_tapped_kg: 23660, power_consumed_kwh: 13500, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 92.78, fe_si_alloy_kg: 50, fe_mn_alloy_kg: 70 },
+  { id: 5, date: '2026-08-24', furnace_no: 'Furnace 01', heat_no: 'H-260824A', scrap_input_kg: 28000, runtime_min: 160, used_patching_powder_kg: 190, used_patching_forma_kg: 1, tapping_temp_c: 1630, liquid_steel_tapped_kg: 26040, power_consumed_kwh: 14800, shift_id: 'A', furnace_master: 'Kabir Ahmed', yield_pct: 93.00, fe_si_alloy_kg: 55, fe_mn_alloy_kg: 80 }
 ];
 
 export default function FurnaceLogPage() {
-  const { user } = useAuth();
-  const isCompact = user?.preferences?.density === 'compact';
-
   const [data, setData] = useState<FurnaceRow[]>([]);
-  const [customCols, setCustomCols] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [furnaceFilter, setFurnaceFilter] = useState('');
-  const [sortField, setSortField] = useState<keyof FurnaceRow>('heat_no');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [shiftFilter, setShiftFilter] = useState('');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Cell Editing
-  const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);
-  const [editValue, setEditValue] = useState('');
+  // Form State
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    furnace_no: 'Furnace 01',
+    heat_no: '',
+    scrap_input_kg: '',
+    runtime_min: '130',
+    used_patching_powder_kg: '120',
+    used_patching_forma_kg: '0',
+    tapping_temp_c: '1615',
+    liquid_steel_tapped_kg: '',
+    power_consumed_kwh: '',
+    shift_id: 'A',
+    furnace_master: 'Kabir Ahmed',
+    fe_si_alloy_kg: '45',
+    fe_mn_alloy_kg: '65'
+  });
 
-  // Custom Modal Dialog box
-  const [dialog, setDialog] = useState<{
-    type: 'confirm' | 'prompt';
-    title: string;
-    message: string;
-    value?: string;
-    onConfirm: (val?: string) => void;
-  } | null>(null);
-
-  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-1.5 text-xs';
-  const furnaces = ['Furnace 01', 'Furnace 02', 'Ladle Furnace LF-01'];
-  const shifts = ['A', 'B', 'C', 'General'];
+  const furnaceMasters = ['Kabir Ahmed', 'Zahirul Haque', 'Ataur Rahman', 'Shahidul Islam'];
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -70,576 +73,574 @@ export default function FurnaceLogPage() {
       setData(initialFurnaceLogs);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialFurnaceLogs));
     }
-
-    const storedCols = localStorage.getItem(`${STORAGE_KEY}_cols`);
-    if (storedCols) {
-      try { setCustomCols(JSON.parse(storedCols)); } catch {}
-    }
   }, []);
 
-  const saveToStorage = (updated: FurnaceRow[], cols = customCols) => {
+  const saveToStorage = (updated: FurnaceRow[]) => {
     setData(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    localStorage.setItem(`${STORAGE_KEY}_cols`, JSON.stringify(cols));
   };
 
-  // Safe Math Evaluator
-  const evaluateMath = (val: string): number | string => {
-    let clean = val.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-      return clean;
-    }
-    if (clean.startsWith('=')) {
-      clean = clean.substring(1).trim();
-    }
-    if (/^[0-9.+\-*/()\s]+$/.test(clean)) {
-      try {
-        const result = new Function(`return (${clean})`)();
-        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
-          return parseFloat(result.toFixed(2));
-        }
-      } catch {}
-    }
-    return val;
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleSort = (field: keyof FurnaceRow) => {
-    if (sortField === field) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDir('asc');
+  // Auto Calculations
+  const scrapInKg = Number(formData.scrap_input_kg) || 0;
+  const liquidOutKg = Number(formData.liquid_steel_tapped_kg) || 0;
+  const computedYield = scrapInKg > 0 ? parseFloat(((liquidOutKg / scrapInKg) * 100).toFixed(2)) : 0;
+  const powerKwh = Number(formData.power_consumed_kwh) || 0;
+  const computedSec = liquidOutKg > 0 ? Math.round(powerKwh / (liquidOutKg / 1000)) : 0;
+
+  const handleCreateHeat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.heat_no || scrapInKg <= 0 || liquidOutKg <= 0) {
+      showToast('Please provide valid heat number and weights.');
+      return;
     }
-  };
 
-  // Add Dynamic Column via Custom Modal Dialog
-  const handleAddColumn = () => {
-    setDialog({
-      type: 'prompt',
-      title: 'Add Custom Column',
-      message: 'Enter the header name for your new dynamic column:',
-      value: '',
-      onConfirm: (val) => {
-        if (val && val.trim()) {
-          const updatedCols = [...customCols, val.trim()];
-          setCustomCols(updatedCols);
-          saveToStorage(data, updatedCols);
-        }
-      }
-    });
-  };
-
-  // Add Row Directly Inline
-  const handleAddRow = () => {
-    const nextLetter = String.fromCharCode(65 + (data.length % 26));
     const newRow: FurnaceRow = {
       id: Date.now(),
+      date: formData.date,
+      furnace_no: formData.furnace_no,
+      heat_no: formData.heat_no.trim().toUpperCase(),
+      scrap_input_kg: scrapInKg,
+      runtime_min: Number(formData.runtime_min) || 120,
+      used_patching_powder_kg: Number(formData.used_patching_powder_kg) || 0,
+      used_patching_forma_kg: Number(formData.used_patching_forma_kg) || 0,
+      tapping_temp_c: Number(formData.tapping_temp_c) || 1615,
+      liquid_steel_tapped_kg: liquidOutKg,
+      power_consumed_kwh: powerKwh,
+      shift_id: formData.shift_id,
+      furnace_master: formData.furnace_master,
+      yield_pct: computedYield,
+      fe_si_alloy_kg: Number(formData.fe_si_alloy_kg) || 0,
+      fe_mn_alloy_kg: Number(formData.fe_mn_alloy_kg) || 0
+    };
+
+    const updated = [newRow, ...data];
+    saveToStorage(updated);
+    setIsModalOpen(false);
+    showToast(`Heat ${newRow.heat_no} recorded (${liquidOutKg.toLocaleString()} kg tapped, yield ${computedYield}%)`);
+
+    // Reset Form
+    setFormData({
       date: new Date().toISOString().split('T')[0],
       furnace_no: 'Furnace 01',
-      heat_no: `H-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}${nextLetter}`,
-      scrap_input_kg: 0,
-      runtime_min: 0,
-      used_patching_powder_kg: 0,
-      used_patching_forma_kg: 0,
-      tapping_temp_c: 1550,
-      liquid_steel_tapped_kg: 0,
-      power_consumed_kwh: 0,
+      heat_no: '',
+      scrap_input_kg: '',
+      runtime_min: '130',
+      used_patching_powder_kg: '120',
+      used_patching_forma_kg: '0',
+      tapping_temp_c: '1615',
+      liquid_steel_tapped_kg: '',
+      power_consumed_kwh: '',
       shift_id: 'A',
-      furnace_master: 'Supervisor',
-      yield_pct: 0,
-      customValues: {}
-    };
-    saveToStorage([...data, newRow]);
-  };
-
-  // Delete Row via Custom Modal Confirm Dialog
-  const handleDeleteRow = (id: number) => {
-    setDialog({
-      type: 'confirm',
-      title: 'Confirm Delete',
-      message: 'Are you sure you want to permanently delete this furnace log record?',
-      onConfirm: () => {
-        saveToStorage(data.filter(r => r.id !== id));
-      }
+      furnace_master: 'Kabir Ahmed',
+      fe_si_alloy_kg: '45',
+      fe_mn_alloy_kg: '65'
     });
   };
 
-  // Excel Copy Down (Fill Down)
-  const handleFillDown = (field: string, isCustom = false) => {
-    if (data.length <= 1) return;
-    const firstVal = isCustom 
-      ? (data[0].customValues?.[field] || '') 
-      : data[0][field as keyof FurnaceRow];
-
-    const updated = data.map((row, idx) => {
-      if (idx === 0) return row;
-      if (isCustom) {
-        return {
-          ...row,
-          customValues: { ...(row.customValues || {}), [field]: String(firstVal) }
-        };
-      } else {
-        const baseRow = { ...row, [field]: firstVal };
-        const input = Number(baseRow.scrap_input_kg);
-        const tapped = Number(baseRow.liquid_steel_tapped_kg);
-        baseRow.yield_pct = input > 0 ? parseFloat(((tapped / input) * 100).toFixed(2)) : 0;
-        return baseRow;
-      }
-    });
-    saveToStorage(updated);
-  };
-
-  const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
-    if (editingCell) {
-      saveInlineEdit(editingCell.id, editingCell.field, editingCell.isCustom, editValue);
+  const handleDelete = (id: number) => {
+    if (confirm('Are you sure you want to delete this furnace heat log?')) {
+      const updated = data.filter(d => d.id !== id);
+      saveToStorage(updated);
+      showToast('Heat record deleted');
     }
-    setEditingCell({ id, field, isCustom });
-    setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: string, isCustom = false, forcedValue?: string) => {
-    const valToSave = forcedValue !== undefined ? forcedValue : editValue;
-    const evaluated = evaluateMath(valToSave);
-    const updated = data.map(row => {
-      if (row.id === id) {
-        if (isCustom) {
-          return {
-            ...row,
-            customValues: { ...(row.customValues || {}), [field]: String(evaluated) }
-          };
-        } else {
-          let val: any = evaluated;
-          if (field === 'scrap_input_kg' || field === 'runtime_min' || field === 'used_patching_powder_kg' || field === 'used_patching_forma_kg' || field === 'tapping_temp_c' || field === 'liquid_steel_tapped_kg' || field === 'power_consumed_kwh') {
-            val = Number(evaluated);
-            if (isNaN(val)) val = row[field as keyof FurnaceRow] || 0;
-          }
-          const baseRow = { ...row, [field]: val };
-          const input = Number(baseRow.scrap_input_kg);
-          const tapped = Number(baseRow.liquid_steel_tapped_kg);
-          baseRow.yield_pct = input > 0 ? parseFloat(((tapped / input) * 100).toFixed(2)) : 0;
-          return baseRow;
-        }
-      }
-      return row;
+  // Filtered dataset
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      const matchesSearch = 
+        item.heat_no.toLowerCase().includes(search.toLowerCase()) ||
+        item.furnace_master.toLowerCase().includes(search.toLowerCase()) ||
+        item.furnace_no.toLowerCase().includes(search.toLowerCase());
+      const matchesFurnace = !furnaceFilter || item.furnace_no === furnaceFilter;
+      const matchesShift = !shiftFilter || item.shift_id === shiftFilter;
+      return matchesSearch && matchesFurnace && matchesShift;
     });
+  }, [data, search, furnaceFilter, shiftFilter]);
 
-    saveToStorage(updated);
-    setEditingCell(null);
-  };
+  // Aggregated KPIs
+  const totalHeats = filteredData.length;
+  const totalScrapChargedKg = filteredData.reduce((sum, d) => sum + Number(d.scrap_input_kg || 0), 0);
+  const totalLiquidTappedKg = filteredData.reduce((sum, d) => sum + Number(d.liquid_steel_tapped_kg || 0), 0);
+  const totalPowerKwh = filteredData.reduce((sum, d) => sum + Number(d.power_consumed_kwh || 0), 0);
+  const avgYield = totalScrapChargedKg > 0 ? ((totalLiquidTappedKg / totalScrapChargedKg) * 100).toFixed(2) : '92.70';
+  const avgSec = totalLiquidTappedKg > 0 ? (totalPowerKwh / (totalLiquidTappedKg / 1000)).toFixed(0) : '545';
 
   const handleExportExcel = () => {
-    const customHeaders = customCols;
-    const headers = ['Heat No', 'Date', 'Furnace No', 'Shift ID', 'Scrap Input (KG)', 'Runtime (Min)', 'Powder (KG)', 'Forma (Qty)', 'Temp (°C)', 'Steel Tapped (KG)', 'Scrap Loss (KG)', 'Power (kWh)', 'Yield (%)', ...customHeaders];
-    
-    const rows = filteredData.map(r => [
-      r.heat_no, r.date, r.furnace_no, r.shift_id, r.scrap_input_kg, r.runtime_min, r.used_patching_powder_kg, r.used_patching_forma_kg, r.tapping_temp_c, r.liquid_steel_tapped_kg, Math.max(0, r.scrap_input_kg - r.liquid_steel_tapped_kg), r.power_consumed_kwh, r.yield_pct,
-      ...(customCols.map(col => r.customValues?.[col] || ''))
-    ]);
-    exportToExcel(headers, rows, 'furnace_melt_logs');
+    const headers = ['Date', 'Shift', 'Furnace No', 'Heat No', 'Scrap Charged (KG)', 'Liquid Tapped (KG)', 'Melting Yield (%)', 'Power Consumed (kWh)', 'Specific Power (kWh/MT)', 'Tapping Temp (°C)', 'Runtime (Min)', 'Furnace Master', 'Alloy FeSi (KG)', 'Alloy FeMn (KG)'];
+    const rows = filteredData.map(r => {
+      const liquidMt = (r.liquid_steel_tapped_kg || 1) / 1000;
+      const sec = Math.round((r.power_consumed_kwh || 0) / liquidMt);
+      return [
+        r.date, r.shift_id, r.furnace_no, r.heat_no, r.scrap_input_kg, r.liquid_steel_tapped_kg, r.yield_pct, r.power_consumed_kwh, sec, r.tapping_temp_c, r.runtime_min, r.furnace_master, r.fe_si_alloy_kg || 0, r.fe_mn_alloy_kg || 0
+      ];
+    });
+    exportToExcel(headers, rows, 'furnace_heat_log');
   };
 
-  const filteredData = data
-    .filter(row => {
-      const matchesSearch = row.heat_no.toLowerCase().includes(search.toLowerCase()) ||
-                            row.furnace_master.toLowerCase().includes(search.toLowerCase());
-      const matchesFurnace = furnaceFilter ? row.furnace_no === furnaceFilter : true;
-      return matchesSearch && matchesFurnace;
-    })
-    .sort((a, b) => {
-      let valA = a[sortField];
-      let valB = b[sortField];
-
-      if (typeof valA === 'string') {
-        return sortDir === 'asc' 
-          ? (valA as string).localeCompare(valB as string)
-          : (valB as string).localeCompare(valA as string);
-      } else {
-        return sortDir === 'asc' 
-          ? (valA as number) - (valB as number)
-          : (valB as number) - (valA as number);
-      }
-    });
-
-  // Summaries
-  const totalInput = filteredData.reduce((sum, r) => sum + r.scrap_input_kg, 0);
-  const totalTapped = filteredData.reduce((sum, r) => sum + r.liquid_steel_tapped_kg, 0);
-  const totalLoss = Math.max(0, totalInput - totalTapped);
-  const totalPower = filteredData.reduce((sum, r) => sum + r.power_consumed_kwh, 0);
-  const avgYield = totalInput > 0 ? parseFloat(((totalTapped / totalInput) * 100).toFixed(2)) : 0;
-
   return (
-    <div className="space-y-6 animate-fade-in text-slate-800">
+    <div className="space-y-7 animate-fade-in text-slate-800 pb-16">
       
-      {/* Custom Modal Dialog Box */}
-      {dialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
-              {dialog.title}
-            </h3>
-            <p className="text-xs text-slate-655 font-sans leading-relaxed">
-              {dialog.message}
-            </p>
-            {dialog.type === 'prompt' && (
-              <input 
-                type="text" 
-                value={dialog.value || ''}
-                onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
-                placeholder="Type dynamic column name..."
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    dialog.onConfirm(dialog.value);
-                    setDialog(null);
-                  }
-                }}
-              />
-            )}
-            <div className="flex justify-end space-x-2 pt-2">
-              <button 
-                onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => {
-                  dialog.onConfirm(dialog.value);
-                  setDialog(null);
-                }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-              >
-                Confirm
-              </button>
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex items-center space-x-3 animate-zoom-in">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-xs font-semibold font-mono tracking-wide">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* HERO & MELTSHOP BANNER WITH REAL SMELTING PHOTO */}
+      <div className="relative overflow-hidden bg-slate-900 rounded-3xl text-white shadow-xl border border-slate-800">
+        <div className="absolute inset-0 opacity-25 mix-blend-luminosity bg-cover bg-center pointer-events-none" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80')` }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent"></div>
+
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center space-x-2.5">
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase px-3 py-1 rounded-full font-mono tracking-wide">
+                Stage 02 • Induction Smelting & Refining
+              </span>
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full font-mono flex items-center">
+                <span className="w-2 h-2 bg-amber-400 rounded-full mr-2 animate-pulse"></span> 1620°C Bath Ready
+              </span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-sans">
+              Induction Furnace Heat & Smelting Log
+            </h1>
+            <p className="text-sm text-slate-300 font-sans leading-relaxed">
+              Track crucible batch heats, ferro-alloy deoxidation (FeSi / FeMn), tapping temperatures, and power consumption.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-600 transition-all cursor-pointer shadow-xs"
+            >
+              Export Heat Book
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-amber-900/25 transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>Record Tapped Heat</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SHORT MINI-DASHBOARD (4 KPI METRIC CARDS) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* KPI 1 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Liquid Steel Output</span>
+            <span className="text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Tapped</span>
+          </div>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalLiquidTappedKg / 1000).toFixed(1)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
+            </div>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">▲ {totalHeats} Total Heats Logged</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+
+        {/* KPI 2 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Melting Yield Efficiency</span>
+            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 font-bold">Yield</span>
+          </div>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgYield}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">%</span>
+            </div>
+            <p className="text-xs text-slate-500 font-mono mt-1.5">Burning/Slag Loss: {(100 - Number(avgYield)).toFixed(2)}%</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+        {/* KPI 3 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Specific Power (SEC)</span>
+            <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Electricity</span>
+          </div>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgSec}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">kWh / MT</span>
+            </div>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">Target Ceiling: 560 kWh/MT</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#C5A059]"></div>
+        </div>
+
+        {/* KPI 4 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Thermal Index</span>
+            <span className="text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-md border border-rose-200 font-bold">Bath Temp</span>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900 font-mono">1618°C Average</div>
+            <p className="text-xs text-slate-500 font-mono mt-1.5">Ladle Superheat: +45°C</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+        </div>
+
+      </div>
+
+      {/* FILTER & VIEW CONTROLS */}
+      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center space-x-3 flex-1 min-w-[260px]">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search Heat No, Master, Furnace..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white transition-all"
+            />
+            <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <select
+            value={furnaceFilter}
+            onChange={e => setFurnaceFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-700 focus:outline-none focus:border-[#C5A059]"
+          >
+            <option value="">All Furnaces</option>
+            <option value="Furnace 01">Furnace 01 (15T)</option>
+            <option value="Furnace 02">Furnace 02 (15T)</option>
+          </select>
+
+          <select
+            value={shiftFilter}
+            onChange={e => setShiftFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-700 focus:outline-none focus:border-[#C5A059]"
+          >
+            <option value="">All Shifts</option>
+            <option value="A">Shift A (Morning)</option>
+            <option value="B">Shift B (Evening)</option>
+            <option value="C">Shift C (Night)</option>
+          </select>
+        </div>
+
+        <div className="flex bg-slate-100 p-1 rounded-xl gap-1 font-sans text-xs">
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`px-3.5 py-2 rounded-lg font-semibold transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Heat Cards
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-3.5 py-2 rounded-lg font-semibold transition-all ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Log Grid
+          </button>
+        </div>
+      </div>
+
+      {/* HEAT CARDS VIEW */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredData.map(item => (
+            <div key={item.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-400 font-mono uppercase">{item.date} • Shift {item.shift_id}</span>
+                  <h3 className="text-base font-bold text-slate-900 mt-0.5">{item.heat_no}</h3>
+                </div>
+                <span className="text-xs font-semibold uppercase px-2.5 py-1 rounded-lg font-mono bg-amber-100 text-amber-900 border border-amber-200">
+                  {item.furnace_no}
+                </span>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70 space-y-2 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-sans">Scrap Input:</span>
+                  <span className="font-semibold text-slate-800">{(item.scrap_input_kg / 1000).toFixed(2)} MT ({item.scrap_input_kg} kg)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-sans">Liquid Steel Tapped:</span>
+                  <span className="font-bold text-amber-700">{(item.liquid_steel_tapped_kg / 1000).toFixed(2)} MT ({item.liquid_steel_tapped_kg} kg)</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span className="font-sans">Power Consumption:</span>
+                  <span>{item.power_consumed_kwh.toLocaleString()} kWh</span>
+                </div>
+              </div>
+
+              {/* Yield Progress Bar */}
+              <div>
+                <div className="flex justify-between text-xs font-mono mb-1">
+                  <span className="text-slate-500 font-sans">Melting Yield:</span>
+                  <span className="font-bold text-emerald-600">{item.yield_pct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-emerald-500 h-full rounded-full transition-all"
+                    style={{ width: `${Math.min(100, item.yield_pct)}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-xs font-mono pt-1">
+                <div>
+                  <span className="text-slate-400 font-sans block">Tapping Temp:</span>
+                  <p className="font-semibold text-rose-600">{item.tapping_temp_c}°C</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-400 font-sans block">Furnace Master:</span>
+                  <p className="font-semibold text-slate-800 font-sans">{item.furnace_master}</p>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
+                <span className="text-slate-500 font-sans">Heat Runtime: {item.runtime_min} mins</span>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-rose-500 hover:text-rose-700 font-semibold cursor-pointer"
+                >
+                  Delete Log
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ENTERPRISE GRID TABLE VIEW */}
+      {viewMode === 'table' && (
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm font-sans border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
+                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-4 py-3.5">Shift</th>
+                  <th className="px-4 py-3.5">Furnace</th>
+                  <th className="px-4 py-3.5">Heat No</th>
+                  <th className="px-4 py-3.5 text-right">Scrap In (kg)</th>
+                  <th className="px-4 py-3.5 text-right">Liquid Out (kg)</th>
+                  <th className="px-4 py-3.5 text-right">Yield %</th>
+                  <th className="px-4 py-3.5 text-right">Power (kWh)</th>
+                  <th className="px-4 py-3.5 text-right">Temp (°C)</th>
+                  <th className="px-4 py-3.5">Master</th>
+                  <th className="px-4 py-3.5 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                {filteredData.map(item => (
+                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="px-4 py-3 text-slate-700">{item.date}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900 font-sans">{item.shift_id}</td>
+                    <td className="px-4 py-3 text-slate-600 font-sans">{item.furnace_no}</td>
+                    <td className="px-4 py-3 text-slate-900 font-bold">{item.heat_no}</td>
+                    <td className="px-4 py-3 text-right">{item.scrap_input_kg.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-bold text-amber-700">{item.liquid_steel_tapped_kg.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-bold text-emerald-600">{item.yield_pct}%</td>
+                    <td className="px-4 py-3 text-right">{item.power_consumed_kwh.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-rose-600 font-semibold">{item.tapping_temp_c}°C</td>
+                    <td className="px-4 py-3 text-slate-800 font-sans">{item.furnace_master}</td>
+                    <td className="px-4 py-3 text-center">
+                      <button onClick={() => handleDelete(item.id)} className="text-rose-500 hover:text-rose-700 font-bold p-1">✕</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-        <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Furnace Melting Log</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs electric arc/ladle refining furnace heats, patching consumables, runtimes, tapping temperatures, and power usage.</p>
+      {/* MODAL: LOG NEW HEAT */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-7 shadow-2xl border border-slate-200 animate-zoom-in space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 font-sans">Record Tapped Furnace Heat</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Log crucible inputs, tapping temperature, and electricity consumption.</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">✕</button>
+            </div>
+
+            <form onSubmit={handleCreateHeat} className="space-y-4 text-xs font-sans">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Heat Log Date</label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={e => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Furnace Unit</label>
+                  <select
+                    value={formData.furnace_no}
+                    onChange={e => setFormData({ ...formData, furnace_no: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  >
+                    <option value="Furnace 01">Furnace 01 (15 Ton)</option>
+                    <option value="Furnace 02">Furnace 02 (15 Ton)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Heat Serial Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. H-260825A"
+                    value={formData.heat_no}
+                    onChange={e => setFormData({ ...formData, heat_no: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold uppercase focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Shift & Master</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={formData.shift_id}
+                      onChange={e => setFormData({ ...formData, shift_id: e.target.value })}
+                      className="mt-1.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    >
+                      <option value="A">Shift A</option>
+                      <option value="B">Shift B</option>
+                      <option value="C">Shift C</option>
+                    </select>
+                    <select
+                      value={formData.furnace_master}
+                      onChange={e => setFormData({ ...formData, furnace_master: e.target.value })}
+                      className="mt-1.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    >
+                      {furnaceMasters.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Scrap Input (KG)</label>
+                  <input
+                    type="number"
+                    placeholder="22000"
+                    value={formData.scrap_input_kg}
+                    onChange={e => setFormData({ ...formData, scrap_input_kg: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Liquid Steel (KG)</label>
+                  <input
+                    type="number"
+                    placeholder="20400"
+                    value={formData.liquid_steel_tapped_kg}
+                    onChange={e => setFormData({ ...formData, liquid_steel_tapped_kg: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Power (kWh)</label>
+                  <input
+                    type="number"
+                    placeholder="11500"
+                    value={formData.power_consumed_kwh}
+                    onChange={e => setFormData({ ...formData, power_consumed_kwh: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Tapping Temp (°C)</label>
+                  <input
+                    type="number"
+                    value={formData.tapping_temp_c}
+                    onChange={e => setFormData({ ...formData, tapping_temp_c: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">FeSi Alloy (KG)</label>
+                  <input
+                    type="number"
+                    value={formData.fe_si_alloy_kg}
+                    onChange={e => setFormData({ ...formData, fe_si_alloy_kg: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">FeMn Alloy (KG)</label>
+                  <input
+                    type="number"
+                    value={formData.fe_mn_alloy_kg}
+                    onChange={e => setFormData({ ...formData, fe_mn_alloy_kg: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Dynamic Calculation Result */}
+              {scrapInKg > 0 && liquidOutKg > 0 && (
+                <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 flex justify-between items-center text-xs font-mono">
+                  <div>
+                    <span className="text-slate-500 font-sans block">Computed Melting Yield:</span>
+                    <strong className="text-base font-bold text-emerald-600 font-mono">{computedYield}%</strong>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-500 font-sans block">Specific Power Consumption:</span>
+                    <strong className="text-base font-bold text-[#B48F48] font-mono">{computedSec} kWh/MT</strong>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Save & Log Smelt Heat
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-          >
-            + Add Column
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-          >
-            Export Excel
-          </button>
-          <button 
-            onClick={handleAddRow}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-          >
-            + Add Row
-          </button>
-        </div>
-      </div>
-
-      {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
-        <input 
-          type="text" 
-          placeholder="Filter by Heat No, or Furnace Master..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
-        />
-        <select 
-          value={furnaceFilter}
-          onChange={(e) => {
-            setSearch('');
-            setFurnaceFilter(e.target.value);
-          }}
-          className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
-        >
-          <option value="">All Furnaces</option>
-          {furnaces.map((f, idx) => <option key={idx} value={f}>{f}</option>)}
-        </select>
-      </div>
-
-      {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1350px] table-fixed">
-            <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
-                <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
-                  Heat No {sortField === 'heat_no' && (sortDir === 'asc' ? '▲' : '▼')}
-                </th>
-                <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>Date</th>
-                <th className={`w-44 ${cellPadding}`}>Furnace No</th>
-                <th className={`w-24 ${cellPadding}`}>Shift ID</th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Scrap Input (KG) <button onClick={() => handleFillDown('scrap_input_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Runtime (Min) <button onClick={() => handleFillDown('runtime_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Powder (KG) <button onClick={() => handleFillDown('used_patching_powder_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Forma (Qty) <button onClick={() => handleFillDown('used_patching_forma_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Temp (°C) <button onClick={() => handleFillDown('tapping_temp_c')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Steel Tapped (KG) <button onClick={() => handleFillDown('liquid_steel_tapped_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-32 ${cellPadding} text-right text-rose-500`}>Scrap Loss (KG)</th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Power (kWh) <button onClick={() => handleFillDown('power_consumed_kwh')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-24 ${cellPadding} text-right`}>Yield%</th>
-                <th className={`w-36 ${cellPadding}`}>
-                  Master Name <button onClick={() => handleFillDown('furnace_master')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-
-                {/* Dynamic Columns */}
-                {customCols.map(col => (
-                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
-                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-mono text-xs">
-              {filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan={15 + customCols.length} className="text-center py-8 text-slate-400">No records found.</td>
-                </tr>
-              ) : filteredData.map((row) => {
-                const scrapLoss = Math.max(0, row.scrap_input_kg - row.liquid_steel_tapped_kg);
-                return (
-                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-9">
-                    
-                    {/* Delete Action */}
-                    <td className="text-center py-1">
-                      <button 
-                        onClick={() => handleDeleteRow(row.id)}
-                        className="text-red-500 hover:text-red-750 font-bold text-xs"
-                      >
-                        ✕
-                      </button>
-                    </td>
-
-                    {/* Heat No */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
-                        {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'heat_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>{row.heat_no}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Date */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
-                        {editingCell?.id === row.id && editingCell?.field === 'date' ? (
-                          <input 
-                            type="date" 
-                            value={editValue} 
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setEditValue(val);
-                              if (val && val.length === 10) {
-                                saveInlineEdit(row.id, 'date', false, val);
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                saveInlineEdit(row.id, 'date', false, editValue);
-                              } else if (e.key === 'Escape') {
-                                setEditingCell(null);
-                              }
-                            }}
-                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" 
-                            autoFocus 
-                          />
-                        ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Furnace No Select */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
-                        <select 
-                          value={row.furnace_no}
-                          onChange={(e) => {
-                            const updated = data.map(r => r.id === row.id ? { ...r, furnace_no: e.target.value } : r);
-                            saveToStorage(updated);
-                          }}
-                          className="w-full bg-transparent border-0 focus:outline-none font-sans py-0.5 font-bold text-slate-800 truncate"
-                        >
-                          {furnaces.map((f, i) => <option key={i} value={f}>{f}</option>)}
-                        </select>
-                      </div>
-                    </td>
-
-                    {/* Shift ID Select */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
-                        <select 
-                          value={row.shift_id}
-                          onChange={(e) => {
-                            const updated = data.map(r => r.id === row.id ? { ...r, shift_id: e.target.value } : r);
-                            saveToStorage(updated);
-                          }}
-                          className="w-full bg-transparent border-0 focus:outline-none font-sans py-0.5 font-bold text-indigo-650 truncate"
-                        >
-                          {shifts.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                        </select>
-                      </div>
-                    </td>
-
-                    {/* Scrap Input */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'scrap_input_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'scrap_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'scrap_input_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-semibold" onClick={() => startEdit(row.id, 'scrap_input_kg', row.scrap_input_kg)}>{row.scrap_input_kg.toLocaleString()}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Runtime (Min) */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'runtime_min' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'runtime_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'runtime_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'runtime_min', row.runtime_min)}>{row.runtime_min} min</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Powder KG */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'used_patching_powder_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_powder_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_powder_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'used_patching_powder_kg', row.used_patching_powder_kg)}>{row.used_patching_powder_kg.toLocaleString()}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Forma Qty */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'used_patching_forma_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'used_patching_forma_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'used_patching_forma_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'used_patching_forma_kg', row.used_patching_forma_kg)}>{row.used_patching_forma_kg}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Tapping Temp */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'tapping_temp_c' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tapping_temp_c')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tapping_temp_c')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'tapping_temp_c', row.tapping_temp_c)}>{row.tapping_temp_c}°C</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Steel Tapped KG */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'liquid_steel_tapped_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'liquid_steel_tapped_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-semibold" onClick={() => startEdit(row.id, 'liquid_steel_tapped_kg', row.liquid_steel_tapped_kg)}>{row.liquid_steel_tapped_kg.toLocaleString()}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Scrap Loss KG (Calculated) */}
-                    <td className={`${cellPadding} text-right text-rose-650 font-bold bg-rose-50/20`}>
-                      <span className="h-7 flex items-center justify-end px-1 select-none">{scrapLoss.toLocaleString()}</span>
-                    </td>
-
-                    {/* Power kwh */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
-                        {editingCell?.id === row.id && editingCell?.field === 'power_consumed_kwh' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'power_consumed_kwh')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'power_consumed_kwh')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'power_consumed_kwh', row.power_consumed_kwh)}>{row.power_consumed_kwh.toLocaleString()} kWh</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Yield % */}
-                    <td className={`${cellPadding} text-right font-black text-rose-600`}>
-                      <span className="h-7 flex items-center justify-end px-1 select-none">{row.yield_pct}%</span>
-                    </td>
-
-                    {/* Master Name */}
-                    <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
-                        {editingCell?.id === row.id && editingCell?.field === 'furnace_master' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_master')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_master')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                        ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'furnace_master', row.furnace_master)}>{row.furnace_master}</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Dynamic Columns */}
-                    {customCols.map(col => (
-                      <td key={col} className={`${cellPadding} bg-amber-50/10`}>
-                        <div className="relative w-full h-7 flex items-center">
-                          {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
-                          ) : (
-                            <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
-                          )}
-                        </div>
-                      </td>
-                    ))}
-
-                  </tr>
-                );
-              })}
-            </tbody>
-
-            {/* Table Summary Footer */}
-            <tfoot>
-              <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200 text-xs">
-                <td className={cellPadding} colSpan={5}>Totals & Averages</td>
-                <td className={`${cellPadding} text-right font-bold`}>{totalInput.toLocaleString()} kg</td>
-                <td colSpan={4}></td>
-                <td className={`${cellPadding} text-right font-bold text-emerald-600`}>{totalTapped.toLocaleString()} kg</td>
-                <td className={`${cellPadding} text-right font-bold text-rose-655 bg-rose-50/20`}>{totalLoss.toLocaleString()} kg</td>
-                <td className={`${cellPadding} text-right font-bold`}>{totalPower.toLocaleString()} kWh</td>
-                <td className={`${cellPadding} text-right font-black text-[#B48F48]`}>{avgYield}%</td>
-                <td colSpan={1 + customCols.length}></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
+      )}
 
     </div>
   );

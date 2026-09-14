@@ -1,8 +1,7 @@
 'use client';
-import { exportToExcel } from '@/lib/excelExport';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import React, { useState, useEffect, useMemo } from 'react';
+import { exportToExcel } from '@/lib/excelExport';
 
 interface ScrapRow {
   id: number;
@@ -16,50 +15,66 @@ interface ScrapRow {
   rate_per_kg: number;
   total_cost: number;
   yard_location: string;
-  customValues?: Record<string, string>;
+  moisture_deduction_pct?: number;
+  quality_grade?: 'Premium Heavy' | 'Standard Medium' | 'Light / Kechi' | 'Direct Reduced';
 }
 
 const STORAGE_KEY = 'steel_erp_scrap';
 
 const initialScrapData: ScrapRow[] = [
-  { id: 1, date: '2026-08-20', supplier_name: 'Metal Recyclers Corp', scrap_category: 'LC Scrap', scrap_rcv_kg: 15000, truck_no: 'TR-1024', gross_weight: 24500, value_tare: 9500, rate_per_kg: 42, total_cost: 630000, yard_location: 'Bay A' },
-  { id: 2, date: '2026-08-21', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'Rolling Kechi', scrap_rcv_kg: 12800, truck_no: 'TR-8812', gross_weight: 22000, value_tare: 9200, rate_per_kg: 44, total_cost: 563200, yard_location: 'Bay B' },
-  { id: 3, date: '2026-08-22', supplier_name: 'Alpha Alloys', scrap_category: 'Plate Cutting', scrap_rcv_kg: 9500, truck_no: 'TR-5034', gross_weight: 18500, value_tare: 9000, rate_per_kg: 40, total_cost: 380000, yard_location: 'Bay A' }
+  { id: 1, date: '2026-08-20', supplier_name: 'Metal Recyclers Corp', scrap_category: 'HMS-1 (Heavy Melting)', scrap_rcv_kg: 15000, truck_no: 'DHAKA-METRO-15-1024', gross_weight: 24500, value_tare: 9500, rate_per_kg: 52.0, total_cost: 780000, yard_location: 'Bay A (Heavy Stock)', quality_grade: 'Premium Heavy', moisture_deduction_pct: 0.5 },
+  { id: 2, date: '2026-08-21', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'Rolling Kechi / End Cuts', scrap_rcv_kg: 12800, truck_no: 'CTG-METRO-14-8812', gross_weight: 22000, value_tare: 9200, rate_per_kg: 49.0, total_cost: 627200, yard_location: 'Bay B (Fast Feed)', quality_grade: 'Light / Kechi', moisture_deduction_pct: 0.8 },
+  { id: 3, date: '2026-08-22', supplier_name: 'Alpha Alloys Sourcing', scrap_category: 'Ship Breaking Plate Cutting', scrap_rcv_kg: 9500, truck_no: 'CTG-METRO-12-5034', gross_weight: 18500, value_tare: 9000, rate_per_kg: 55.0, total_cost: 522500, yard_location: 'Bay A (Heavy Stock)', quality_grade: 'Premium Heavy', moisture_deduction_pct: 0.2 },
+  { id: 4, date: '2026-08-23', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'HMS-1 (Heavy Melting)', scrap_rcv_kg: 18200, truck_no: 'DHAKA-METRO-14-2041', gross_weight: 28200, value_tare: 10000, rate_per_kg: 53.0, total_cost: 964600, yard_location: 'Bay C (Bunkers)', quality_grade: 'Premium Heavy', moisture_deduction_pct: 0.4 },
+  { id: 5, date: '2026-08-24', supplier_name: 'Direct Metals Ltd', scrap_category: 'Direct Reduced Iron (DRI / Sponge)', scrap_rcv_kg: 21000, truck_no: 'DHAKA-METRO-18-4021', gross_weight: 31000, value_tare: 10000, rate_per_kg: 56.5, total_cost: 1186500, yard_location: 'DRI Silo 01', quality_grade: 'Direct Reduced', moisture_deduction_pct: 0.1 }
 ];
 
 export default function ScrapSourcingPage() {
-  const { user } = useAuth();
-  const isCompact = user?.preferences?.density === 'compact';
-
   const [data, setData] = useState<ScrapRow[]>([]);
-  const [customCols, setCustomCols] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [sortField, setSortField] = useState<keyof ScrapRow>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Cell Editing
-  const [editingCell, setEditingCell] = useState<{ id: number; field: string; isCustom: boolean } | null>(null);
-  const [editValue, setEditValue] = useState('');
+  // Form State for new scrap entry
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    supplier_name: '',
+    scrap_category: 'HMS-1 (Heavy Melting)',
+    truck_no: '',
+    gross_weight: '',
+    value_tare: '',
+    rate_per_kg: '52.0',
+    yard_location: 'Bay A (Heavy Stock)',
+    moisture_deduction_pct: '0.5',
+    quality_grade: 'Premium Heavy' as const
+  });
 
-  // Custom Modal Dialog box
-  const [dialog, setDialog] = useState<{
-    type: 'confirm' | 'prompt';
-    title: string;
-    message: string;
-    value?: string;
-    onConfirm: (val?: string) => void;
-  } | null>(null);
+  const categories = [
+    'HMS-1 (Heavy Melting)',
+    'HMS-2 (Mixed Scrap)',
+    'Rolling Kechi / End Cuts',
+    'Ship Breaking Plate Cutting',
+    'Direct Reduced Iron (DRI / Sponge)',
+    'Cast Iron Scrap',
+    'Bundle Press Scrap'
+  ];
 
-  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-1.5 text-xs';
-  const categories = ['LC Scrap', 'Rolling Kechi', 'Tin Bundle', 'Plate Cutting', 'Heavy Melting', 'Others'];
+  const yardBays = [
+    'Bay A (Heavy Stock)',
+    'Bay B (Fast Feed)',
+    'Bay C (Bunkers)',
+    'Bay D (Kechi Stacking)',
+    'DRI Silo 01',
+    'DRI Silo 02'
+  ];
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored);
-        setData(parsed);
+        setData(JSON.parse(stored));
       } catch {
         setData(initialScrapData);
       }
@@ -67,585 +82,522 @@ export default function ScrapSourcingPage() {
       setData(initialScrapData);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialScrapData));
     }
-
-    const storedCols = localStorage.getItem(`${STORAGE_KEY}_cols`);
-    if (storedCols) {
-      try { setCustomCols(JSON.parse(storedCols)); } catch {}
-    }
   }, []);
 
-  const saveToStorage = (updated: ScrapRow[], cols = customCols) => {
+  const saveToStorage = (updated: ScrapRow[]) => {
     setData(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    localStorage.setItem(`${STORAGE_KEY}_cols`, JSON.stringify(cols));
   };
 
-  // Safe Math Evaluator
-  const evaluateMath = (val: string): number | string => {
-    let clean = val.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-      return clean;
-    }
-    if (clean.startsWith('=')) {
-      clean = clean.substring(1).trim();
-    }
-    if (/^[0-9.+\-*/()\s]+$/.test(clean)) {
-      try {
-        const result = new Function(`return (${clean})`)();
-        if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
-          return parseFloat(result.toFixed(2));
-        }
-      } catch {}
-    }
-    return val;
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleSort = (field: keyof ScrapRow) => {
-    if (sortField === field) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDir('asc');
+  // Auto calculate net and total
+  const grossNum = Number(formData.gross_weight) || 0;
+  const tareNum = Number(formData.value_tare) || 0;
+  const rawNet = Math.max(0, grossNum - tareNum);
+  const moisturePct = Number(formData.moisture_deduction_pct) || 0;
+  const netScrapCalculated = Math.round(rawNet * (1 - moisturePct / 100));
+  const rateNum = Number(formData.rate_per_kg) || 0;
+  const totalCostCalculated = Math.round(netScrapCalculated * rateNum);
+
+  const handleCreateScrap = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.supplier_name || !formData.truck_no || rawNet <= 0) {
+      showToast('Please enter valid supplier, truck and weighbridge measurements.');
+      return;
     }
-  };
 
-  // Add Dynamic Column via Custom Modal Dialog
-  const handleAddColumn = () => {
-    setDialog({
-      type: 'prompt',
-      title: 'Add Custom Column',
-      message: 'Enter the header name for your new dynamic column:',
-      value: '',
-      onConfirm: (val) => {
-        if (val && val.trim()) {
-          const updatedCols = [...customCols, val.trim()];
-          setCustomCols(updatedCols);
-          saveToStorage(data, updatedCols);
-        }
-      }
-    });
-  };
-
-  // Add Row Directly Inline
-  const handleAddRow = () => {
     const newRow: ScrapRow = {
       id: Date.now(),
-      date: new Date().toISOString().split('T')[0],
-      supplier_name: 'New Supplier',
-      scrap_category: 'LC Scrap',
-      scrap_rcv_kg: 0,
-      truck_no: 'TR-' + Math.floor(1000 + Math.random() * 9000),
-      gross_weight: 0,
-      value_tare: 0,
-      rate_per_kg: 0,
-      total_cost: 0,
-      yard_location: 'Bay A',
-      customValues: {}
+      date: formData.date,
+      supplier_name: formData.supplier_name.trim(),
+      scrap_category: formData.scrap_category,
+      scrap_rcv_kg: netScrapCalculated,
+      truck_no: formData.truck_no.trim().toUpperCase(),
+      gross_weight: grossNum,
+      value_tare: tareNum,
+      rate_per_kg: rateNum,
+      total_cost: totalCostCalculated,
+      yard_location: formData.yard_location,
+      moisture_deduction_pct: moisturePct,
+      quality_grade: formData.quality_grade
     };
-    saveToStorage([...data, newRow]);
-  };
 
-  // Delete Row via Custom Modal Dialog
-  const handleDeleteRow = (id: number) => {
-    setDialog({
-      type: 'confirm',
-      title: 'Confirm Delete',
-      message: 'Are you sure you want to permanently delete this scrap sourcing record?',
-      onConfirm: () => {
-        saveToStorage(data.filter(r => r.id !== id));
-      }
-    });
-  };
-
-  // Excel Copy Down (Fill Down)
-  const handleFillDown = (field: string, isCustom = false) => {
-    if (data.length <= 1) return;
-    const firstVal = isCustom 
-      ? (data[0].customValues?.[field] || '') 
-      : data[0][field as keyof ScrapRow];
-
-    const updated = data.map((row, idx) => {
-      if (idx === 0) return row;
-      if (isCustom) {
-        return {
-          ...row,
-          customValues: { ...(row.customValues || {}), [field]: String(firstVal) }
-        };
-      } else {
-        const baseRow = { ...row, [field]: firstVal };
-        const gross = Number(baseRow.gross_weight);
-        const tare = Number(baseRow.value_tare);
-        const rcv = Math.max(0, gross - tare) || Number(baseRow.scrap_rcv_kg);
-        const rate = Number(baseRow.rate_per_kg);
-        baseRow.scrap_rcv_kg = rcv;
-        baseRow.total_cost = rcv * rate;
-        return baseRow;
-      }
-    });
+    const updated = [newRow, ...data];
     saveToStorage(updated);
+    setIsModalOpen(false);
+    showToast(`Successfully logged ${netScrapCalculated.toLocaleString()} kg from ${formData.supplier_name}`);
+
+    // Reset Form
+    setFormData({
+      date: new Date().toISOString().split('T')[0],
+      supplier_name: '',
+      scrap_category: 'HMS-1 (Heavy Melting)',
+      truck_no: '',
+      gross_weight: '',
+      value_tare: '',
+      rate_per_kg: '52.0',
+      yard_location: 'Bay A (Heavy Stock)',
+      moisture_deduction_pct: '0.5',
+      quality_grade: 'Premium Heavy'
+    });
   };
 
-  const startEdit = (id: number, field: string, currentVal: any, isCustom = false) => {
-    if (editingCell) {
-      saveInlineEdit(editingCell.id, editingCell.field, editingCell.isCustom, editValue);
+  const handleDelete = (id: number) => {
+    if (confirm('Are you sure you want to remove this scrap intake record?')) {
+      const updated = data.filter(d => d.id !== id);
+      saveToStorage(updated);
+      showToast('Intake record deleted');
     }
-    setEditingCell({ id, field, isCustom });
-    setEditValue(String(currentVal));
   };
 
-  const saveInlineEdit = (id: number, field: string, isCustom = false, forcedValue?: string) => {
-    const valToSave = forcedValue !== undefined ? forcedValue : editValue;
-    const evaluated = evaluateMath(valToSave);
-    const updated = data.map(row => {
-      if (row.id === id) {
-        if (isCustom) {
-          return {
-            ...row,
-            customValues: { ...(row.customValues || {}), [field]: String(evaluated) }
-          };
-        } else {
-          let val: any = evaluated;
-          if (field === 'scrap_rcv_kg' || field === 'gross_weight' || field === 'value_tare' || field === 'rate_per_kg') {
-            val = Number(evaluated);
-            if (isNaN(val)) val = row[field as keyof ScrapRow] || 0;
-          }
-          const baseRow = { ...row, [field]: val };
-          const gross = Number(baseRow.gross_weight);
-          const tare = Number(baseRow.value_tare);
-          const rcv = (field === 'gross_weight' || field === 'value_tare') 
-            ? Math.max(0, gross - tare) 
-            : Number(baseRow.scrap_rcv_kg);
-          const rate = Number(baseRow.rate_per_kg);
-          
-          baseRow.scrap_rcv_kg = rcv;
-          baseRow.total_cost = rcv * rate;
-          return baseRow;
-        }
-      }
-      return row;
+  // Filtered dataset
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      const matchesSearch = 
+        item.supplier_name.toLowerCase().includes(search.toLowerCase()) ||
+        item.truck_no.toLowerCase().includes(search.toLowerCase()) ||
+        item.scrap_category.toLowerCase().includes(search.toLowerCase()) ||
+        item.yard_location.toLowerCase().includes(search.toLowerCase());
+      const matchesCat = !categoryFilter || item.scrap_category === categoryFilter;
+      return matchesSearch && matchesCat;
     });
+  }, [data, search, categoryFilter]);
 
-    saveToStorage(updated);
-    setEditingCell(null);
-  };
+  // Aggregated KPIs
+  const totalScrapKg = filteredData.reduce((sum, d) => sum + Number(d.scrap_rcv_kg || 0), 0);
+  const totalCostBdt = filteredData.reduce((sum, d) => sum + Number(d.total_cost || 0), 0);
+  const avgRatePerKg = totalScrapKg > 0 ? (totalCostBdt / totalScrapKg).toFixed(2) : '52.50';
+  const uniqueSuppliers = Array.from(new Set(data.map(d => d.supplier_name))).length;
 
   const handleExportExcel = () => {
-    const customHeaders = customCols;
-    const headers = ['Date', 'Supplier Name', 'Scrap Category', 'Scrap Received (kg)', 'Challan/Truck No', 'Gross Weight (kg)', 'Tare Weight (kg)', 'Rate/kg', 'Total Cost', 'Yard Location', ...customHeaders];
-    
+    const headers = ['Date', 'Supplier Name', 'Scrap Category', 'Quality Grade', 'Truck No', 'Gross Wt (KG)', 'Tare Wt (KG)', 'Net Scrap (KG)', 'Rate (BDT/KG)', 'Total Value (BDT)', 'Yard Location', 'Moisture Ded (%)'];
     const rows = filteredData.map(r => [
-      r.date, r.supplier_name, r.scrap_category, r.scrap_rcv_kg, r.truck_no, r.gross_weight, r.value_tare, r.rate_per_kg, r.total_cost, r.yard_location,
-      ...(customCols.map(col => r.customValues?.[col] || ''))
+      r.date, r.supplier_name, r.scrap_category, r.quality_grade || 'Standard Medium', r.truck_no, r.gross_weight, r.value_tare, r.scrap_rcv_kg, r.rate_per_kg, r.total_cost, r.yard_location, r.moisture_deduction_pct || 0
     ]);
-    exportToExcel(headers, rows, 'scrap_procurement_ledger');
+    exportToExcel(headers, rows, 'scrap_sourcing_manifest');
   };
 
-  const filteredData = data
-    .filter(row => {
-      const matchesSearch = row.supplier_name.toLowerCase().includes(search.toLowerCase()) ||
-                            row.truck_no.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = categoryFilter ? row.scrap_category === categoryFilter : true;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      let valA = a[sortField];
-      let valB = b[sortField];
-
-      if (typeof valA === 'string') {
-        return sortDir === 'asc' 
-          ? (valA as string).localeCompare(valB as string)
-          : (valB as string).localeCompare(valA as string);
-      } else {
-        return sortDir === 'asc' 
-          ? (valA as number) - (valB as number)
-          : (valB as number) - (valA as number);
-      }
-    });
-
-  // Summaries
-  const totalRcv = filteredData.reduce((sum, r) => sum + r.scrap_rcv_kg, 0);
-  const totalCost = filteredData.reduce((sum, r) => sum + r.total_cost, 0);
-
   return (
-    <div className="space-y-6 animate-fade-in text-slate-800">
+    <div className="space-y-7 animate-fade-in text-slate-800 pb-16">
       
-      {/* Custom Modal Dialog Window */}
-      {dialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
-              {dialog.title}
-            </h3>
-            <p className="text-xs text-slate-655 font-sans leading-relaxed">
-              {dialog.message}
-            </p>
-            {dialog.type === 'prompt' && (
-              <input 
-                type="text" 
-                value={dialog.value || ''}
-                onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
-                placeholder="Type dynamic column name..."
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    dialog.onConfirm(dialog.value);
-                    setDialog(null);
-                  }
-                }}
-              />
-            )}
-            <div className="flex justify-end space-x-2 pt-2">
-              <button 
-                onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => {
-                  dialog.onConfirm(dialog.value);
-                  setDialog(null);
-                }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-              >
-                Confirm
-              </button>
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex items-center space-x-3 animate-zoom-in">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-xs font-semibold font-mono tracking-wide">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* HERO & YARD CONTEXT BANNER WITH REAL INDUSTRIAL IMAGERY */}
+      <div className="relative overflow-hidden bg-slate-900 rounded-3xl text-white shadow-xl border border-slate-800">
+        <div className="absolute inset-0 opacity-25 mix-blend-luminosity bg-cover bg-center pointer-events-none" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80')` }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent"></div>
+
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center space-x-2.5">
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase px-3 py-1 rounded-full font-mono tracking-wide">
+                Stage 01 • Raw Material Sourcing
+              </span>
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-3 py-1 rounded-full font-mono flex items-center">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span> Weighbridge Active
+              </span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-sans">
+              Scrap Yard Sourcing & Inbound Logistics
+            </h1>
+            <p className="text-sm text-slate-300 font-sans leading-relaxed">
+              Supervise scrap truck weigh-ins, moisture/dust tare deductions, yard bay allocations, and HMS quality gradings.
+            </p>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-600 transition-all cursor-pointer shadow-xs"
+            >
+              Export Manifest
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-amber-900/25 transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>Log Scrap Consignment</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SHORT MINI-DASHBOARD (4 KPI METRIC CARDS) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* KPI 1 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Total Intake Volume</span>
+            <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Yard Net</span>
+          </div>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalScrapKg / 1000).toFixed(1)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
+            </div>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">▲ {filteredData.length} Trucks Cleared</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#C5A059]"></div>
+        </div>
+
+        {/* KPI 2 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Cumulative Value</span>
+            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 font-bold">Cost</span>
+          </div>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">৳{(totalCostBdt / 100000).toFixed(1)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">Lakh</span>
+            </div>
+            <p className="text-xs text-slate-500 font-mono mt-1.5">Weighted Rate: ৳{avgRatePerKg}/kg</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+        {/* KPI 3 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Active Yard Locations</span>
+            <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200 font-bold">Bays</span>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900 font-mono">5 Dedicated Bays</div>
+            <p className="text-xs text-indigo-600 font-semibold font-mono mt-1.5">Bay A & B at 74% Capacity</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-500"></div>
+        </div>
+
+        {/* KPI 4 */}
+        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Vendor Reliability</span>
+            <span className="text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-md border border-cyan-200 font-bold">Suppliers</span>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900 font-mono">{uniqueSuppliers} Registered Vendors</div>
+            <p className="text-xs text-slate-500 font-mono mt-1.5">Avg Moisture: 0.4% (Within Spec)</p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-500"></div>
+        </div>
+
+      </div>
+
+      {/* FILTER & VIEW CONTROLS */}
+      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center space-x-3 flex-1 min-w-[260px]">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search truck, supplier, category, bay..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white transition-all"
+            />
+            <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <select
+            value={categoryFilter}
+            onChange={e => setCategoryFilter(e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-700 focus:outline-none focus:border-[#C5A059]"
+          >
+            <option value="">All Categories</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        {/* Card / Table Switcher */}
+        <div className="flex bg-slate-100 p-1 rounded-xl gap-1 font-sans text-xs">
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`px-3.5 py-2 rounded-lg font-semibold transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Consignment Cards
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-3.5 py-2 rounded-lg font-semibold transition-all ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Grid Table
+          </button>
+        </div>
+      </div>
+
+      {/* CONSIGNMENT CARDS VIEW */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredData.map(item => (
+            <div key={item.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-400 font-mono uppercase">{item.date} • {item.truck_no}</span>
+                  <h3 className="text-base font-bold text-slate-900 mt-0.5">{item.supplier_name}</h3>
+                </div>
+                <span className={`text-xs font-semibold uppercase px-2.5 py-1 rounded-lg font-mono ${
+                  item.quality_grade === 'Premium Heavy' ? 'bg-amber-100 text-amber-900 border border-amber-200' :
+                  item.quality_grade === 'Direct Reduced' ? 'bg-cyan-100 text-cyan-900 border border-cyan-200' : 'bg-slate-100 text-slate-700 border border-slate-200'
+                }`}>
+                  {item.quality_grade || 'Standard'}
+                </span>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70 space-y-2 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-sans">Category:</span>
+                  <span className="font-semibold text-slate-800">{item.scrap_category}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-sans">Net Weight:</span>
+                  <span className="font-bold text-[#B48F48]">{(item.scrap_rcv_kg / 1000).toFixed(2)} MT ({item.scrap_rcv_kg} kg)</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span className="font-sans">Gross / Tare:</span>
+                  <span>{item.gross_weight} kg / {item.value_tare} kg</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-xs font-mono pt-1">
+                <div>
+                  <span className="text-slate-400 font-sans block">Yard Bay:</span>
+                  <p className="font-semibold text-slate-800">{item.yard_location}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-400 font-sans block">Total Value:</span>
+                  <p className="font-bold text-emerald-700 text-sm">৳{item.total_cost.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
+                <span className="text-slate-500">Rate: ৳{item.rate_per_kg}/kg</span>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-rose-500 hover:text-rose-700 font-semibold cursor-pointer"
+                >
+                  Remove Consignment
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ENTERPRISE GRID TABLE VIEW */}
+      {viewMode === 'table' && (
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm font-sans border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
+                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-4 py-3.5">Supplier Name</th>
+                  <th className="px-4 py-3.5">Category</th>
+                  <th className="px-4 py-3.5">Truck No</th>
+                  <th className="px-4 py-3.5 text-right">Gross (kg)</th>
+                  <th className="px-4 py-3.5 text-right">Tare (kg)</th>
+                  <th className="px-4 py-3.5 text-right">Net Rcv (MT)</th>
+                  <th className="px-4 py-3.5 text-right">Rate (৳/kg)</th>
+                  <th className="px-4 py-3.5 text-right">Total Cost (৳)</th>
+                  <th className="px-4 py-3.5">Yard Bay</th>
+                  <th className="px-4 py-3.5 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                {filteredData.map(item => (
+                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="px-4 py-3 text-slate-700">{item.date}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900 font-sans">{item.supplier_name}</td>
+                    <td className="px-4 py-3 text-slate-600">{item.scrap_category}</td>
+                    <td className="px-4 py-3 text-slate-500 font-semibold">{item.truck_no}</td>
+                    <td className="px-4 py-3 text-right">{item.gross_weight.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-slate-400">{item.value_tare.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-bold text-[#B48F48]">{(item.scrap_rcv_kg / 1000).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right">৳{item.rate_per_kg}</td>
+                    <td className="px-4 py-3 text-right font-bold text-emerald-700">৳{item.total_cost.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-slate-700 font-sans">{item.yard_location}</td>
+                    <td className="px-4 py-3 text-center">
+                      <button onClick={() => handleDelete(item.id)} className="text-rose-500 hover:text-rose-700 font-bold p-1">✕</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-        <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Scrap Sourcing Sheet</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs inbound raw scrap party details, received weight compliance, rates, and unloading bay locations.</p>
+      {/* MODAL: LOG NEW SCRAP INTAKE */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-7 shadow-2xl border border-slate-200 animate-zoom-in space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 font-sans">Weighbridge Scrap Consignment Intake</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Record gross and tare weighbridge weights to compute net melt feedstock.</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">✕</button>
+            </div>
+
+            <form onSubmit={handleCreateScrap} className="space-y-4 text-xs font-sans">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Intake Date</label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={e => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Truck Registration No</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. DHAKA-METRO-15-1024"
+                    value={formData.truck_no}
+                    onChange={e => setFormData({ ...formData, truck_no: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold uppercase focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Supplier Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Metal Recyclers Corp"
+                    value={formData.supplier_name}
+                    onChange={e => setFormData({ ...formData, supplier_name: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Scrap Category</label>
+                  <select
+                    value={formData.scrap_category}
+                    onChange={e => setFormData({ ...formData, scrap_category: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  >
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Gross Wt (KG)</label>
+                  <input
+                    type="number"
+                    placeholder="25000"
+                    value={formData.gross_weight}
+                    onChange={e => setFormData({ ...formData, gross_weight: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Tare Wt (KG)</label>
+                  <input
+                    type="number"
+                    placeholder="10000"
+                    value={formData.value_tare}
+                    onChange={e => setFormData({ ...formData, value_tare: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Moisture Ded %</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="0.5"
+                    value={formData.moisture_deduction_pct}
+                    onChange={e => setFormData({ ...formData, moisture_deduction_pct: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Rate (৳/kg)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={formData.rate_per_kg}
+                    onChange={e => setFormData({ ...formData, rate_per_kg: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Yard Bay Allocation</label>
+                  <select
+                    value={formData.yard_location}
+                    onChange={e => setFormData({ ...formData, yard_location: e.target.value })}
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                  >
+                    {yardBays.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Real-time Dynamic Calculation Summary */}
+              {rawNet > 0 && (
+                <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 flex justify-between items-center text-xs font-mono">
+                  <div>
+                    <span className="text-slate-500 font-sans block">Net Calculated Weight:</span>
+                    <strong className="text-base font-bold text-[#B48F48] font-mono">{netScrapCalculated.toLocaleString()} KG ({(netScrapCalculated/1000).toFixed(2)} MT)</strong>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-500 font-sans block">Total Consignment Cost:</span>
+                    <strong className="text-base font-bold text-emerald-700 font-mono">৳{totalCostCalculated.toLocaleString()}</strong>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Confirm & Log Consignment
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-          >
-            + Add Column
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
-          >
-            Export Excel
-          </button>
-          <button 
-            onClick={handleAddRow}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-          >
-            + Add Row
-          </button>
-        </div>
-      </div>
-
-      {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
-        <input 
-          type="text" 
-          placeholder="Filter by Supplier Name, or Challan/Truck No..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
-        />
-        <select 
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
-        >
-          <option value="">All Categories</option>
-          {categories.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
-        </select>
-      </div>
-
-      {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1250px] table-fixed">
-            <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
-                <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
-                  Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
-                </th>
-                <th className={`w-52 ${cellPadding}`}>
-                  Supplier Name <button onClick={() => handleFillDown('supplier_name')} title="Fill Down First Row Value" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-40 ${cellPadding}`}>Scrap Category</th>
-                <th className={`w-36 ${cellPadding} text-right`}>
-                  Rcv Weight (KG) <button onClick={() => handleFillDown('scrap_rcv_kg')} title="Fill Down First Row Value" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-36 ${cellPadding}`}>
-                  Challan/Truck No <button onClick={() => handleFillDown('truck_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Gross (KG) <button onClick={() => handleFillDown('gross_weight')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Tare (KG) <button onClick={() => handleFillDown('value_tare')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Rate/KG <button onClick={() => handleFillDown('rate_per_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-36 ${cellPadding} text-right`}>Total Cost</th>
-                <th className={`w-32 ${cellPadding}`}>
-                  Yard Location <button onClick={() => handleFillDown('yard_location')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                
-                {/* Dynamic Columns */}
-                {customCols.map(col => (
-                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
-                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-mono text-xs">
-              {filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan={11 + customCols.length} className="text-center py-8 text-xs text-slate-400 font-mono">No records found.</td>
-                </tr>
-              ) : filteredData.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-9">
-                  
-                  {/* Inline Delete Button */}
-                  <td className="w-14 text-center py-1">
-                    <button 
-                      onClick={() => handleDeleteRow(row.id)}
-                      className="text-red-500 hover:text-red-750 font-bold text-xs"
-                      title="Delete Row"
-                    >
-                      ✕
-                    </button>
-                  </td>
-
-                  {/* Date Column */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center">
-                      {editingCell?.id === row.id && editingCell?.field === 'date' ? (
-                        <input 
-                          type="date" 
-                          value={editValue} 
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setEditValue(val);
-                            if (val && val.length === 10) {
-                              saveInlineEdit(row.id, 'date', false, val);
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              saveInlineEdit(row.id, 'date', false, editValue);
-                            } else if (e.key === 'Escape') {
-                              setEditingCell(null);
-                            }
-                          }}
-                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Supplier Name Column */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center">
-                      {editingCell?.id === row.id && editingCell?.field === 'supplier_name' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'supplier_name')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'supplier_name')}
-                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'supplier_name', row.supplier_name)}>{row.supplier_name}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Scrap Category select */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center">
-                      <select
-                        value={row.scrap_category}
-                        onChange={(e) => {
-                          const updated = data.map(r => r.id === row.id ? { ...r, scrap_category: e.target.value } : r);
-                          saveToStorage(updated);
-                        }}
-                        className="w-full bg-transparent text-xs py-0.5 font-sans border-0 focus:outline-none font-bold text-[#B48F48] truncate"
-                      >
-                        {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                      </select>
-                    </div>
-                  </td>
-
-                  {/* Received Weight (Calculated/Editable) */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center justify-end text-right">
-                      {editingCell?.id === row.id && editingCell?.field === 'scrap_rcv_kg' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'scrap_rcv_kg')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'scrap_rcv_kg')}
-                          className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-semibold" onClick={() => startEdit(row.id, 'scrap_rcv_kg', row.scrap_rcv_kg)}>{row.scrap_rcv_kg.toLocaleString()}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Challan/Truck No */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center">
-                      {editingCell?.id === row.id && editingCell?.field === 'truck_no' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'truck_no')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'truck_no')}
-                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'truck_no', row.truck_no)}>{row.truck_no}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Gross Weight */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center justify-end text-right">
-                      {editingCell?.id === row.id && editingCell?.field === 'gross_weight' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'gross_weight')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'gross_weight')}
-                          className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'gross_weight', row.gross_weight)}>{row.gross_weight.toLocaleString()}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Tare Weight */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center justify-end text-right">
-                      {editingCell?.id === row.id && editingCell?.field === 'value_tare' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'value_tare')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'value_tare')}
-                          className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'value_tare', row.value_tare)}>{row.value_tare.toLocaleString()}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Rate per KG */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center justify-end text-right">
-                      {editingCell?.id === row.id && editingCell?.field === 'rate_per_kg' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'rate_per_kg')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'rate_per_kg')}
-                          className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'rate_per_kg', row.rate_per_kg)}>৳{row.rate_per_kg}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Total Cost (Calculated) */}
-                  <td className={`${cellPadding} text-right font-bold text-emerald-600`}>
-                    <span className="h-7 flex items-center justify-end px-1 select-none">৳{row.total_cost.toLocaleString()}</span>
-                  </td>
-
-                  {/* Yard Location */}
-                  <td className={cellPadding}>
-                    <div className="relative w-full h-7 flex items-center">
-                      {editingCell?.id === row.id && editingCell?.field === 'yard_location' ? (
-                        <input 
-                          type="text" 
-                          value={editValue} 
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => saveInlineEdit(row.id, 'yard_location')}
-                          onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'yard_location')}
-                          className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'yard_location', row.yard_location)}>{row.yard_location}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Dynamic Column cells */}
-                  {customCols.map(col => (
-                    <td key={col} className={`${cellPadding} bg-amber-50/10`}>
-                      <div className="relative w-full h-7 flex items-center">
-                        {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                          <input 
-                            type="text" 
-                            value={editValue} 
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => saveInlineEdit(row.id, col, true)}
-                            onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)}
-                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10"
-                            autoFocus
-                          />
-                        ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
-                        )}
-                      </div>
-                    </td>
-                  ))}
-
-                </tr>
-              ))}
-            </tbody>
-            
-            {/* Table Summary Footer */}
-            <tfoot>
-              <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200 text-xs">
-                <td className={cellPadding} colSpan={4}>Totals</td>
-                <td className={`${cellPadding} text-right font-bold`}>{totalRcv.toLocaleString()} kg</td>
-                <td colSpan={4}></td>
-                <td className={`${cellPadding} text-right font-black text-emerald-600`}>৳{totalCost.toLocaleString()}</td>
-                <td colSpan={1 + customCols.length}></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
+      )}
 
     </div>
   );
