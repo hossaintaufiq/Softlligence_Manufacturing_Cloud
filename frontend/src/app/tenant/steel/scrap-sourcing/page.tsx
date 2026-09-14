@@ -37,7 +37,7 @@ export default function ScrapSourcingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Form State for new scrap entry
+  // Form State
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     supplier_name: '',
@@ -182,125 +182,117 @@ export default function ScrapSourcingPage() {
   };
 
   return (
-    <div className="space-y-7 animate-fade-in text-slate-800 pb-16">
+    <div className="space-y-6 animate-fade-in text-slate-900 pb-16">
       
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex items-center space-x-3 animate-zoom-in">
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#C5A059] flex items-center space-x-3 animate-zoom-in">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-xs font-semibold font-mono tracking-wide">{toastMessage}</span>
+          <span className="text-sm font-semibold font-mono tracking-wide">{toastMessage}</span>
         </div>
       )}
 
-      {/* HERO & YARD CONTEXT BANNER WITH REAL INDUSTRIAL IMAGERY */}
-      <div className="relative overflow-hidden bg-slate-900 rounded-3xl text-white shadow-xl border border-slate-800">
-        <div className="absolute inset-0 opacity-25 mix-blend-luminosity bg-cover bg-center pointer-events-none" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80')` }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent"></div>
-
-        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center space-x-2.5">
-              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase px-3 py-1 rounded-full font-mono tracking-wide">
-                Stage 01 • Raw Material Sourcing
-              </span>
-              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-3 py-1 rounded-full font-mono flex items-center">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span> Weighbridge Active
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-sans">
-              Scrap Yard Sourcing & Inbound Logistics
-            </h1>
-            <p className="text-sm text-slate-300 font-sans leading-relaxed">
-              Supervise scrap truck weigh-ins, moisture/dust tare deductions, yard bay allocations, and HMS quality gradings.
-            </p>
+      {/* CLEAN ENTERPRISE PAGE HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono">
+            <span>Raw Material Sourcing</span>
+            <span>•</span>
+            <span className="text-slate-500">Stage 01</span>
+            <span>•</span>
+            <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono">Weighbridge Active</span>
           </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1 font-sans">
+            Scrap Yard Sourcing & Logistics
+          </h1>
+          <p className="text-sm text-slate-500 mt-1 font-sans">
+            Manage weighbridge gross/tare measurements, moisture deductions, yard allocations, and supplier purchase orders.
+          </p>
+        </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleExportExcel}
-              className="px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-600 transition-all cursor-pointer shadow-xs"
-            >
-              Export Manifest
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-amber-900/25 transition-all cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              <span>Log Scrap Consignment</span>
-            </button>
-          </div>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleExportExcel}
+            className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
+          >
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export Manifest
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center space-x-2 shadow-sm transition-all cursor-pointer"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Log Scrap Consignment</span>
+          </button>
         </div>
       </div>
 
-      {/* SHORT MINI-DASHBOARD (4 KPI METRIC CARDS) */}
+      {/* 4 KPI METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Total Intake Volume</span>
-            <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Yard Net</span>
+            <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200 font-bold">Yard Net</span>
           </div>
           <div>
             <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalScrapKg / 1000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">▲ {filteredData.length} Trucks Cleared</p>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1">▲ {filteredData.length} Trucks Cleared</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#C5A059]"></div>
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Cumulative Value</span>
-            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 font-bold">Cost</span>
+            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 font-bold">Cost</span>
           </div>
           <div>
             <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">৳{(totalCostBdt / 100000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Lakh</span>
             </div>
-            <p className="text-xs text-slate-500 font-mono mt-1.5">Weighted Rate: ৳{avgRatePerKg}/kg</p>
+            <p className="text-xs text-slate-500 font-mono mt-1">Weighted Rate: ৳{avgRatePerKg}/kg</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Active Yard Locations</span>
-            <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200 font-bold">Bays</span>
+            <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200 font-bold">Bays</span>
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900 font-mono">5 Dedicated Bays</div>
-            <p className="text-xs text-indigo-600 font-semibold font-mono mt-1.5">Bay A & B at 74% Capacity</p>
+            <p className="text-xs text-indigo-600 font-semibold font-mono mt-1">Bay A & B at 74% Capacity</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-500"></div>
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Vendor Reliability</span>
-            <span className="text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-md border border-cyan-200 font-bold">Suppliers</span>
+            <span className="text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded border border-cyan-200 font-bold">Suppliers</span>
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900 font-mono">{uniqueSuppliers} Registered Vendors</div>
-            <p className="text-xs text-slate-500 font-mono mt-1.5">Avg Moisture: 0.4% (Within Spec)</p>
+            <p className="text-xs text-slate-500 font-mono mt-1">Avg Moisture: 0.4% (Within Spec)</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-500"></div>
         </div>
 
       </div>
 
       {/* FILTER & VIEW CONTROLS */}
-      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-3 flex-1 min-w-[260px]">
           <div className="relative w-full max-w-md">
             <input
@@ -311,7 +303,7 @@ export default function ScrapSourcingPage() {
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white transition-all"
             />
             <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
 
@@ -346,11 +338,11 @@ export default function ScrapSourcingPage() {
       {viewMode === 'cards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map(item => (
-            <div key={item.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
+            <div key={item.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-xs font-semibold text-slate-400 font-mono uppercase">{item.date} • {item.truck_no}</span>
-                  <h3 className="text-base font-bold text-slate-900 mt-0.5">{item.supplier_name}</h3>
+                  <h3 className="text-base font-bold text-slate-900 mt-0.5 font-sans">{item.supplier_name}</h3>
                 </div>
                 <span className={`text-xs font-semibold uppercase px-2.5 py-1 rounded-lg font-mono ${
                   item.quality_grade === 'Premium Heavy' ? 'bg-amber-100 text-amber-900 border border-amber-200' :
@@ -402,7 +394,7 @@ export default function ScrapSourcingPage() {
 
       {/* ENTERPRISE GRID TABLE VIEW */}
       {viewMode === 'table' && (
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm font-sans border-collapse">
               <thead>
@@ -425,7 +417,7 @@ export default function ScrapSourcingPage() {
                   <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-4 py-3 text-slate-700">{item.date}</td>
                     <td className="px-4 py-3 font-semibold text-slate-900 font-sans">{item.supplier_name}</td>
-                    <td className="px-4 py-3 text-slate-600">{item.scrap_category}</td>
+                    <td className="px-4 py-3 text-slate-600 font-sans">{item.scrap_category}</td>
                     <td className="px-4 py-3 text-slate-500 font-semibold">{item.truck_no}</td>
                     <td className="px-4 py-3 text-right">{item.gross_weight.toLocaleString()}</td>
                     <td className="px-4 py-3 text-right text-slate-400">{item.value_tare.toLocaleString()}</td>
@@ -444,61 +436,69 @@ export default function ScrapSourcingPage() {
         </div>
       )}
 
-      {/* MODAL: LOG NEW SCRAP INTAKE */}
+      {/* CLEAN ENTERPRISE MODAL: LOG NEW SCRAP INTAKE */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-7 shadow-2xl border border-slate-200 animate-zoom-in space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in">
+            
+            {/* Crisp Modal Header */}
+            <div className="px-7 py-5 border-b border-slate-150 flex items-center justify-between bg-white">
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-sans">Weighbridge Scrap Consignment Intake</h3>
+                <h3 className="text-lg font-bold text-slate-900 font-sans">Weighbridge Scrap Consignment Intake</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Record gross and tare weighbridge weights to compute net melt feedstock.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">✕</button>
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors text-base"
+              >
+                ✕
+              </button>
             </div>
 
-            <form onSubmit={handleCreateScrap} className="space-y-4 text-xs font-sans">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleCreateScrap} className="p-7 space-y-5 text-sm font-sans bg-white">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Intake Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Intake Date</label>
                   <input
                     type="date"
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Truck Registration No</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Truck Registration No</label>
                   <input
                     type="text"
                     placeholder="e.g. DHAKA-METRO-15-1024"
                     value={formData.truck_no}
                     onChange={e => setFormData({ ...formData, truck_no: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold uppercase focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Supplier Name</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Supplier Name</label>
                   <input
                     type="text"
                     placeholder="e.g. Metal Recyclers Corp"
                     value={formData.supplier_name}
                     onChange={e => setFormData({ ...formData, supplier_name: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Scrap Category</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Scrap Category</label>
                   <select
                     value={formData.scrap_category}
                     onChange={e => setFormData({ ...formData, scrap_category: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                   >
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -507,58 +507,58 @@ export default function ScrapSourcingPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Gross Wt (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Gross Wt (KG)</label>
                   <input
                     type="number"
                     placeholder="25000"
                     value={formData.gross_weight}
                     onChange={e => setFormData({ ...formData, gross_weight: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Tare Wt (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Tare Wt (KG)</label>
                   <input
                     type="number"
                     placeholder="10000"
                     value={formData.value_tare}
                     onChange={e => setFormData({ ...formData, value_tare: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Moisture Ded %</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Moisture %</label>
                   <input
                     type="number"
                     step="0.1"
                     placeholder="0.5"
                     value={formData.moisture_deduction_pct}
                     onChange={e => setFormData({ ...formData, moisture_deduction_pct: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Rate (৳/kg)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Rate (৳/kg)</label>
                   <input
                     type="number"
                     step="0.5"
                     value={formData.rate_per_kg}
                     onChange={e => setFormData({ ...formData, rate_per_kg: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Yard Bay Allocation</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase">Yard Bay Allocation</label>
                   <select
                     value={formData.yard_location}
                     onChange={e => setFormData({ ...formData, yard_location: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
                   >
                     {yardBays.map(b => <option key={b} value={b}>{b}</option>)}
                   </select>
@@ -567,7 +567,7 @@ export default function ScrapSourcingPage() {
 
               {/* Real-time Dynamic Calculation Summary */}
               {rawNet > 0 && (
-                <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 flex justify-between items-center text-xs font-mono">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
                   <div>
                     <span className="text-slate-500 font-sans block">Net Calculated Weight:</span>
                     <strong className="text-base font-bold text-[#B48F48] font-mono">{netScrapCalculated.toLocaleString()} KG ({(netScrapCalculated/1000).toFixed(2)} MT)</strong>
@@ -579,21 +579,23 @@ export default function ScrapSourcingPage() {
                 </div>
               )}
 
-              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+              {/* Clean Modal Action Footer */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-150">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all cursor-pointer"
+                  className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-sm transition-all cursor-pointer shadow-2xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold rounded-xl text-sm shadow-sm transition-all cursor-pointer"
                 >
                   Confirm & Log Consignment
                 </button>
               </div>
+
             </form>
           </div>
         </div>

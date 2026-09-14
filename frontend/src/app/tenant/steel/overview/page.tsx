@@ -1518,34 +1518,36 @@ export default function SteelOverviewDashboard() {
 
       {/* MODAL: QUICK HEAT ENTRY TO LOG DIRECTLY INTO SYSTEM */}
       {isQuickHeatModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 animate-zoom-in space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200/90 animate-zoom-in space-y-5 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#FAF6EE] text-[#B48F48] flex items-center justify-center font-bold">
-                  ⚡
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-[#B48F48] flex items-center justify-center font-bold border border-amber-500/20">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 font-mono">Log New Smelting & Tapping Heat</h3>
-                  <p className="text-[10px] text-slate-400">Instantly record heat production and synchronize mill dashboard.</p>
+                  <h3 className="text-base font-bold text-slate-900 font-sans">Log Induction Smelting Heat</h3>
+                  <p className="text-xs text-slate-500 font-sans">Synchronize live plant telemetry with tapped heat records.</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsQuickHeatModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold transition-all cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddQuickHeat} className="space-y-4 text-xs font-mono">
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleAddQuickHeat} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Furnace Station</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Furnace Station</label>
                   <select
                     value={newHeat.furnace_no}
                     onChange={e => setNewHeat({ ...newHeat, furnace_no: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="Furnace 01">Furnace 01 (15 Ton)</option>
                     <option value="Furnace 02">Furnace 02 (15 Ton)</option>
@@ -1553,109 +1555,110 @@ export default function SteelOverviewDashboard() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Heat Number</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Heat Number</label>
                   <input
                     type="text"
                     value={newHeat.heat_no}
                     onChange={e => setNewHeat({ ...newHeat, heat_no: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold uppercase"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-sans text-slate-900 uppercase font-mono focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Scrap In (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Scrap Charged (KG)</label>
                   <input
                     type="number"
                     value={newHeat.scrap_input_kg}
                     onChange={e => setNewHeat({ ...newHeat, scrap_input_kg: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Liquid Out (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Liquid Steel (KG)</label>
                   <input
                     type="number"
                     value={newHeat.liquid_steel_tapped_kg}
                     onChange={e => setNewHeat({ ...newHeat, liquid_steel_tapped_kg: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Temp (°C)</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Tapping Temp (°C)</label>
                   <input
                     type="number"
                     value={newHeat.tapping_temp_c}
                     onChange={e => setNewHeat({ ...newHeat, tapping_temp_c: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Power (kWh)</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Power Units (kWh)</label>
                   <input
                     type="number"
                     value={newHeat.power_consumed_kwh}
                     onChange={e => setNewHeat({ ...newHeat, power_consumed_kwh: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Runtime (Min)</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Runtime (Mins)</label>
                   <input
                     type="number"
                     value={newHeat.runtime_min}
                     onChange={e => setNewHeat({ ...newHeat, runtime_min: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Shift / Master</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Shift / Lead</label>
                   <select
                     value={newHeat.shift_id}
                     onChange={e => setNewHeat({ ...newHeat, shift_id: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
-                    <option value="A">Shift A (Kabir)</option>
-                    <option value="B">Shift B (Zahirul)</option>
-                    <option value="C">Shift C (Ataur)</option>
+                    <option value="A">Shift A (Kabir Ahmed)</option>
+                    <option value="B">Shift B (Zahirul Haque)</option>
+                    <option value="C">Shift C (Ataur Rahman)</option>
                   </select>
                 </div>
               </div>
 
-              <div className="bg-[#FAF6EE] p-3 rounded-2xl border border-[#C5A059]/20 flex justify-between items-center text-xs">
-                <span className="text-slate-600">Calculated Smelting Yield:</span>
-                <span className="font-black text-[#B48F48]">
+              {/* Dynamic Yield & SEC calculation strip */}
+              <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-3.5 flex justify-between items-center text-xs font-mono">
+                <span className="text-slate-600 font-medium">Calculated Smelting Yield:</span>
+                <span className="font-bold text-[#B48F48] text-sm">
                   {newHeat.scrap_input_kg > 0 ? ((newHeat.liquid_steel_tapped_kg / newHeat.scrap_input_kg) * 100).toFixed(2) : 0}%
                 </span>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsQuickHeatModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl"
+                  className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-gradient-to-r from-[#B48F48] to-[#C5A059] text-slate-950 font-black rounded-xl shadow-md hover:opacity-95"
+                  className="px-5 py-2 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl shadow-xs transition-all cursor-pointer"
                 >
-                  Record & Commit Heat
+                  Commit Heat Record
                 </button>
               </div>
             </form>

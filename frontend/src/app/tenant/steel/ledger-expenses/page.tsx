@@ -249,12 +249,12 @@ export default function LedgerExpensesPage() {
       
       {/* Custom Modal Dialog Box */}
       {dialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-4 animate-zoom-in my-8">
+            <h3 className="text-base font-bold text-slate-900 font-sans border-b border-slate-100 pb-2.5">
               {dialog.title}
             </h3>
-            <p className="text-xs text-slate-655 font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans leading-relaxed">
               {dialog.message}
             </p>
             {dialog.type === 'prompt' && (
@@ -262,7 +262,7 @@ export default function LedgerExpensesPage() {
                 type="text" 
                 value={dialog.value || ''}
                 onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                className="w-full bg-white border border-slate-300 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
                 placeholder="Type dynamic column name..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -273,10 +273,10 @@ export default function LedgerExpensesPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
               <button 
                 onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+                className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-white"
               >
                 Cancel
               </button>
@@ -285,7 +285,7 @@ export default function LedgerExpensesPage() {
                   dialog.onConfirm(dialog.value);
                   setDialog(null);
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="px-5 py-2 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -294,47 +294,109 @@ export default function LedgerExpensesPage() {
         </div>
       )}
 
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+      {/* Enterprise Header Bar */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Factory Ledger Expenses</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs factory cash vouchers, consumable spares payments, utilities bills, auxiliary expenses, and transaction logs.</p>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Cost Accounting & CAPEX</span>
+            <span>•</span>
+            <span>Plant Ledger & Vouchers</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Factory Ledger Expenses</h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">Disbursement vouchers for refractory linings, ferroalloy additives, mechanical mill spares, and plant auxiliary operational costs.</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Column
+            <span>+ Add Column</span>
           </button>
           <button 
             onClick={handleExportExcel}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            Export Excel
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Export XLS</span>
           </button>
           <button 
             onClick={handleAddRow}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Row
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Record Voucher</span>
           </button>
         </div>
       </div>
 
+      {/* 4 Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Total Expenses</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">This Month</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">৳{(totalAmount / 1000).toFixed(0)}k</span>
+            <span className="text-xs text-slate-400 font-mono">BDT Total</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Spares & Hardware</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Maintenance</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              ৳{(filteredData.filter(r => r.expense_head.includes('Mechanical') || r.expense_head.includes('Electrical')).reduce((acc, r) => acc + (Number(r.amount_bdt) || 0), 0) / 1000).toFixed(0)}k
+            </span>
+            <span className="text-xs text-slate-400 font-mono">BDT Spent</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Refractory & Lining</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">Furnace</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              ৳{(filteredData.filter(r => r.expense_head.includes('Refractory')).reduce((acc, r) => acc + (Number(r.amount_bdt) || 0), 0) / 1000).toFixed(0)}k
+            </span>
+            <span className="text-xs text-slate-400 font-mono">BDT Lining</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Vouchers Logged</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Audited</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-emerald-600">{filteredData.length}</span>
+            <span className="text-xs text-emerald-600 font-mono font-medium">Valid Vouchers</span>
+          </div>
+        </div>
+      </div>
+
       {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs">
         <input 
           type="text" 
           placeholder="Filter by Head, Voucher, Details, or Payee..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="flex-1 bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         />
         <select 
           value={modeFilter}
           onChange={(e) => setModeFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         >
           <option value="">All Payment Modes</option>
           {paymentModes.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
@@ -342,34 +404,34 @@ export default function LedgerExpensesPage() {
       </div>
 
       {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px] table-fixed">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
-                  Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
+                <th className={`w-32 ${cellPadding} cursor-pointer hover:text-slate-900 transition-colors`} onClick={() => handleSort('date')}>
+                  Date {sortField === 'date' && (sortDir === 'asc' ? '↑' : '↓')}
                 </th>
-                <th className={`w-48 ${cellPadding}`}>
-                  Expense Head (Consumable Group) <button onClick={() => handleFillDown('expense_head')} title="Fill Down First Row Value" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                <th className={`w-44 ${cellPadding}`}>Expense Head</th>
+                <th className={`w-64 ${cellPadding}`}>
+                  Particulars Details
                 </th>
-                <th className={`w-52 ${cellPadding}`}>
-                  Particulars Details <button onClick={() => handleFillDown('particular_details')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                <th className={`w-36 ${cellPadding}`}>
+                  Voucher No
                 </th>
-                <th className={`w-28 ${cellPadding}`}>Voucher No</th>
-                <th className={`w-32 ${cellPadding} text-right`}>
-                  Amount (BDT) <button onClick={() => handleFillDown('amount_bdt')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                <th className={`w-32 ${cellPadding} text-right text-emerald-700 font-bold`}>
+                  Amount (BDT)
                 </th>
                 <th className={`w-40 ${cellPadding}`}>
-                  Paid To <button onClick={() => handleFillDown('paid_to')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Paid To
                 </th>
                 <th className={`w-36 ${cellPadding}`}>Payment Mode</th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`w-32 ${cellPadding} text-slate-650 bg-amber-50/30`}>
-                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  <th key={col} className={`w-32 ${cellPadding} text-amber-900 bg-amber-50/60 font-semibold`}>
+                    {col}
                   </th>
                 ))}
               </tr>

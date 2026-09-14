@@ -71,7 +71,7 @@ export default function BilletCCMPage() {
     onConfirm: (val?: string) => void;
   } | null>(null);
 
-  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-2 text-xs';
+  const cellPadding = isCompact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm';
   const sizes = ['100x100mm x 6m', '125x125mm x 6m', '130x130mm x 6m', '150x150mm x 6m'];
 
   useEffect(() => {
@@ -370,16 +370,16 @@ export default function BilletCCMPage() {
   const latestStockKg = filteredData.length > 0 ? filteredData[0].billet_stock_kg : 0;
 
   return (
-    <div className="space-y-6 animate-fade-in text-slate-800">
+    <div className="space-y-7 animate-fade-in text-slate-800 pb-16">
       
       {/* Dialog */}
       {dialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+          <div className="bg-white border border-slate-200 p-7 rounded-3xl shadow-2xl w-full max-w-md space-y-4 animate-scale-in">
+            <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
               {dialog.title}
             </h3>
-            <p className="text-xs text-slate-600 font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans leading-relaxed">
               {dialog.message}
             </p>
             {dialog.type === 'prompt' && (
@@ -387,7 +387,7 @@ export default function BilletCCMPage() {
                 type="text" 
                 value={dialog.value || ''}
                 onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                className="w-full bg-slate-50 border border-slate-200 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
                 placeholder="Type column header..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -398,10 +398,10 @@ export default function BilletCCMPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-3 pt-3">
               <button 
                 onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
               >
                 Cancel
               </button>
@@ -410,7 +410,7 @@ export default function BilletCCMPage() {
                   dialog.onConfirm(dialog.value);
                   setDialog(null);
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -419,64 +419,43 @@ export default function BilletCCMPage() {
         </div>
       )}
 
-      {/* Modern Hero Banner with Image & Diagnostics */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl border border-slate-800">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity transform scale-105 transition-transform duration-1000"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80')` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent" />
-        
-        <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider font-mono">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Continuous Casting Machine • 2-Strand Billet CCM
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white font-sans">
-              Billet CCM Casting Operations
-            </h1>
-            <p className="text-xs md:text-sm text-slate-300 font-sans leading-relaxed">
-              Real-time monitoring of liquid steel casting into square billets, mold lubrication parameters, tundish superheats, cropping scull loss, and automated mill feed inventory.
-            </p>
+      {/* CLEAN ENTERPRISE HEADER BAR */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Steel Production</span>
+            <span className="text-slate-300">/</span>
+            <span>Stage 03</span>
+            <span className="text-slate-300">/</span>
+            <span className="bg-amber-100/70 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-mono text-[11px]">Continuous Casting Machine</span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#B48F48] hover:from-[#B48F48] hover:to-[#9E7A37] text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-900/30 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Log Cast Heat
-            </button>
-            <button 
-              onClick={handleExportExcel}
-              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold rounded-xl backdrop-blur-xs transition-all cursor-pointer flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export CSV
-            </button>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">
+            Billet CCM Casting Operations
+          </h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">
+            Real-time monitoring of liquid steel casting into square billets, mold lubrication parameters, tundish superheats, and mill feed inventory.
+          </p>
         </div>
 
-        {/* Status Bar */}
-        <div className="relative z-10 bg-slate-950/60 border-t border-white/10 px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-300">
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span> CCM Strand #1 & #2: ACTIVE (1.85 m/min)
-            </span>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <span className="text-amber-400">Tundish Superheat: +32°C (Optimal)</span>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <span className="text-slate-300">Mold Level Control: Auto-Radiometric</span>
-          </div>
-          <div className="text-slate-400">
-            Last Heat Cast: <span className="text-white font-bold">{data[0]?.heat_no || 'N/A'}</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={handleExportExcel}
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export CSV</span>
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Log Cast Heat</span>
+          </button>
         </div>
       </div>
 
@@ -484,115 +463,94 @@ export default function BilletCCMPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Billets Produced */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Billet Cast Total</p>
-            <span className="p-2 rounded-xl bg-amber-50 text-[#B48F48]">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Billet Cast Total</span>
+            <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Cast Output</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {(totalOutputKg / 1000).toFixed(2)} <span className="text-sm font-semibold text-slate-500">MT</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalOutputKg / 1000).toFixed(2)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
               <span>Charged: {(totalInputKg / 1000).toFixed(2)} MT</span>
-              <span className="text-emerald-600 font-bold">{filteredData.length} Heats Cast</span>
+              <span className="text-emerald-600 font-semibold">{filteredData.length} Heats</span>
             </div>
           </div>
         </div>
 
         {/* Card 2: Casting Yield */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">CCM Casting Yield</p>
-            <span className={`p-2 rounded-xl ${avgYield >= 97 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>CCM Casting Yield</span>
+            <span className={`px-2 py-0.5 rounded-md border text-[11px] font-bold ${avgYield >= 97 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+              {avgYield >= 97 ? 'Optimal' : 'Below Target'}
             </span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {avgYield}%
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgYield}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">%</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Benchmark: 97.0%</span>
-              <span className={avgYield >= 97 ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}>
-                {avgYield >= 97 ? '✓ Above Target' : '⚠ Below Target'}
-              </span>
-            </div>
+            <p className="text-xs text-slate-500 font-mono mt-1">Benchmark: 97.0% Casting Recovery</p>
           </div>
         </div>
 
         {/* Card 3: Scull & Cropping Loss */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Scull & Crop Loss</p>
-            <span className="p-2 rounded-xl bg-rose-50 text-rose-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Scull & Crop Loss</span>
+            <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Crop Scrap</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-rose-600 font-mono">
-              {(totalScullKg / 1000).toFixed(2)} <span className="text-sm font-semibold text-slate-500">MT</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-rose-600 font-mono tracking-tight">{(totalScullKg / 1000).toFixed(2)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Loss Rate: {totalInputKg > 0 ? ((totalScullKg / totalInputKg) * 100).toFixed(2) : 0}%</span>
-              <span className="text-slate-400">Recycled to Scrap</span>
-            </div>
+            <p className="text-xs text-slate-500 font-mono mt-1">Loss Rate: {totalInputKg > 0 ? ((totalScullKg / totalInputKg) * 100).toFixed(2) : 0}% (Recycled to Yard)</p>
           </div>
         </div>
 
         {/* Card 4: Billet Yard Buffer */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Running Billet Stock</p>
-            <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Running Billet Stock</span>
+            <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[11px] font-bold">Yard Buffer</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {(latestStockKg / 1000).toFixed(1)} <span className="text-sm font-semibold text-slate-500">MT</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(latestStockKg / 1000).toFixed(1)}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Rolling Buffer: Ready</span>
-              <span className="text-emerald-600 font-bold">● High Capacity</span>
-            </div>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1">● Rolling Feed Readied</p>
           </div>
         </div>
 
       </div>
 
       {/* Controls & Filter Bar */}
-      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         
         {/* Search & Size Filter */}
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative flex-1 min-w-[240px]">
             <input 
               type="text" 
               placeholder="Search by Heat No or Grade (e.g. H-260820A, Prime 500W)..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-xs pl-9 pr-3 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+              className="w-full bg-slate-50 border border-slate-200 text-sm pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] focus:bg-white font-sans transition-all"
             />
-            <svg className="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
 
           <select 
             value={sizeFilter}
             onChange={(e) => setSizeFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-medium text-slate-700"
+            className="bg-slate-50 border border-slate-200 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans text-slate-700"
           >
             <option value="">All Billet Sizes</option>
             {sizes.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
@@ -601,16 +559,16 @@ export default function BilletCCMPage() {
 
         {/* View Toggle & Actions */}
         <div className="flex items-center gap-2">
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1">
+          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 font-sans text-xs">
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
               Cast Cards
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
               Data Ledger
             </button>
@@ -618,13 +576,13 @@ export default function BilletCCMPage() {
 
           <button 
             onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white hidden sm:inline-flex items-center gap-1.5"
+            className="px-3.5 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white hidden sm:inline-flex items-center gap-1.5"
           >
             + Column
           </button>
           <button 
             onClick={handleAddRow}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
           >
             + Row
           </button>
@@ -633,19 +591,19 @@ export default function BilletCCMPage() {
 
       {/* Main Content: Card View or Grid View */}
       {viewMode === 'cards' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map((row) => (
-            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-[#C5A059]/40 transition-all relative overflow-hidden group space-y-4">
               
-              <div className="flex justify-between items-start mb-3">
+              <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-base font-black text-slate-900">{row.heat_no}</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-50 text-[#B48F48] border border-amber-200/60 font-mono">
+                    <span className="font-mono text-base font-bold text-slate-900">{row.heat_no}</span>
+                    <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-50 text-[#B48F48] border border-amber-200 font-mono">
                       {row.furnace_no}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 font-sans mt-0.5">{row.date} • {row.quality_grade || 'Prime 500W'}</p>
+                  <p className="text-xs text-slate-400 font-sans mt-0.5">{row.date} • {row.quality_grade || 'Prime 500W'}</p>
                 </div>
                 <button 
                   onClick={() => handleDeleteRow(row.id)}
@@ -659,51 +617,51 @@ export default function BilletCCMPage() {
               </div>
 
               {/* Billet Size Badge */}
-              <div className="mb-4 bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center justify-between">
+              <div className="bg-slate-50 border border-slate-200/70 rounded-xl p-3.5 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-mono text-slate-400 font-bold block">Section Size</span>
-                  <span className="text-xs font-black text-slate-800">{row.billet_size_section}</span>
+                  <span className="text-xs uppercase font-mono text-slate-400 font-semibold block">Section Size</span>
+                  <span className="text-sm font-bold text-slate-900 font-sans">{row.billet_size_section}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] uppercase font-mono text-slate-400 font-bold block">Tundish Superheat</span>
-                  <span className="text-xs font-bold text-amber-600 font-mono">{row.tundish_temp || 1535}°C</span>
+                  <span className="text-xs uppercase font-mono text-slate-400 font-semibold block">Tundish Superheat</span>
+                  <span className="text-sm font-bold text-amber-600 font-mono">{row.tundish_temp || 1535}°C</span>
                 </div>
               </div>
 
               {/* Flow Weights */}
-              <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-100 font-mono text-center">
+              <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 font-mono text-center">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Tapped In</span>
-                  <p className="text-xs font-bold text-slate-700 mt-0.5">{(row.steel_tapped_input_kg / 1000).toFixed(2)} MT</p>
+                  <span className="text-xs text-slate-400 uppercase font-sans">Tapped In</span>
+                  <p className="text-xs font-bold text-slate-800 mt-0.5">{(row.steel_tapped_input_kg / 1000).toFixed(2)} MT</p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Billet Out</span>
+                  <span className="text-xs text-slate-400 uppercase font-sans">Billet Out</span>
                   <p className="text-xs font-bold text-emerald-600 mt-0.5">{(row.billet_output_kg / 1000).toFixed(2)} MT</p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Scull Loss</span>
+                  <span className="text-xs text-slate-400 uppercase font-sans">Scull Loss</span>
                   <p className="text-xs font-bold text-rose-500 mt-0.5">{row.scull_loss_kg} kg</p>
                 </div>
               </div>
 
               {/* Yield Progress Bar */}
-              <div className="mt-4">
+              <div>
                 <div className="flex justify-between text-xs font-mono mb-1">
-                  <span className="text-slate-500">Casting Yield</span>
+                  <span className="text-slate-500 font-sans">Casting Yield</span>
                   <span className="font-bold text-emerald-600">{row.billet_yield_pct}%</span>
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#C5A059] to-emerald-500 rounded-full transition-all"
+                    className="h-full bg-emerald-500 rounded-full transition-all"
                     style={{ width: `${Math.min(100, row.billet_yield_pct)}%` }}
                   />
                 </div>
               </div>
 
               {/* Footer info */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
                 <span>Speed: {row.casting_speed || 1.85} m/min</span>
-                <span>Stock: <strong className="text-slate-800 font-bold">{(row.billet_stock_kg / 1000).toFixed(1)} MT</strong></span>
+                <span>Stock: <strong className="text-slate-900 font-bold">{(row.billet_stock_kg / 1000).toFixed(1)} MT</strong></span>
               </div>
 
             </div>
@@ -713,49 +671,49 @@ export default function BilletCCMPage() {
         /* Full-Screen Sheet Grid Table */
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[1150px] table-fixed">
+            <table className="w-full text-left border-collapse min-w-[1150px] table-fixed text-sm font-sans">
               <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 font-semibold select-none">
                   <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
                   <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
                     Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
                   </th>
                   <th className={`w-32 ${cellPadding}`}>
-                    Furnace <button onClick={() => handleFillDown('furnace_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Furnace <button onClick={() => handleFillDown('furnace_no')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('heat_no')}>
-                    Heat No <button onClick={() => handleFillDown('heat_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Heat No <button onClick={() => handleFillDown('heat_no')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
-                  <th className={`w-40 ${cellPadding}`}>Billet Size</th>
+                  <th className={`w-44 ${cellPadding}`}>Billet Size</th>
                   <th className={`w-32 ${cellPadding} text-right`}>
-                    Input (KG) <button onClick={() => handleFillDown('steel_tapped_input_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Input (KG) <button onClick={() => handleFillDown('steel_tapped_input_kg')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-32 ${cellPadding} text-right`}>
-                    Output (KG) <button onClick={() => handleFillDown('billet_output_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Output (KG) <button onClick={() => handleFillDown('billet_output_kg')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-28 ${cellPadding} text-right text-rose-500`}>Scull (KG)</th>
                   <th className={`w-24 ${cellPadding} text-right`}>Yield %</th>
                   <th className={`w-28 ${cellPadding} text-right`}>Tundish °C</th>
                   <th className={`w-36 ${cellPadding} text-right`}>
-                    Stock (KG) <button onClick={() => handleFillDown('billet_stock_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Stock (KG) <button onClick={() => handleFillDown('billet_stock_kg')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
 
                   {/* Dynamic Columns */}
                   {customCols.map(col => (
                     <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
-                      {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                      {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-xs">
                 {filteredData.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-10">
+                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-11">
                     
                     <td className="text-center py-1">
                       <button 
                         onClick={() => handleDeleteRow(row.id)}
-                        className="text-red-500 hover:text-red-700 font-bold text-xs"
+                        className="text-red-500 hover:text-red-700 font-bold text-xs p-1"
                       >
                         ✕
                       </button>
@@ -763,7 +721,7 @@ export default function BilletCCMPage() {
 
                     {/* Date */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'date' ? (
                           <input 
                             type="date" 
@@ -771,29 +729,29 @@ export default function BilletCCMPage() {
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveInlineEdit(row.id, 'date')}
                             onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')}
-                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" 
+                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" 
                             autoFocus 
                           />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-slate-700" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Furnace No */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'furnace_no' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'furnace_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'furnace_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'furnace_no', row.furnace_no)}>{row.furnace_no}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-sans" onClick={() => startEdit(row.id, 'furnace_no', row.furnace_no)}>{row.furnace_no}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Heat No */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'heat_no' ? (
                           <input 
                             type="text" 
@@ -801,11 +759,11 @@ export default function BilletCCMPage() {
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveInlineEdit(row.id, 'heat_no')} 
                             onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'heat_no')} 
-                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 font-bold" 
+                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10 font-bold" 
                             autoFocus 
                           />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block font-bold text-slate-900 select-none" onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>{row.heat_no}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block font-bold text-slate-900 select-none" onClick={() => startEdit(row.id, 'heat_no', row.heat_no)}>{row.heat_no}</span>
                         )}
                       </div>
                     </td>
@@ -818,7 +776,7 @@ export default function BilletCCMPage() {
                           const updated = data.map(r => r.id === row.id ? { ...r, billet_size_section: e.target.value } : r);
                           saveToStorage(updated);
                         }}
-                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans truncate font-medium text-slate-700"
+                        className="w-full bg-transparent border-0 focus:outline-none py-1 text-xs font-sans truncate font-medium text-slate-700"
                       >
                         {sizes.map((s, i) => <option key={i} value={s}>{s}</option>)}
                       </select>
@@ -826,54 +784,54 @@ export default function BilletCCMPage() {
 
                     {/* Steel Input */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'steel_tapped_input_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'steel_tapped_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'steel_tapped_input_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'steel_tapped_input_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'steel_tapped_input_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'steel_tapped_input_kg', row.steel_tapped_input_kg)}>{row.steel_tapped_input_kg.toLocaleString()}</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'steel_tapped_input_kg', row.steel_tapped_input_kg)}>{row.steel_tapped_input_kg.toLocaleString()}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Production Output */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'billet_output_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_output_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_output_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_output_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_output_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block text-[#B48F48] select-none font-semibold" onClick={() => startEdit(row.id, 'billet_output_kg', row.billet_output_kg)}>{row.billet_output_kg.toLocaleString()}</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block text-[#B48F48] select-none font-bold" onClick={() => startEdit(row.id, 'billet_output_kg', row.billet_output_kg)}>{row.billet_output_kg.toLocaleString()}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Scull Loss */}
                     <td className={`${cellPadding} text-right text-rose-600 font-bold bg-rose-50/20`}>
-                      <span className="h-7 flex items-center justify-end px-1 select-none">{row.scull_loss_kg.toLocaleString()}</span>
+                      <span className="h-8 flex items-center justify-end px-1 select-none">{row.scull_loss_kg.toLocaleString()}</span>
                     </td>
 
                     {/* Yield */}
-                    <td className={`${cellPadding} text-right font-black text-emerald-600`}>
-                      <span className="h-7 flex items-center justify-end px-1 select-none">{row.billet_yield_pct}%</span>
+                    <td className={`${cellPadding} text-right font-bold text-emerald-600`}>
+                      <span className="h-8 flex items-center justify-end px-1 select-none">{row.billet_yield_pct}%</span>
                     </td>
 
                     {/* Tundish Temp */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'tundish_temp' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tundish_temp')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tundish_temp')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'tundish_temp')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'tundish_temp')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-amber-600 font-bold" onClick={() => startEdit(row.id, 'tundish_temp', row.tundish_temp || 1535)}>{row.tundish_temp || 1535}°C</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-amber-600 font-bold" onClick={() => startEdit(row.id, 'tundish_temp', row.tundish_temp || 1535)}>{row.tundish_temp || 1535}°C</span>
                         )}
                       </div>
                     </td>
 
                     {/* Running Stock */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'billet_stock_kg' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_stock_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_stock_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 font-black text-emerald-600" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_stock_kg')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_stock_kg')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10 font-bold text-emerald-600" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-black text-emerald-600" onClick={() => startEdit(row.id, 'billet_stock_kg', row.billet_stock_kg)}>{row.billet_stock_kg.toLocaleString()}</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-emerald-600" onClick={() => startEdit(row.id, 'billet_stock_kg', row.billet_stock_kg)}>{row.billet_stock_kg.toLocaleString()}</span>
                         )}
                       </div>
                     </td>
@@ -881,11 +839,11 @@ export default function BilletCCMPage() {
                     {/* Dynamic Columns */}
                     {customCols.map(col => (
                       <td key={col} className={`${cellPadding} bg-amber-50/10`}>
-                        <div className="relative w-full h-7 flex items-center">
+                        <div className="relative w-full h-8 flex items-center">
                           {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                           ) : (
-                            <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
+                            <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
                           )}
                         </div>
                       </td>
@@ -902,9 +860,9 @@ export default function BilletCCMPage() {
                   <td className={`${cellPadding} text-right font-bold`}>{totalInputKg.toLocaleString()} kg</td>
                   <td className={`${cellPadding} text-right font-bold text-emerald-600`}>{totalOutputKg.toLocaleString()} kg</td>
                   <td className={`${cellPadding} text-right font-bold text-rose-600 bg-rose-50/20`}>{totalScullKg.toLocaleString()} kg</td>
-                  <td className={`${cellPadding} text-right font-black text-emerald-600`}>{avgYield}%</td>
+                  <td className={`${cellPadding} text-right font-bold text-emerald-600`}>{avgYield}%</td>
                   <td className={`${cellPadding} text-right text-slate-400`}>-</td>
-                  <td className={`${cellPadding} text-right font-black text-emerald-600`}>{latestStockKg.toLocaleString()} kg</td>
+                  <td className={`${cellPadding} text-right font-bold text-emerald-600`}>{latestStockKg.toLocaleString()} kg</td>
                   <td colSpan={customCols.length}></td>
                 </tr>
               </tfoot>
@@ -915,46 +873,44 @@ export default function BilletCCMPage() {
 
       {/* Modern Log Cast Heat Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
             
             {/* Modal Header */}
-            <div className="bg-slate-900 px-6 py-5 text-white flex justify-between items-center">
+            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
               <div>
-                <h3 className="text-base font-bold">Log CCM Heat Casting Run</h3>
-                <p className="text-xs text-slate-300 mt-0.5">Record continuous casting parameters, billet length tonnage & losses</p>
+                <h3 className="text-base font-bold text-slate-900 font-sans">Log CCM Heat Casting Run</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Record continuous casting parameters, billet length tonnage & losses</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleAddCastSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleAddCastSubmit} className="p-7 space-y-4 text-xs font-sans">
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Date</label>
                   <input 
                     type="date"
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Furnace Unit</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Furnace Unit</label>
                   <select
                     value={formData.furnace_no}
                     onChange={(e) => setFormData({ ...formData, furnace_no: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="Furnace 01">Furnace 01 (15 Ton IF)</option>
                     <option value="Furnace 02">Furnace 02 (15 Ton IF)</option>
@@ -965,8 +921,8 @@ export default function BilletCCMPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">
-                    Heat No <span className="text-[#B48F48] text-[10px] font-normal lowercase">(auto lookup)</span>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">
+                    Heat No <span className="text-[#B48F48] text-xs font-normal lowercase">(auto lookup)</span>
                   </label>
                   <input 
                     type="text"
@@ -974,16 +930,16 @@ export default function BilletCCMPage() {
                     placeholder="e.g. H-260820A"
                     value={formData.heat_no}
                     onChange={(e) => handleHeatNoChange(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] uppercase"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Billet Section</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Billet Section</label>
                   <select
                     value={formData.billet_size_section}
                     onChange={(e) => setFormData({ ...formData, billet_size_section: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     {sizes.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
                   </select>
@@ -992,7 +948,7 @@ export default function BilletCCMPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Steel Input (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Steel Input (KG)</label>
                   <input 
                     type="number"
                     required
@@ -1007,12 +963,12 @@ export default function BilletCCMPage() {
                         scull_loss_kg: input && out ? String(Math.max(0, input - out)) : formData.scull_loss_kg 
                       });
                     }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Billet Out (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Billet Out (KG)</label>
                   <input 
                     type="number"
                     required
@@ -1027,50 +983,50 @@ export default function BilletCCMPage() {
                         scull_loss_kg: input && out ? String(Math.max(0, input - out)) : formData.scull_loss_kg
                       });
                     }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Scull Loss (KG)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Scull Loss (KG)</label>
                   <input 
                     type="number"
                     placeholder="300"
                     value={formData.scull_loss_kg}
                     onChange={(e) => setFormData({ ...formData, scull_loss_kg: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Cast Speed (m/min)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Speed (m/min)</label>
                   <input 
                     type="number"
                     step="0.05"
                     value={formData.casting_speed}
                     onChange={(e) => setFormData({ ...formData, casting_speed: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Tundish Temp (°C)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Tundish Temp (°C)</label>
                   <input 
                     type="number"
                     value={formData.tundish_temp}
                     onChange={(e) => setFormData({ ...formData, tundish_temp: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Quality Grade</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Grade</label>
                   <select
                     value={formData.quality_grade}
                     onChange={(e) => setFormData({ ...formData, quality_grade: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="Prime 500W">Prime 500W</option>
                     <option value="Prime 550D">Prime 550D</option>
@@ -1081,16 +1037,16 @@ export default function BilletCCMPage() {
 
               {/* Real-time Computed Summary */}
               {Number(formData.steel_tapped_input_kg) > 0 && Number(formData.billet_output_kg) > 0 && (
-                <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-3 flex justify-between items-center text-xs">
+                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
                   <div>
-                    <span className="text-slate-500 block">Computed Casting Yield:</span>
-                    <strong className="text-base font-black text-[#B48F48] font-mono">
+                    <span className="text-slate-600 font-sans block">Computed Casting Yield:</span>
+                    <strong className="text-base font-bold text-[#B48F48] font-mono">
                       {((Number(formData.billet_output_kg) / Number(formData.steel_tapped_input_kg)) * 100).toFixed(2)}%
                     </strong>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500 block">Est. Scull Residue:</span>
-                    <strong className="text-sm font-bold text-rose-600 font-mono">
+                    <span className="text-slate-600 font-sans block">Est. Scull Residue:</span>
+                    <strong className="text-base font-bold text-rose-600 font-mono">
                       {Math.max(0, Number(formData.steel_tapped_input_kg) - Number(formData.billet_output_kg))} KG
                     </strong>
                   </div>
@@ -1102,13 +1058,13 @@ export default function BilletCCMPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#B48F48] hover:from-[#B48F48] hover:to-[#9E7A37] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
                 >
                   Submit & Log Casting
                 </button>

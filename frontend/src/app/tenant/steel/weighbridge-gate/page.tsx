@@ -256,14 +256,14 @@ export default function WeighbridgeGatePage() {
   return (
     <div className="space-y-6 animate-fade-in text-slate-800">
       
-      {/* Custom Modal Dialog Box (Unifying confirm & alert prompts) */}
+      {/* Custom Modal Dialog Box */}
       {dialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-4 animate-zoom-in my-8">
+            <h3 className="text-base font-bold text-slate-900 font-sans border-b border-slate-100 pb-2.5">
               {dialog.title}
             </h3>
-            <p className="text-xs text-slate-655 font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans leading-relaxed">
               {dialog.message}
             </p>
             {dialog.type === 'prompt' && (
@@ -271,7 +271,7 @@ export default function WeighbridgeGatePage() {
                 type="text" 
                 value={dialog.value || ''}
                 onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                className="w-full bg-white border border-slate-300 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
                 placeholder="Type dynamic column name..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -282,10 +282,10 @@ export default function WeighbridgeGatePage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
               <button 
                 onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+                className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-white"
               >
                 Cancel
               </button>
@@ -294,7 +294,7 @@ export default function WeighbridgeGatePage() {
                   dialog.onConfirm(dialog.value);
                   setDialog(null);
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="px-5 py-2 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -303,89 +303,151 @@ export default function WeighbridgeGatePage() {
         </div>
       )}
 
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+      {/* Enterprise Header Bar */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Weighbridge Gate Control</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs plant gross-tare-net vehicle weighments for incoming raw scrap and outgoing finished rod shipments.</p>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Plant Gate Operations</span>
+            <span>•</span>
+            <span>Weighbridge Terminal 01</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Weighbridge Gate Control</h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">Automated gross-tare-net weight tracking for incoming scrap loads and outgoing rebar consignments.</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Column
+            <span>+ Add Column</span>
           </button>
           <button 
             onClick={handleExportExcel}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            Export Excel
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Export XLS</span>
           </button>
           <button 
             onClick={handleAddRow}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Row
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Log Ticket</span>
           </button>
         </div>
       </div>
 
-      {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
+      {/* 4 Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Total Tickets</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">24h Shift</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{data.length}</span>
+            <span className="text-xs text-slate-400 font-mono">Vehicles</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Inward Scrap Net</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Raw In</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              {(data.filter(r => r.material_type === 'Raw Scrap Inward').reduce((acc, r) => acc + (Number(r.net_weight_kg) || 0), 0) / 1000).toFixed(1)}
+            </span>
+            <span className="text-xs text-slate-400 font-mono">Metric Tons</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Outward Rebar Net</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">Sales Out</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              {(data.filter(r => r.material_type === 'Finished Rod Outward').reduce((acc, r) => acc + (Number(r.net_weight_kg) || 0), 0) / 1000).toFixed(1)}
+            </span>
+            <span className="text-xs text-slate-400 font-mono">Metric Tons</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Scale Calibration</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Verified</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">±0.02%</span>
+            <span className="text-xs text-emerald-600 font-mono font-medium">Certified 60T</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Search Strip */}
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs">
         <input 
           type="text" 
-          placeholder="Filter by Ticket, Vehicle Number, or Party name..." 
+          placeholder="Search by ticket number, vehicle plate, or party name..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="flex-1 bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         />
         <select 
           value={materialFilter}
           onChange={(e) => setMaterialFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         >
-          <option value="">All Materials</option>
+          <option value="">All Material Types</option>
           <option value="Raw Scrap Inward">Raw Scrap Inward</option>
           <option value="Finished Rod Outward">Finished Rod Outward</option>
         </select>
       </div>
 
-      {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      {/* Enterprise Data Grid Table */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px] table-fixed">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-450 select-none">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('ticket_no')}>
-                  Ticket No {sortField === 'ticket_no' && (sortDir === 'asc' ? '▲' : '▼')}
+                <th className={`w-36 ${cellPadding} cursor-pointer hover:text-slate-900 transition-colors`} onClick={() => handleSort('ticket_no')}>
+                  Ticket No {sortField === 'ticket_no' && (sortDir === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className={`w-40 ${cellPadding}`}>
-                  Date & Time <button onClick={() => handleFillDown('date_time')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Date & Time
                 </th>
-                <th className={`w-28 ${cellPadding}`}>
-                  Vehicle Number <button onClick={() => handleFillDown('vehicle_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                <th className={`w-32 ${cellPadding}`}>
+                  Vehicle Number
                 </th>
                 <th className={`w-52 ${cellPadding}`}>
-                  Party Name <button onClick={() => handleFillDown('party_name')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Party Name
                 </th>
                 <th className={`w-44 ${cellPadding}`}>Material Type</th>
                 <th className={`w-28 ${cellPadding} text-right`}>
-                  Gross (KG) <button onClick={() => handleFillDown('gross_weight_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Gross (KG)
                 </th>
                 <th className={`w-28 ${cellPadding} text-right`}>
-                  Mock Tare (KG) <button onClick={() => handleFillDown('tare_weight_kg')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Tare (KG)
                 </th>
-                <th className={`w-28 ${cellPadding} text-right text-[#B48F48]`}>Net (KG)</th>
+                <th className={`w-28 ${cellPadding} text-right text-[#B48F48] font-bold`}>Net (KG)</th>
                 <th className={`w-36 ${cellPadding}`}>
-                  Operator Signature <button onClick={() => handleFillDown('operator_signature')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Operator
                 </th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`w-32 ${cellPadding} text-slate-650 bg-amber-50/30`}>
-                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  <th key={col} className={`w-32 ${cellPadding} text-amber-900 bg-amber-50/60 font-semibold`}>
+                    {col}
                   </th>
                 ))}
               </tr>

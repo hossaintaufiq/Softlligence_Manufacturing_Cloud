@@ -187,64 +187,108 @@ export default function YardInventoryPage() {
       }
     });
 
+  // Calculate KPI stats
+  const totalPhysical = filteredData.reduce((sum, r) => sum + Number(r.physical_stock || 0), 0);
+  const rawScrapStock = filteredData.filter(r => r.item_category === 'Raw Scrap').reduce((sum, r) => sum + Number(r.physical_stock || 0), 0);
+  const billetStock = filteredData.filter(r => r.item_category === 'MS Billet').reduce((sum, r) => sum + Number(r.physical_stock || 0), 0);
+  const finishedRebarStock = filteredData.filter(r => r.item_category === 'Deformed Rod').reduce((sum, r) => sum + Number(r.physical_stock || 0), 0);
+
   return (
     <div className="space-y-6 animate-fade-in text-slate-800">
       
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+      {/* Enterprise Header Bar */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Yard Inventory Control</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Monitors raw scrap, cast steel billets, final reinforcing deformed bar coils, and warehouse consumables.</p>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Material Logistics & Yard</span>
+            <span>•</span>
+            <span>Stockroom & Bay Allocation</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Finished Yard & Stock Inventory</h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">Real-time balances for raw scrap feedstocks, continuous cast billets, finished deformed rebar bundles, and ferroalloys.</p>
         </div>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => setShowColMenu(!showColMenu)}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all relative cursor-pointer"
-          >
-            Column visibility ⚙️
-            {showColMenu && (
-              <div className="absolute right-0 top-10 z-30 bg-white border border-slate-250 p-3 rounded-xl shadow-xl w-48 text-left space-y-1.5 font-sans font-normal text-xs text-slate-700">
-                {Object.keys(visibleCols).map(col => (
-                  <label key={col} className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={visibleCols[col as keyof typeof visibleCols]} 
-                      onChange={() => setVisibleCols({ ...visibleCols, [col]: !visibleCols[col as keyof typeof visibleCols] })}
-                    />
-                    <span className="capitalize">{col.replace('_', ' ')}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </button>
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleExportCSV}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            Export Excel
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Export CSV</span>
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Multi-Row Log Entry
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Add Inventory Item</span>
           </button>
         </div>
       </div>
 
+      {/* 4 Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Total Physical Stock</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">Yard Total</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{totalPhysical.toLocaleString()}</span>
+            <span className="text-xs text-slate-400 font-mono">MT Combined</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Raw Scrap Stock</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Feedstock</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{rawScrapStock.toLocaleString()}</span>
+            <span className="text-xs text-slate-400 font-mono">Metric Tons</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Cast Billet Stock</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">CCM Buffer</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{billetStock.toLocaleString()}</span>
+            <span className="text-xs text-slate-400 font-mono">Metric Tons</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Finished Rebars</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Ready Dispatch</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-emerald-600">{finishedRebarStock.toLocaleString()}</span>
+            <span className="text-xs text-emerald-600 font-mono font-medium">Metric Tons</span>
+          </div>
+        </div>
+      </div>
+
       {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs">
         <input 
           type="text" 
           placeholder="Filter by Item Code, Description, or Bay location..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="flex-1 bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         />
         <select 
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         >
           <option value="">All Categories</option>
           {categories.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
@@ -252,22 +296,22 @@ export default function YardInventoryPage() {
       </div>
 
       {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[950px]">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-450">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 select-none">
                 {visibleCols.item_code && (
-                  <th className={`sticky left-0 bg-slate-50 z-10 border-r border-slate-100 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('item_code')}>
-                    Item Code {sortField === 'item_code' && (sortDir === 'asc' ? '▲' : '▼')}
+                  <th className={`sticky left-0 bg-slate-50/90 z-10 border-r border-slate-200 ${cellPadding} cursor-pointer hover:text-slate-900 transition-colors`} onClick={() => handleSort('item_code')}>
+                    Item Code {sortField === 'item_code' && (sortDir === 'asc' ? '↑' : '↓')}
                   </th>
                 )}
-                {visibleCols.item_description && <th className={`${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('item_description')}>Description</th>}
+                {visibleCols.item_description && <th className={`${cellPadding} cursor-pointer hover:text-slate-900 transition-colors`} onClick={() => handleSort('item_description')}>Description</th>}
                 {visibleCols.item_category && <th className={`${cellPadding}`}>Category</th>}
                 {visibleCols.uom && <th className={`${cellPadding}`}>UOM</th>}
                 {visibleCols.physical_stock && <th className={`${cellPadding} text-right`}>Physical Stock</th>}
                 {visibleCols.allocated_qty && <th className={`${cellPadding} text-right`}>Allocated</th>}
-                {visibleCols.available_qty && <th className={`${cellPadding} text-right`}>Available Qty</th>}
+                {visibleCols.available_qty && <th className={`${cellPadding} text-right text-emerald-700 font-bold`}>Available Qty</th>}
                 {visibleCols.yard_bay_no && <th className={`${cellPadding}`}>Yard/Bay No</th>}
                 {visibleCols.min_safety_stock && <th className={`${cellPadding} text-right`}>Safety Stock</th>}
               </tr>
@@ -350,16 +394,24 @@ export default function YardInventoryPage() {
 
       {/* Multi-Row Quick Modal Entry */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 p-4 md:p-6">
-          <div className="bg-white border border-slate-250 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden border-t-4 border-t-[#C5A059] flex flex-col max-h-[90vh]">
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono">Create Yard Stock Items</h3>
-              <p className="text-[10px] text-slate-450 mt-1">Simultaneously log new stock ledger allocations, parts, or scrap types.</p>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 p-6 rounded-2xl w-full max-w-5xl md:max-w-6xl shadow-2xl space-y-4 relative overflow-hidden flex flex-col max-h-[90vh] my-8 animate-zoom-in">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 font-sans">Create Yard Stock Items</h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">Simultaneously log new stock ledger allocations, parts, or scrap types.</p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold transition-all cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
             {validationError && (
-              <div className="bg-rose-50 text-rose-800 p-3 rounded-xl border border-rose-100 text-[10px] font-bold font-mono">
-                🚨 Error: {validationError}
+              <div className="bg-rose-50 text-rose-800 p-3 rounded-xl border border-rose-200 text-xs font-bold font-mono">
+                Error: {validationError}
               </div>
             )}
 
@@ -368,70 +420,59 @@ export default function YardInventoryPage() {
                 <div className="space-y-3 min-w-[950px] pr-2">
                 {modalRows.map((row, idx) => (
                   <div key={idx} className="flex gap-3 items-end border-b border-slate-100 pb-3 last:border-b-0">
-                    <div className="w-32 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Item Code</label>
-                      <input type="text" placeholder="FG-ROD-XX" value={row.item_code} onChange={(e) => handleModalRowChange(idx, 'item_code', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none font-mono" />
+                    <div className="w-36 space-y-1">
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Item Code</label>
+                      <input type="text" placeholder="FG-ROD-XX" value={row.item_code} onChange={(e) => handleModalRowChange(idx, 'item_code', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-mono text-slate-900" />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Description</label>
-                      <input type="text" placeholder="Item description" value={row.item_description} onChange={(e) => handleModalRowChange(idx, 'item_description', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Description</label>
+                      <input type="text" placeholder="Item description" value={row.item_description} onChange={(e) => handleModalRowChange(idx, 'item_description', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900" />
                     </div>
-                    <div className="w-32 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Category</label>
-                      <select value={row.item_category} onChange={(e) => handleModalRowChange(idx, 'item_category', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none">
+                    <div className="w-36 space-y-1">
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Category</label>
+                      <select value={row.item_category} onChange={(e) => handleModalRowChange(idx, 'item_category', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900">
                         {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
                       </select>
                     </div>
-                    <div className="w-16 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">UOM</label>
-                      <select value={row.uom} onChange={(e) => handleModalRowChange(idx, 'uom', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none">
+                    <div className="w-20 space-y-1">
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">UOM</label>
+                      <select value={row.uom} onChange={(e) => handleModalRowChange(idx, 'uom', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900">
                         <option value="MT">MT</option>
                         <option value="KG">KG</option>
                         <option value="PCS">PCS</option>
                         <option value="Ltr">Ltr</option>
                       </select>
                     </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Physical Stock</label>
-                      <input type="number" placeholder="50" value={row.physical_stock} onChange={(e) => handleModalRowChange(idx, 'physical_stock', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
+                    <div className="w-24 space-y-1">
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Stock Qty</label>
+                      <input type="number" placeholder="50" value={row.physical_stock} onChange={(e) => handleModalRowChange(idx, 'physical_stock', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-mono text-slate-900" />
+                    </div>
+                    <div className="w-28 space-y-1">
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Bay Location</label>
+                      <input type="text" placeholder="Bay A-01" value={row.yard_bay_no} onChange={(e) => handleModalRowChange(idx, 'yard_bay_no', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900" />
                     </div>
                     <div className="w-24 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Bay No</label>
-                      <input type="text" placeholder="Bay A" value={row.yard_bay_no} onChange={(e) => handleModalRowChange(idx, 'yard_bay_no', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
-                    </div>
-                    <div className="w-20 space-y-1">
-                      <label className="text-[8px] font-bold font-mono text-slate-400">Safety Min</label>
-                      <input type="number" placeholder="10" value={row.min_safety_stock} onChange={(e) => handleModalRowChange(idx, 'min_safety_stock', e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-xs px-2.5 py-1.5 rounded focus:outline-none" />
+                      <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Safety Min</label>
+                      <input type="number" placeholder="10" value={row.min_safety_stock} onChange={(e) => handleModalRowChange(idx, 'min_safety_stock', e.target.value)} className="w-full bg-white border border-slate-300 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-mono text-slate-900" />
                     </div>
                     {modalRows.length > 1 && (
-                      <button type="button" onClick={() => removeModalRow(idx)} className="text-red-500 hover:text-red-750 pb-2.5 font-bold cursor-pointer">✕</button>
+                      <button type="button" onClick={() => removeModalRow(idx)} className="text-rose-550 hover:text-rose-700 font-bold text-xs p-2">✕</button>
                     )}
                   </div>
                 ))}
                 </div>
               </div>
 
-              <div className="pt-3 flex justify-between">
-                <button 
-                  type="button" 
-                  onClick={addModalRow}
-                  className="px-3.5 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer"
-                >
-                  + Add Row
+              <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                <button type="button" onClick={addModalRow} className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer">
+                  + Add Another Row
                 </button>
-                <div className="flex space-x-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4.5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition-all"
-                  >
+                <div className="flex space-x-3">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer">
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    className="px-5 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#C5A059] hover:to-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    Save Stock Items
+                  <button type="submit" className="px-5 py-2 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer">
+                    Save All Items
                   </button>
                 </div>
               </div>

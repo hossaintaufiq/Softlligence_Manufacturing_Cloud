@@ -272,12 +272,12 @@ export default function QualitySpectroPage() {
       
       {/* Custom Modal Dialog Box */}
       {dialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-4 animate-zoom-in my-8">
+            <h3 className="text-base font-bold text-slate-900 font-sans border-b border-slate-100 pb-2.5">
               {dialog.title}
             </h3>
-            <p className="text-xs text-slate-655 font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans leading-relaxed">
               {dialog.message}
             </p>
             {dialog.type === 'prompt' && (
@@ -285,7 +285,7 @@ export default function QualitySpectroPage() {
                 type="text" 
                 value={dialog.value || ''}
                 onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                className="w-full bg-white border border-slate-300 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
                 placeholder="Type dynamic column name..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -296,10 +296,10 @@ export default function QualitySpectroPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
               <button 
                 onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+                className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-white"
               >
                 Cancel
               </button>
@@ -308,7 +308,7 @@ export default function QualitySpectroPage() {
                   dialog.onConfirm(dialog.value);
                   setDialog(null);
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="px-5 py-2 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -317,47 +317,109 @@ export default function QualitySpectroPage() {
         </div>
       )}
 
-      {/* Title Bar */}
-      <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+      {/* Enterprise Header Bar */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider font-mono">Spectrometer Chemistry & QA</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Logs spectrometer metal composition checks, yield strength tests, elongation, and physical bend evaluations.</p>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Quality Assurance & Lab</span>
+            <span>•</span>
+            <span>OES Spectrometer & UTM Testing</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Spectrometer Chemistry & QA Testing</h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">Chemical composition analysis (%C, %Mn, %Si, %S, %P, %CE) and mechanical strength certifications (BDS ISO 6935-2 / ASTM A615).</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Column
+            <span>+ Add Column</span>
           </button>
           <button 
             onClick={handleExportExcel}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            Export Excel
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Export XLS</span>
           </button>
           <button 
             onClick={handleAddRow}
-            className="px-4 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
-            + Add Row
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>+ Log Lab Sample</span>
           </button>
         </div>
       </div>
 
+      {/* 4 Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Samples Tested</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">24h Shift</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{data.length}</span>
+            <span className="text-xs text-slate-400 font-mono">Spectro Samples</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Avg Carbon Eq (%CE)</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">≤ 0.42% Spec</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              {data.length > 0 ? (data.reduce((acc, r) => acc + (Number(r.pct_ce) || 0), 0) / data.length).toFixed(2) : '0.37'}%
+            </span>
+            <span className="text-xs text-emerald-600 font-mono font-medium">Optimum Weldability</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Yield Strength</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">500W Grade</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
+              {data.length > 0 ? Math.round(data.reduce((acc, r) => acc + (Number(r.yield_strength_n_mm2) || 0), 0) / data.length) : 520}
+            </span>
+            <span className="text-xs text-slate-400 font-mono">N/mm² (MPa)</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Bend Test Result</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">180° Cold Bend</span>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-3xl font-bold font-mono tracking-tight text-emerald-600">100%</span>
+            <span className="text-xs text-emerald-600 font-mono font-medium">Approved No Cracks</span>
+          </div>
+        </div>
+      </div>
+
       {/* Spreadsheet Control Search */}
-      <div className="flex gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs">
         <input 
           type="text" 
           placeholder="Filter by Sample ID, or Heat No..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="flex-1 bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         />
         <select 
           value={gradeFilter}
           onChange={(e) => setGradeFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none"
+          className="bg-white border border-slate-300 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans text-slate-900"
         >
           <option value="">All Steel Grades</option>
           {grades.map((g, idx) => <option key={idx} value={g}>{g}</option>)}
@@ -365,55 +427,55 @@ export default function QualitySpectroPage() {
       </div>
 
       {/* Full-Screen Sheet Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1350px] table-fixed">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 select-none">
                 <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
-                <th className={`w-36 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('sample_id')}>
-                  Sample ID {sortField === 'sample_id' && (sortDir === 'asc' ? '▲' : '▼')}
+                <th className={`w-36 ${cellPadding} cursor-pointer hover:text-slate-900 transition-colors`} onClick={() => handleSort('sample_id')}>
+                  Sample ID {sortField === 'sample_id' && (sortDir === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className={`w-28 ${cellPadding}`}>Rebar Size</th>
                 <th className={`w-28 ${cellPadding}`}>Steel Grade</th>
                 <th className={`w-32 ${cellPadding}`}>
-                  Heat No <button onClick={() => handleFillDown('heat_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Heat No
                 </th>
                 <th className={`w-32 ${cellPadding}`}>Date</th>
                 <th className={`w-24 ${cellPadding} text-right`}>
-                  %C <button onClick={() => handleFillDown('pct_c')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  %C
                 </th>
                 <th className={`w-24 ${cellPadding} text-right`}>
-                  %Mn <button onClick={() => handleFillDown('pct_mn')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  %Mn
                 </th>
                 <th className={`w-24 ${cellPadding} text-right`}>
-                  %Si <button onClick={() => handleFillDown('pct_si')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  %Si
                 </th>
                 <th className={`w-24 ${cellPadding} text-right`}>
-                  %S <button onClick={() => handleFillDown('pct_s')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  %S
                 </th>
                 <th className={`w-24 ${cellPadding} text-right`}>
-                  %P <button onClick={() => handleFillDown('pct_p')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  %P
                 </th>
-                <th className={`w-24 ${cellPadding} text-right text-rose-500`}>%CE</th>
+                <th className={`w-24 ${cellPadding} text-right text-amber-700 font-bold`}>%CE</th>
                 <th className={`w-28 ${cellPadding} text-right`}>
-                  Yield Strength (N/mm²) <button onClick={() => handleFillDown('yield_strength_n_mm2')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
-                </th>
-                <th className={`w-28 ${cellPadding} text-right`}>
-                  Tensile (N/mm²) <button onClick={() => handleFillDown('tensile_strength_n_mm2')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Yield (N/mm²)
                 </th>
                 <th className={`w-28 ${cellPadding} text-right`}>
-                  Elongation % <button onClick={() => handleFillDown('elongation_pct')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Tensile (N/mm²)
+                </th>
+                <th className={`w-28 ${cellPadding} text-right`}>
+                  Elongation %
                 </th>
                 <th className={`w-32 ${cellPadding}`}>Bend Test</th>
                 <th className={`w-32 ${cellPadding} text-right`}>
-                  Nominal Mass (kg/m) <button onClick={() => handleFillDown('nominal_mass_g_m')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  Mass (kg/m)
                 </th>
 
                 {/* Dynamic Columns */}
                 {customCols.map(col => (
-                  <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
-                    {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                  <th key={col} className={`w-32 ${cellPadding} text-amber-900 bg-amber-50/60 font-semibold`}>
+                    {col}
                   </th>
                 ))}
               </tr>

@@ -69,7 +69,7 @@ export default function DowntimeTrackerPage() {
     onConfirm: (val?: string) => void;
   } | null>(null);
 
-  const cellPadding = isCompact ? 'px-3 py-1 text-[11px]' : 'px-4 py-2 text-xs';
+  const cellPadding = isCompact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm';
   const categories = ['Mechanical', 'Electrical', 'Furnace Refractory', 'CCM Mold', 'Roll Changing', 'Hydraulics', 'Power Grid Failure', 'No Billet Stock', 'Others'];
   const shifts = ['A', 'B', 'C', 'General'];
   const equipmentOptions = [
@@ -317,16 +317,16 @@ export default function DowntimeTrackerPage() {
   const avgMTTR = filteredData.length > 0 ? Math.round(totalDowntimeMin / filteredData.length) : 0;
 
   return (
-    <div className="space-y-6 animate-fade-in text-slate-800">
+    <div className="space-y-7 animate-fade-in text-slate-800 pb-16">
       
       {/* Custom Modal Dialog Box */}
       {dialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-scale-in">
-            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
+          <div className="bg-white border border-slate-200 p-7 rounded-3xl shadow-2xl w-full max-w-md space-y-4 animate-scale-in">
+            <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider font-mono border-b border-slate-100 pb-2">
               {dialog.title}
             </h3>
-            <p className="text-xs text-slate-600 font-sans leading-relaxed">
+            <p className="text-sm text-slate-600 font-sans leading-relaxed">
               {dialog.message}
             </p>
             {dialog.type === 'prompt' && (
@@ -334,7 +334,7 @@ export default function DowntimeTrackerPage() {
                 type="text" 
                 value={dialog.value || ''}
                 onChange={(e) => setDialog({ ...dialog, value: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-250 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+                className="w-full bg-slate-50 border border-slate-200 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
                 placeholder="Type dynamic column name..."
                 autoFocus
                 onKeyDown={(e) => {
@@ -345,10 +345,10 @@ export default function DowntimeTrackerPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-3 pt-3">
               <button 
                 onClick={() => setDialog(null)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
               >
                 Cancel
               </button>
@@ -357,7 +357,7 @@ export default function DowntimeTrackerPage() {
                   dialog.onConfirm(dialog.value);
                   setDialog(null);
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -366,64 +366,43 @@ export default function DowntimeTrackerPage() {
         </div>
       )}
 
-      {/* Hero Banner with Free Industrial Maintenance Imagery */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl border border-slate-800">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-luminosity transform scale-105 transition-transform duration-1000"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1200&q=80')` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent" />
-        
-        <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider font-mono">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Plant Maintenance & Reliability Center • MTTR Diagnostics
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white font-sans">
-              Downtime & Breakdown Incident Tracker
-            </h1>
-            <p className="text-xs md:text-sm text-slate-300 font-sans leading-relaxed">
-              Track factory outages, mechanical & electrical disruptions, scheduled roll-changing intervals, root-cause diagnostic logs, and mean-time-to-recovery (MTTR) performance.
-            </p>
+      {/* CLEAN ENTERPRISE HEADER BAR */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Steel Production</span>
+            <span className="text-slate-300">/</span>
+            <span>Plant Reliability</span>
+            <span className="text-slate-300">/</span>
+            <span className="bg-amber-100/70 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-mono text-[11px]">Maintenance & Reliability</span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#B48F48] hover:from-[#B48F48] hover:to-[#9E7A37] text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-900/30 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Log Breakdown Ticket
-            </button>
-            <button 
-              onClick={handleExportExcel}
-              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold rounded-xl backdrop-blur-xs transition-all cursor-pointer flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export CSV
-            </button>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">
+            Downtime & Breakdown Incident Tracker
+          </h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">
+            Track factory outages, mechanical & electrical disruptions, roll-changing intervals, and mean-time-to-recovery (MTTR).
+          </p>
         </div>
 
-        {/* Live Mill Telemetry Strip */}
-        <div className="relative z-10 bg-slate-950/60 border-t border-white/10 px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-300">
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Plant Uptime: 96.4% (30-Day Avg)
-            </span>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <span className="text-amber-400">Active Incidents: {filteredData.length} Tickets</span>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <span className="text-slate-300">Scheduled Roll Changeover: Shift B (22:00)</span>
-          </div>
-          <div className="text-slate-400">
-            Avg MTTR: <span className="text-white font-bold">{avgMTTR} Mins / Incident</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={handleExportExcel}
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export CSV</span>
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Log Breakdown Ticket</span>
+          </button>
         </div>
       </div>
 
@@ -431,86 +410,67 @@ export default function DowntimeTrackerPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Downtime */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Total Downtime</p>
-            <span className="p-2 rounded-xl bg-rose-50 text-rose-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Total Downtime</span>
+            <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Total Stoppage</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-rose-600 font-mono">
-              {totalDowntimeMin} <span className="text-sm font-semibold text-slate-500">Mins</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-rose-600 font-mono tracking-tight">{totalDowntimeMin}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
               <span>{(totalDowntimeMin / 60).toFixed(1)} Total Hours</span>
-              <span className="text-slate-600 font-bold">{filteredData.length} Incident Logs</span>
+              <span className="text-slate-700 font-semibold">{filteredData.length} Incident Logs</span>
             </div>
           </div>
         </div>
 
         {/* Card 2: Meltshop Breakdown */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Meltshop Outages</p>
-            <span className="p-2 rounded-xl bg-amber-50 text-[#B48F48]">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Meltshop Outages</span>
+            <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Furnace / CCM</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {totalBilletDown} <span className="text-sm font-semibold text-slate-500">Mins</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{totalBilletDown}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Furnace & CCM Area</span>
-              <span className="text-amber-600 font-bold">{totalDowntimeMin > 0 ? Math.round((totalBilletDown / totalDowntimeMin) * 100) : 0}% share</span>
-            </div>
+            <p className="text-xs text-amber-700 font-mono mt-1 font-semibold">{totalDowntimeMin > 0 ? Math.round((totalBilletDown / totalDowntimeMin) * 100) : 0}% of total stoppage</p>
           </div>
         </div>
 
         {/* Card 3: Rolling Mill Breakdown */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Rolling Mill Outages</p>
-            <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Rolling Mill Outages</span>
+            <span className="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 text-[11px] font-bold">Stands & Rolls</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {totalRollingDown} <span className="text-sm font-semibold text-slate-500">Mins</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{totalRollingDown}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Stands & Roll Changes</span>
-              <span className="text-indigo-600 font-bold">{totalDowntimeMin > 0 ? Math.round((totalRollingDown / totalDowntimeMin) * 100) : 0}% share</span>
-            </div>
+            <p className="text-xs text-indigo-700 font-mono mt-1 font-semibold">{totalDowntimeMin > 0 ? Math.round((totalRollingDown / totalDowntimeMin) * 100) : 0}% of total stoppage</p>
           </div>
         </div>
 
         {/* Card 4: Critical Tickets & MTTR */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Mean Time to Repair</p>
-            <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+            <span>Mean Time to Repair</span>
+            <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[11px] font-bold">MTTR</span>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-slate-900 font-mono">
-              {avgMTTR} <span className="text-sm font-semibold text-slate-500">Mins</span>
+          <div>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgMTTR}</span>
+              <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>Critical Severity: {criticalCount}</span>
-              <span className="text-emerald-600 font-bold">100% Resolved</span>
+            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
+              <span>Critical Issues: {criticalCount}</span>
+              <span className="text-emerald-600 font-semibold">100% Resolved</span>
             </div>
           </div>
         </div>
@@ -518,19 +478,19 @@ export default function DowntimeTrackerPage() {
       </div>
 
       {/* Controls & Filter Bar */}
-      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         
         {/* Search & Category Filter */}
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative flex-1 min-w-[240px]">
             <input 
               type="text" 
               placeholder="Search by Ticket No, Equipment, or Root Cause Notes..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-xs pl-9 pr-3 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans"
+              className="w-full bg-slate-50 border border-slate-200 text-sm pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] focus:bg-white font-sans transition-all"
             />
-            <svg className="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -538,7 +498,7 @@ export default function DowntimeTrackerPage() {
           <select 
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs px-3 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-medium text-slate-700"
+            className="bg-slate-50 border border-slate-200 text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A059] font-sans text-slate-700"
           >
             <option value="">All Breakdown Categories</option>
             {categories.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
@@ -547,16 +507,16 @@ export default function DowntimeTrackerPage() {
 
         {/* View Mode & Actions */}
         <div className="flex items-center gap-2">
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1">
+          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 font-sans text-xs">
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
               Ticket Cards
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
               Data Ledger
             </button>
@@ -564,13 +524,13 @@ export default function DowntimeTrackerPage() {
 
           <button 
             onClick={handleAddColumn}
-            className="px-3 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white hidden sm:inline-flex items-center gap-1.5"
+            className="px-3.5 py-2 border border-[#C5A059] text-[#B48F48] hover:bg-[#FAF6EE] text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white hidden sm:inline-flex items-center gap-1.5"
           >
             + Column
           </button>
           <button 
             onClick={handleAddRow}
-            className="px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer bg-white"
+            className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
           >
             + Row
           </button>
@@ -579,18 +539,18 @@ export default function DowntimeTrackerPage() {
 
       {/* Main Content: Card View or Grid View */}
       {viewMode === 'cards' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map((row) => (
-            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between">
+            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-[#C5A059]/40 transition-all relative overflow-hidden group flex flex-col justify-between space-y-4">
               
               <div>
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                      <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
                         {row.ticket_no}
                       </span>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md font-mono ${
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-md font-mono ${
                         row.severity === 'Critical' ? 'bg-rose-50 text-rose-600 border border-rose-200' :
                         row.severity === 'Minor' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
                         'bg-amber-50 text-amber-600 border border-amber-200'
@@ -598,8 +558,8 @@ export default function DowntimeTrackerPage() {
                         {row.severity || 'Medium'}
                       </span>
                     </div>
-                    <h4 className="text-sm font-black text-slate-800 font-sans mt-2">{row.equipment}</h4>
-                    <p className="text-[11px] text-slate-400 font-sans">{row.date} • Shift {row.shift_code} • {row.breakdown_category}</p>
+                    <h4 className="text-base font-bold text-slate-900 font-sans mt-2">{row.equipment}</h4>
+                    <p className="text-xs text-slate-400 font-sans">{row.date} • Shift {row.shift_code} • {row.breakdown_category}</p>
                   </div>
                   <button 
                     onClick={() => handleDeleteRow(row.id)}
@@ -613,33 +573,33 @@ export default function DowntimeTrackerPage() {
                 </div>
 
                 {/* Duration Meter */}
-                <div className="mb-4 grid grid-cols-2 gap-2 bg-slate-50 border border-slate-100 rounded-xl p-3 font-mono">
+                <div className="mb-4 grid grid-cols-2 gap-2 bg-slate-50 border border-slate-200/70 rounded-xl p-3.5 font-mono">
                   <div>
-                    <span className="text-[10px] uppercase text-slate-400 font-bold block">Melt Shop Down</span>
-                    <span className={`text-xs font-black ${row.billet_breakdown_min > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                    <span className="text-xs uppercase text-slate-400 font-semibold block font-sans">Melt Shop Down</span>
+                    <span className={`text-sm font-bold ${row.billet_breakdown_min > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
                       {row.billet_breakdown_min} mins
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] uppercase text-slate-400 font-bold block">Rolling Mill Down</span>
-                    <span className={`text-xs font-black ${row.rolling_breakdown_min > 0 ? 'text-indigo-600' : 'text-slate-400'}`}>
+                    <span className="text-xs uppercase text-slate-400 font-semibold block font-sans">Rolling Mill Down</span>
+                    <span className={`text-sm font-bold ${row.rolling_breakdown_min > 0 ? 'text-indigo-600' : 'text-slate-400'}`}>
                       {row.rolling_breakdown_min} mins
                     </span>
                   </div>
                 </div>
 
                 {/* Root Cause Note */}
-                <div className="space-y-2 text-xs font-sans">
+                <div className="space-y-2.5 text-xs font-sans">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 font-mono block">Root Cause Analysis</span>
-                    <p className="text-slate-700 bg-slate-50/70 p-2 rounded-lg border border-slate-100 text-[11px] leading-relaxed">
+                    <span className="text-xs uppercase font-semibold text-slate-500 font-mono block">Root Cause Analysis</span>
+                    <p className="text-slate-700 bg-slate-50/80 p-2.5 rounded-lg border border-slate-100 text-xs leading-relaxed">
                       {row.root_cause_notes || 'No root cause notes logged.'}
                     </p>
                   </div>
 
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 font-mono block">Resolution Action</span>
-                    <p className="text-emerald-800 bg-emerald-50/50 p-2 rounded-lg border border-emerald-100/60 text-[11px] leading-relaxed">
+                    <span className="text-xs uppercase font-semibold text-slate-500 font-mono block">Resolution Action</span>
+                    <p className="text-emerald-900 bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100 text-xs leading-relaxed">
                       {row.action_taken || 'No action notes logged.'}
                     </p>
                   </div>
@@ -647,7 +607,7 @@ export default function DowntimeTrackerPage() {
               </div>
 
               {/* Card Footer */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
                 <span>By: {row.technician || 'Eng. Maintenance Lead'}</span>
                 <span className="text-emerald-600 font-bold">✓ RESOLVED</span>
               </div>
@@ -659,50 +619,50 @@ export default function DowntimeTrackerPage() {
         /* Full-Screen Sheet Grid Table */
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[1150px] table-fixed">
+            <table className="w-full text-left border-collapse min-w-[1150px] table-fixed text-sm font-sans">
               <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-150 text-[10px] uppercase font-mono text-slate-400 select-none">
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-mono text-slate-500 font-semibold select-none">
                   <th className={`w-14 text-center ${cellPadding}`}>Actions</th>
                   <th className={`w-32 ${cellPadding} cursor-pointer hover:bg-slate-100`} onClick={() => handleSort('date')}>
                     Date {sortField === 'date' && (sortDir === 'asc' ? '▲' : '▼')}
                   </th>
                   <th className={`w-28 ${cellPadding}`}>
-                    Ticket No <button onClick={() => handleFillDown('ticket_no')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Ticket No <button onClick={() => handleFillDown('ticket_no')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-44 ${cellPadding}`}>
-                    Equipment <button onClick={() => handleFillDown('equipment')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Equipment <button onClick={() => handleFillDown('equipment')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-36 ${cellPadding}`}>Category</th>
                   <th className={`w-52 ${cellPadding}`}>
-                    Root Cause <button onClick={() => handleFillDown('root_cause_notes')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Root Cause <button onClick={() => handleFillDown('root_cause_notes')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-20 ${cellPadding}`}>Shift</th>
                   <th className={`w-48 ${cellPadding}`}>
-                    Action Taken <button onClick={() => handleFillDown('action_taken')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Action Taken <button onClick={() => handleFillDown('action_taken')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-28 ${cellPadding} text-right`}>
-                    Melt Shop (Min) <button onClick={() => handleFillDown('billet_breakdown_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Melt Shop (Min) <button onClick={() => handleFillDown('billet_breakdown_min')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
                   <th className={`w-28 ${cellPadding} text-right`}>
-                    Rolling Mill (Min) <button onClick={() => handleFillDown('rolling_breakdown_min')} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                    Rolling Mill (Min) <button onClick={() => handleFillDown('rolling_breakdown_min')} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                   </th>
 
                   {/* Dynamic Columns */}
                   {customCols.map(col => (
                     <th key={col} className={`w-32 ${cellPadding} text-slate-600 bg-amber-50/30`}>
-                      {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-[10px] ml-1 text-[#B48F48] hover:underline">⬇️</button>
+                      {col} <button onClick={() => handleFillDown(col, true)} title="Fill Down" className="text-xs ml-1 text-[#B48F48] hover:underline">⬇️</button>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-xs">
                 {filteredData.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-10">
+                  <tr key={row.id} className="hover:bg-slate-50/40 transition-colors h-11">
                     
                     <td className="text-center py-1">
                       <button 
                         onClick={() => handleDeleteRow(row.id)}
-                        className="text-red-500 hover:text-red-750 font-bold text-xs"
+                        className="text-red-500 hover:text-red-700 font-bold text-xs p-1"
                       >
                         ✕
                       </button>
@@ -710,7 +670,7 @@ export default function DowntimeTrackerPage() {
 
                     {/* Date */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'date' ? (
                           <input 
                             type="date" 
@@ -718,33 +678,33 @@ export default function DowntimeTrackerPage() {
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={() => saveInlineEdit(row.id, 'date')}
                             onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'date')}
-                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" 
+                            className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" 
                             autoFocus 
                           />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-slate-700" onClick={() => startEdit(row.id, 'date', row.date)}>{row.date}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Ticket No */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'ticket_no' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'ticket_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'ticket_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 font-bold" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'ticket_no')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'ticket_no')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10 font-bold" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'ticket_no', row.ticket_no)}>{row.ticket_no}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none font-bold text-slate-900" onClick={() => startEdit(row.id, 'ticket_no', row.ticket_no)}>{row.ticket_no}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Equipment */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'equipment' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'equipment')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'equipment')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'equipment')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'equipment')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none truncate font-medium" onClick={() => startEdit(row.id, 'equipment', row.equipment)}>{row.equipment}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block select-none truncate font-semibold font-sans text-slate-900" onClick={() => startEdit(row.id, 'equipment', row.equipment)}>{row.equipment}</span>
                         )}
                       </div>
                     </td>
@@ -757,7 +717,7 @@ export default function DowntimeTrackerPage() {
                           const updated = data.map(r => r.id === row.id ? { ...r, breakdown_category: e.target.value } : r);
                           saveToStorage(updated);
                         }}
-                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans font-bold text-indigo-700 truncate"
+                        className="w-full bg-transparent border-0 focus:outline-none py-1 text-xs font-sans font-semibold text-indigo-700 truncate"
                       >
                         {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
                       </select>
@@ -765,11 +725,11 @@ export default function DowntimeTrackerPage() {
 
                     {/* Root Cause Notes */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'root_cause_notes' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'root_cause_notes')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'root_cause_notes')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'root_cause_notes')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'root_cause_notes')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none text-slate-600" title={row.root_cause_notes} onClick={() => startEdit(row.id, 'root_cause_notes', row.root_cause_notes)}>{row.root_cause_notes || 'Add root cause'}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none text-slate-600 font-sans" title={row.root_cause_notes} onClick={() => startEdit(row.id, 'root_cause_notes', row.root_cause_notes)}>{row.root_cause_notes || 'Add root cause'}</span>
                         )}
                       </div>
                     </td>
@@ -782,7 +742,7 @@ export default function DowntimeTrackerPage() {
                           const updated = data.map(r => r.id === row.id ? { ...r, shift_code: e.target.value } : r);
                           saveToStorage(updated);
                         }}
-                        className="w-full bg-transparent border-0 focus:outline-none py-0.5 text-xs font-sans text-slate-700 truncate"
+                        className="w-full bg-transparent border-0 focus:outline-none py-1 text-xs font-sans text-slate-700 truncate font-semibold"
                       >
                         {shifts.map((s, i) => <option key={i} value={s}>{s}</option>)}
                       </select>
@@ -790,33 +750,33 @@ export default function DowntimeTrackerPage() {
 
                     {/* Action Taken */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center">
+                      <div className="relative w-full h-8 flex items-center">
                         {editingCell?.id === row.id && editingCell?.field === 'action_taken' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'action_taken')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'action_taken')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'action_taken')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'action_taken')} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none text-emerald-700" title={row.action_taken} onClick={() => startEdit(row.id, 'action_taken', row.action_taken)}>{row.action_taken || 'Add action taken'}</span>
+                          <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block truncate select-none text-emerald-700 font-sans font-medium" title={row.action_taken} onClick={() => startEdit(row.id, 'action_taken', row.action_taken)}>{row.action_taken || 'Add action taken'}</span>
                         )}
                       </div>
                     </td>
 
                     {/* Billet Breakdown Min */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'billet_breakdown_min' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 text-amber-600 font-bold" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'billet_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'billet_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10 text-amber-600 font-bold" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-amber-600 font-bold" onClick={() => startEdit(row.id, 'billet_breakdown_min', row.billet_breakdown_min)}>{row.billet_breakdown_min} min</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-amber-600 font-bold" onClick={() => startEdit(row.id, 'billet_breakdown_min', row.billet_breakdown_min)}>{row.billet_breakdown_min} min</span>
                         )}
                       </div>
                     </td>
 
                     {/* Rolling Breakdown Min */}
                     <td className={cellPadding}>
-                      <div className="relative w-full h-7 flex items-center justify-end text-right">
+                      <div className="relative w-full h-8 flex items-center justify-end text-right">
                         {editingCell?.id === row.id && editingCell?.field === 'rolling_breakdown_min' ? (
-                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'rolling_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'rolling_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10 text-indigo-600 font-bold" autoFocus />
+                          <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, 'rolling_breakdown_min')} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, 'rolling_breakdown_min')} className="absolute inset-0 w-full h-full text-right bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10 text-indigo-600 font-bold" autoFocus />
                         ) : (
-                          <span className="w-full h-7 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-indigo-600 font-bold" onClick={() => startEdit(row.id, 'rolling_breakdown_min', row.rolling_breakdown_min)}>{row.rolling_breakdown_min} min</span>
+                          <span className="w-full h-8 flex items-center justify-end px-1 cursor-pointer hover:bg-slate-100 rounded block select-none text-indigo-600 font-bold" onClick={() => startEdit(row.id, 'rolling_breakdown_min', row.rolling_breakdown_min)}>{row.rolling_breakdown_min} min</span>
                         )}
                       </div>
                     </td>
@@ -824,11 +784,11 @@ export default function DowntimeTrackerPage() {
                     {/* Dynamic Columns */}
                     {customCols.map(col => (
                       <td key={col} className={`${cellPadding} bg-amber-50/10`}>
-                        <div className="relative w-full h-7 flex items-center">
+                        <div className="relative w-full h-8 flex items-center">
                           {editingCell?.id === row.id && editingCell?.field === col && editingCell?.isCustom ? (
-                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded px-1.5 focus:outline-none font-sans text-xs z-10" autoFocus />
+                            <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} onBlur={() => saveInlineEdit(row.id, col, true)} onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit(row.id, col, true)} className="absolute inset-0 w-full h-full bg-slate-50 border border-[#C5A059] rounded-lg px-2 focus:outline-none font-sans text-xs z-10" autoFocus />
                           ) : (
-                            <span className="w-full h-7 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
+                            <span className="w-full h-8 flex items-center px-1 cursor-pointer hover:bg-slate-100 rounded block min-h-[1.2rem] select-none" onClick={() => startEdit(row.id, col, row.customValues?.[col] || '', true)}>{row.customValues?.[col] || ''}</span>
                           )}
                         </div>
                       </td>
@@ -854,84 +814,82 @@ export default function DowntimeTrackerPage() {
 
       {/* Modern Log Breakdown Ticket Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
             
             {/* Modal Header */}
-            <div className="bg-slate-900 px-6 py-5 text-white flex justify-between items-center">
+            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
               <div>
-                <h3 className="text-base font-bold">Log Breakdown & Maintenance Ticket</h3>
-                <p className="text-xs text-slate-300 mt-0.5">Record machinery shutdown, outage duration, root cause diagnosis & repairs</p>
+                <h3 className="text-base font-bold text-slate-900 font-sans">Log Breakdown & Maintenance Ticket</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Record machinery shutdown, outage duration, root cause diagnosis & repairs</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleAddIncidentSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleAddIncidentSubmit} className="p-7 space-y-4 text-xs font-sans">
               
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Date</label>
                   <input 
                     type="date"
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Ticket No</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Ticket No</label>
                   <input 
                     type="text"
                     required
                     value={formData.ticket_no}
                     onChange={(e) => setFormData({ ...formData, ticket_no: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Shift</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Shift</label>
                   <select
                     value={formData.shift_code}
                     onChange={(e) => setFormData({ ...formData, shift_code: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="A">Shift A (Morning)</option>
                     <option value="B">Shift B (Evening)</option>
                     <option value="C">Shift C (Night)</option>
-                    <option value="General">General / Maintenance</option>
+                    <option value="General">General Maintenance</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Equipment / Asset</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Equipment / Asset</label>
                   <select
                     value={formData.equipment}
                     onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059] font-medium"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     {equipmentOptions.map((eq, idx) => <option key={idx} value={eq}>{eq}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Breakdown Category</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Breakdown Category</label>
                   <select
                     value={formData.breakdown_category}
                     onChange={(e) => setFormData({ ...formData, breakdown_category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-indigo-700 focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-indigo-700 font-sans focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     {categories.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
                   </select>
@@ -940,33 +898,33 @@ export default function DowntimeTrackerPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Melt Shop (Min)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Melt Shop (Min)</label>
                   <input 
                     type="number"
                     placeholder="0"
                     value={formData.billet_breakdown_min}
                     onChange={(e) => setFormData({ ...formData, billet_breakdown_min: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Rolling Mill (Min)</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Rolling Mill (Min)</label>
                   <input 
                     type="number"
                     placeholder="0"
                     value={formData.rolling_breakdown_min}
                     onChange={(e) => setFormData({ ...formData, rolling_breakdown_min: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Severity</label>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Severity</label>
                   <select
                     value={formData.severity}
                     onChange={(e) => setFormData({ ...formData, severity: e.target.value as any })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#C5A059]"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="Minor">Minor (Routine/Quick)</option>
                     <option value="Medium">Medium (Line Pause)</option>
@@ -976,24 +934,24 @@ export default function DowntimeTrackerPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Root Cause Diagnosis</label>
+                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Root Cause Diagnosis</label>
                 <textarea 
                   rows={2}
                   placeholder="Describe failure symptom, sensor error code, or mechanical jam..."
                   value={formData.root_cause_notes}
                   onChange={(e) => setFormData({ ...formData, root_cause_notes: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-mono">Action Taken / Resolution</label>
+                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Action Taken / Resolution</label>
                 <textarea 
                   rows={2}
                   placeholder="Action taken to restore line (part replaced, recalibration, roll alignment)..."
                   value={formData.action_taken}
                   onChange={(e) => setFormData({ ...formData, action_taken: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#C5A059]"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                 />
               </div>
 
@@ -1002,13 +960,13 @@ export default function DowntimeTrackerPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#B48F48] hover:from-[#B48F48] hover:to-[#9E7A37] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
                 >
                   Submit & Log Ticket
                 </button>

@@ -194,111 +194,104 @@ export default function FurnaceLogPage() {
         </div>
       )}
 
-      {/* HERO & MELTSHOP BANNER WITH REAL SMELTING PHOTO */}
-      <div className="relative overflow-hidden bg-slate-900 rounded-3xl text-white shadow-xl border border-slate-800">
-        <div className="absolute inset-0 opacity-25 mix-blend-luminosity bg-cover bg-center pointer-events-none" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80')` }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent"></div>
-
-        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center space-x-2.5">
-              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase px-3 py-1 rounded-full font-mono tracking-wide">
-                Stage 02 • Induction Smelting & Refining
-              </span>
-              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full font-mono flex items-center">
-                <span className="w-2 h-2 bg-amber-400 rounded-full mr-2 animate-pulse"></span> 1620°C Bath Ready
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-sans">
-              Induction Furnace Heat & Smelting Log
-            </h1>
-            <p className="text-sm text-slate-300 font-sans leading-relaxed">
-              Track crucible batch heats, ferro-alloy deoxidation (FeSi / FeMn), tapping temperatures, and power consumption.
-            </p>
+      {/* CLEAN ENTERPRISE HEADER BAR */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+            <span>Steel Production</span>
+            <span className="text-slate-300">/</span>
+            <span>Stage 02</span>
+            <span className="text-slate-300">/</span>
+            <span className="bg-amber-100/70 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-mono text-[11px]">Induction Smelting & Refining</span>
           </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">
+            Induction Furnace Heat & Smelting Log
+          </h1>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">
+            Track crucible batch heats, ferro-alloy deoxidation (FeSi / FeMn), tapping temperatures, and power consumption.
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleExportExcel}
-              className="px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-600 transition-all cursor-pointer shadow-xs"
-            >
-              Export Heat Book
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-amber-900/25 transition-all cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              <span>Record Tapped Heat</span>
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={handleExportExcel}
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export Heat Book</span>
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Record Tapped Heat</span>
+          </button>
         </div>
       </div>
 
-      {/* SHORT MINI-DASHBOARD (4 KPI METRIC CARDS) */}
+      {/* 4 KPI METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Liquid Steel Output</span>
-            <span className="text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Tapped</span>
+            <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Tapped</span>
           </div>
           <div>
             <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalLiquidTappedKg / 1000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">▲ {totalHeats} Total Heats Logged</p>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1">▲ {totalHeats} Total Heats Logged</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Melting Yield Efficiency</span>
-            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 font-bold">Yield</span>
+            <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px] font-bold">Yield</span>
           </div>
           <div>
             <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgYield}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">%</span>
             </div>
-            <p className="text-xs text-slate-500 font-mono mt-1.5">Burning/Slag Loss: {(100 - Number(avgYield)).toFixed(2)}%</p>
+            <p className="text-xs text-slate-500 font-mono mt-1">Burning/Slag Loss: {(100 - Number(avgYield)).toFixed(2)}%</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Specific Power (SEC)</span>
-            <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-bold">Electricity</span>
+            <span className="text-[#B48F48] bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Electricity</span>
           </div>
           <div>
             <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgSec}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">kWh / MT</span>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1.5">Target Ceiling: 560 kWh/MT</p>
+            <p className="text-xs text-emerald-600 font-semibold font-mono mt-1">Target Ceiling: 560 kWh/MT</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#C5A059]"></div>
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-40 relative overflow-hidden">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Thermal Index</span>
-            <span className="text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-md border border-rose-200 font-bold">Bath Temp</span>
+            <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Bath Temp</span>
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900 font-mono">1618°C Average</div>
-            <p className="text-xs text-slate-500 font-mono mt-1.5">Ladle Superheat: +45°C</p>
+            <p className="text-xs text-slate-500 font-mono mt-1">Ladle Superheat: +45°C</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
         </div>
 
       </div>
@@ -472,34 +465,41 @@ export default function FurnaceLogPage() {
 
       {/* MODAL: LOG NEW HEAT */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-7 shadow-2xl border border-slate-200 animate-zoom-in space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
+            
+            {/* Header */}
+            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">Record Tapped Furnace Heat</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Log crucible inputs, tapping temperature, and electricity consumption.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">✕</button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
-            <form onSubmit={handleCreateHeat} className="space-y-4 text-xs font-sans">
+            <form onSubmit={handleCreateHeat} className="p-7 space-y-4 text-xs font-sans">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Heat Log Date</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Heat Log Date</label>
                   <input
                     type="date"
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Furnace Unit</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Furnace Unit</label>
                   <select
                     value={formData.furnace_no}
                     onChange={e => setFormData({ ...formData, furnace_no: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   >
                     <option value="Furnace 01">Furnace 01 (15 Ton)</option>
                     <option value="Furnace 02">Furnace 02 (15 Ton)</option>
@@ -509,23 +509,23 @@ export default function FurnaceLogPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Heat Serial Number</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Heat Serial Number</label>
                   <input
                     type="text"
                     placeholder="e.g. H-260825A"
                     value={formData.heat_no}
                     onChange={e => setFormData({ ...formData, heat_no: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold uppercase focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Shift & Master</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Shift & Master</label>
                   <div className="grid grid-cols-2 gap-2">
                     <select
                       value={formData.shift_id}
                       onChange={e => setFormData({ ...formData, shift_id: e.target.value })}
-                      className="mt-1.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                      className="mt-1.5 px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     >
                       <option value="A">Shift A</option>
                       <option value="B">Shift B</option>
@@ -534,7 +534,7 @@ export default function FurnaceLogPage() {
                     <select
                       value={formData.furnace_master}
                       onChange={e => setFormData({ ...formData, furnace_master: e.target.value })}
-                      className="mt-1.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                      className="mt-1.5 px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     >
                       {furnaceMasters.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
@@ -544,35 +544,35 @@ export default function FurnaceLogPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Scrap Input (KG)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Scrap Input (KG)</label>
                   <input
                     type="number"
                     placeholder="22000"
                     value={formData.scrap_input_kg}
                     onChange={e => setFormData({ ...formData, scrap_input_kg: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Liquid Steel (KG)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Liquid Steel (KG)</label>
                   <input
                     type="number"
                     placeholder="20400"
                     value={formData.liquid_steel_tapped_kg}
                     onChange={e => setFormData({ ...formData, liquid_steel_tapped_kg: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Power (kWh)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Power (kWh)</label>
                   <input
                     type="number"
                     placeholder="11500"
                     value={formData.power_consumed_kwh}
                     onChange={e => setFormData({ ...formData, power_consumed_kwh: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                     required
                   />
                 </div>
@@ -580,43 +580,43 @@ export default function FurnaceLogPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">Tapping Temp (°C)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Tapping Temp (°C)</label>
                   <input
                     type="number"
                     value={formData.tapping_temp_c}
                     onChange={e => setFormData({ ...formData, tapping_temp_c: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">FeSi Alloy (KG)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">FeSi Alloy (KG)</label>
                   <input
                     type="number"
                     value={formData.fe_si_alloy_kg}
                     onChange={e => setFormData({ ...formData, fe_si_alloy_kg: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 uppercase font-mono">FeMn Alloy (KG)</label>
+                  <label className="text-xs font-semibold text-slate-700 uppercase font-mono">FeMn Alloy (KG)</label>
                   <input
                     type="number"
                     value={formData.fe_mn_alloy_kg}
                     onChange={e => setFormData({ ...formData, fe_mn_alloy_kg: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#C5A059] focus:bg-white"
+                    className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
               </div>
 
               {/* Dynamic Calculation Result */}
               {scrapInKg > 0 && liquidOutKg > 0 && (
-                <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 flex justify-between items-center text-xs font-mono">
+                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
                   <div>
-                    <span className="text-slate-500 font-sans block">Computed Melting Yield:</span>
-                    <strong className="text-base font-bold text-emerald-600 font-mono">{computedYield}%</strong>
+                    <span className="text-slate-600 font-sans block">Computed Melting Yield:</span>
+                    <strong className="text-base font-bold text-emerald-700 font-mono">{computedYield}%</strong>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500 font-sans block">Specific Power Consumption:</span>
+                    <span className="text-slate-600 font-sans block">Specific Power Consumption:</span>
                     <strong className="text-base font-bold text-[#B48F48] font-mono">{computedSec} kWh/MT</strong>
                   </div>
                 </div>
@@ -632,7 +632,7 @@ export default function FurnaceLogPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                  className="px-6 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold rounded-xl text-xs shadow-sm transition-all cursor-pointer"
                 >
                   Save & Log Smelt Heat
                 </button>

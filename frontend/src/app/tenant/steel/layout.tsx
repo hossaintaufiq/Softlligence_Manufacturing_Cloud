@@ -79,70 +79,69 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
   ];
 
   const sidebarElement = (
-    <div className="flex flex-col h-full overflow-hidden select-none">
-      {/* Sidebar Header */}
-      <div className="p-5 border-b border-slate-200/80 flex items-center justify-between bg-white flex-shrink-0">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#B48F48] to-[#9E7A37] text-white flex items-center justify-center shadow-sm">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
-            </svg>
+    <div className="relative flex flex-col h-full overflow-hidden select-none bg-[url('/images/steel-mill-sidebar.jpg')] bg-cover bg-center">
+      {/* Dark Gradient Overlay for Glassmorphism & High Contrast */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/95 via-slate-950/88 to-slate-950/96 backdrop-blur-[3px] pointer-events-none" />
+
+      {/* Sidebar Content (layered above overlay) */}
+      <div className="relative z-10 flex flex-col h-full overflow-hidden">
+        {/* Sidebar Header */}
+        <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/30 backdrop-blur-md flex-shrink-0">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A059] to-[#9E7A37] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-900/30 font-black">
+              <svg className="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
+              </svg>
+            </div>
+            <div className="leading-tight overflow-hidden max-w-[160px]">
+              <h2 className="text-sm font-bold text-white tracking-tight truncate">Hi-Tech Steel MIS</h2>
+              <p className="text-[11px] text-[#C5A059] font-mono font-semibold tracking-wide uppercase mt-0.5">Manufacturing Cloud</p>
+            </div>
           </div>
-          <div className="leading-tight overflow-hidden max-w-[160px]">
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight truncate">Hi-Tech Steel MIS</h2>
-            <p className="text-[11px] text-[#B48F48] font-mono font-semibold tracking-wide uppercase mt-0.5">Manufacturing Cloud</p>
-          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="block lg:hidden text-slate-400 hover:text-white">✕</button>
         </div>
-        <button onClick={() => setIsSidebarOpen(false)} className="block lg:hidden text-slate-400 hover:text-slate-700">✕</button>
-      </div>
 
-      {/* Grouped Sidebar Sections */}
-      <nav className="p-4 space-y-5 flex-1 overflow-y-auto min-h-0 scrollbar-thin">
-        {menuSections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-1.5">
-            <h4 className="px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 font-mono">
-              {section.title}
-            </h4>
-            <div className="space-y-1">
-              {section.links.map((link, idx) => (
-                <Link
-                  key={idx}
-                  href={link.href}
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all relative ${
-                    activeTab === link.activeKey 
-                      ? 'bg-amber-500/10 text-amber-900 font-semibold border border-amber-500/20' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                  }`}
-                >
-                  {activeTab === link.activeKey && <div className="absolute left-0 top-2.5 w-1 h-5 bg-[#C5A059] rounded-r" />}
-                  <svg className={`w-4 h-4 flex-shrink-0 ${activeTab === link.activeKey ? 'text-[#B48F48]' : 'text-slate-400'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
-                  </svg>
-                  <span className="truncate">{link.text}</span>
-                </Link>
-              ))}
+        {/* Grouped Sidebar Sections - Clean, No Scrollbar */}
+        <nav className="p-4 space-y-5 flex-1 overflow-y-auto min-h-0 no-scrollbar">
+          {menuSections.map((section, sIdx) => (
+            <div key={sIdx} className="space-y-1.5">
+              <h4 className="px-3 text-[10.5px] uppercase tracking-wider font-bold text-amber-300/90 font-mono">
+                {section.title}
+              </h4>
+              <div className="space-y-1">
+                {section.links.map((link, idx) => (
+                  <Link
+                    key={idx}
+                    href={link.href}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-150 relative ${
+                      activeTab === link.activeKey 
+                        ? 'bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5 text-amber-200 font-semibold border border-amber-400/40 shadow-sm' 
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {activeTab === link.activeKey && (
+                      <div className="absolute left-0 top-2 w-1 h-5 bg-[#C5A059] rounded-r shadow-xs shadow-amber-400" />
+                    )}
+                    <svg className={`w-4 h-4 flex-shrink-0 ${activeTab === link.activeKey ? 'text-[#C5A059]' : 'text-slate-400'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
+                    </svg>
+                    <span className="truncate">{link.text}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
 
-      {/* Footer Profile */}
-      <div className="p-4 border-t border-slate-200/80 bg-slate-50/70 flex-shrink-0">
-        <Link href="/tenant/steel/profile" onClick={() => setIsSidebarOpen(false)} className="flex items-center justify-between mb-3 cursor-pointer hover:bg-white p-2 rounded-xl transition-all border border-transparent hover:border-slate-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-xs text-[#B48F48]">
-              {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-            </div>
-            <div className="leading-tight">
-              <p className="text-xs font-bold text-slate-900 truncate w-32">{user.name}</p>
-              <span className="text-[11px] text-slate-500 font-mono">Plant Admin</span>
-            </div>
+        {/* System Version Footer Strip (No Admin) */}
+        <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between text-[11px] text-slate-400 font-mono flex-shrink-0">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Steel Core v4.2</span>
           </div>
-        </Link>
-        <button onClick={logout} className="w-full py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-600 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer">
-          <span>Sign Out Session</span>
-        </button>
+          <span className="text-amber-400/90 font-semibold">SCADA 100%</span>
+        </div>
       </div>
     </div>
   );
@@ -151,15 +150,15 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
     <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-900 font-sans overflow-auto relative min-w-[1280px]">
       
       {/* Sidebar - Always visible in desktop layout */}
-      <aside className="flex w-68 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
+      <aside className="flex w-68 h-full border-r border-slate-900/40 flex-col justify-between flex-shrink-0 z-10 shadow-xl">
         {sidebarElement}
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 h-full flex flex-col overflow-hidden">
         
-        {/* Header */}
-        <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 flex-shrink-0">
+        {/* Header with Top-Right Admin & User Profile Controls */}
+        <header className="h-16 border-b border-slate-200/80 bg-white/90 backdrop-blur-md flex items-center justify-between px-8 flex-shrink-0 z-10">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2.5 text-xs font-medium text-slate-500 font-mono">
               <span className="text-slate-400">Softlligence Enterprise</span>
@@ -172,20 +171,39 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
           
-          {/* Header Controls */}
+          {/* Header Controls: Telemetry Status, Profile Pill, Admin Badge & Sign Out */}
           <div className="flex items-center space-x-3">
             <div className="px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full flex items-center gap-1.5 text-xs font-semibold text-emerald-700 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Live MES Online
             </div>
 
-            {/* Profile Pill */}
-            <Link href="/tenant/steel/profile" className="flex items-center space-x-2.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all">
-              <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center font-bold text-xs text-[#B48F48] border border-amber-200">
+            {/* Admin Profile Pill */}
+            <Link 
+              href="/tenant/steel/profile" 
+              className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all"
+              title="Admin User Profile & Preferences"
+            >
+              <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center font-bold text-xs text-[#B48F48] border border-amber-200 shadow-xs">
                 {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
-              <span className="text-xs font-semibold hidden md:inline">{user.name}</span>
+              <div className="text-left leading-tight hidden sm:block">
+                <span className="text-xs font-bold text-slate-900 block">{user.name}</span>
+                <span className="text-[10px] font-mono text-amber-700 font-semibold">Plant Admin</span>
+              </div>
             </Link>
+
+            {/* Sign Out Button in Top Right */}
+            <button 
+              onClick={logout} 
+              className="p-2 md:px-3 md:py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer"
+              title="Sign Out Session"
+            >
+              <svg className="w-4 h-4 text-slate-400 group-hover:text-rose-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="hidden md:inline">Sign Out</span>
+            </button>
           </div>
         </header>
 
