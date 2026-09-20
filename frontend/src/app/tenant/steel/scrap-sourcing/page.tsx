@@ -37,6 +37,8 @@ export default function ScrapSourcingPage() {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<{ id: number; col: string } | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   const DEFAULT_COLS = ['date', 'supplier_name', 'scrap_category', 'truck_no', 'gross_weight', 'value_tare', 'scrap_rcv_kg', 'rate_per_kg', 'total_cost', 'yard_location'];
   const [colOrder, setColOrder] = useState<string[]>([]);
@@ -295,6 +297,41 @@ export default function ScrapSourcingPage() {
     setColOrder(newOrder);
     localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
     showToast(`Column renamed to "${newName}".`);
+  };
+
+  const handleEditCell = (id: number, col: string, value: any) => {
+    setEditingCell({ id, col });
+    setEditValue(value !== undefined && value !== null ? String(value) : '');
+  };
+
+  const handleSaveCell = () => {
+    if (!editingCell) return;
+    const { id, col } = editingCell;
+    const updatedData = data.map(item => {
+      if (item.id === id) {
+        let parsedValue: any = editValue;
+        if (['gross_weight', 'value_tare', 'scrap_rcv_kg', 'rate_per_kg', 'total_cost', 'moisture_deduction_pct'].includes(col)) {
+           parsedValue = Number(editValue) || 0;
+        }
+        const updatedItem = { ...item, [col]: parsedValue };
+        
+        if (['gross_weight', 'value_tare', 'moisture_deduction_pct', 'rate_per_kg'].includes(col)) {
+           const gross = col === 'gross_weight' ? parsedValue : updatedItem.gross_weight;
+           const tare = col === 'value_tare' ? parsedValue : updatedItem.value_tare;
+           const mPct = col === 'moisture_deduction_pct' ? parsedValue : (updatedItem.moisture_deduction_pct || 0);
+           const rawNet = Math.max(0, gross - tare);
+           const net = Math.round(rawNet * (1 - mPct / 100));
+           updatedItem.scrap_rcv_kg = net;
+           const rate = col === 'rate_per_kg' ? parsedValue : updatedItem.rate_per_kg;
+           updatedItem.total_cost = Math.round(net * rate);
+        }
+        return updatedItem;
+      }
+      return item;
+    });
+    saveToStorage(updatedData);
+    setEditingCell(null);
+    showToast(`Cell updated`);
   };
 
   // Aggregated KPIs
@@ -600,8 +637,34 @@ export default function ScrapSourcingPage() {
                       if (col === 'total_cost') cellContent = <span className="font-bold text-emerald-700">৳{(item.total_cost || 0).toLocaleString()}</span>;
                       if (col === 'yard_location') cellContent = <span className="text-slate-700 font-sans">{item.yard_location}</span>;
                       
+                      const isEditing = editingCell?.id === item.id && editingCell?.col === col;
+                      
+                      if (isEditing) {
+                        return (
+                          <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                            <input
+                              autoFocus
+                              type="text"
+                              value={editValue}
+                              onChange={e => setEditValue(e.target.value)}
+                              onBlur={handleSaveCell}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSaveCell();
+                                if (e.key === 'Escape') setEditingCell(null);
+                              }}
+                              className="w-full min-w-[80px] px-2 py-1 bg-white border border-[#C5A059] rounded shadow-sm text-xs font-sans focus:outline-none"
+                            />
+                          </td>
+                        );
+                      }
+
                       return (
-                        <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                        <td 
+                          key={col} 
+                          className={`px-4 py-3 cursor-pointer hover:bg-[#C5A059]/10 transition-colors ${alignRight ? 'text-right' : ''}`}
+                          onDoubleClick={() => handleEditCell(item.id, col, item[col])}
+                          title="Double click to edit"
+                        >
                           {cellContent}
                         </td>
                       );

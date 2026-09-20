@@ -41,6 +41,8 @@ export default function FurnaceLogPage() {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<{ id: number; col: string } | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   const DEFAULT_COLS = ['date', 'shift_id', 'furnace_no', 'heat_no', 'scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c', 'furnace_master'];
   const [colOrder, setColOrder] = useState<string[]>([]);
@@ -291,6 +293,36 @@ export default function FurnaceLogPage() {
     setColOrder(newOrder);
     localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
     showToast(`Column renamed to "${newName}".`);
+  };
+
+  const handleEditCell = (id: number, col: string, value: any) => {
+    setEditingCell({ id, col });
+    setEditValue(value !== undefined && value !== null ? String(value) : '');
+  };
+
+  const handleSaveCell = () => {
+    if (!editingCell) return;
+    const { id, col } = editingCell;
+    const updatedData = data.map(item => {
+      if (item.id === id) {
+        let parsedValue: any = editValue;
+        if (['scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c', 'runtime_min', 'fe_si_alloy_kg', 'fe_mn_alloy_kg'].includes(col)) {
+           parsedValue = Number(editValue) || 0;
+        }
+        const updatedItem = { ...item, [col]: parsedValue };
+        
+        if (['scrap_input_kg', 'liquid_steel_tapped_kg'].includes(col)) {
+           const scrapIn = col === 'scrap_input_kg' ? parsedValue : updatedItem.scrap_input_kg;
+           const liquidOut = col === 'liquid_steel_tapped_kg' ? parsedValue : updatedItem.liquid_steel_tapped_kg;
+           updatedItem.yield_pct = scrapIn > 0 ? parseFloat(((liquidOut / scrapIn) * 100).toFixed(2)) : 0;
+        }
+        return updatedItem;
+      }
+      return item;
+    });
+    saveToStorage(updatedData);
+    setEditingCell(null);
+    showToast(`Cell updated`);
   };
 
   // Aggregated KPIs
@@ -627,8 +659,34 @@ export default function FurnaceLogPage() {
                       if (col === 'tapping_temp_c') cellContent = <span className="text-rose-600 font-semibold">{item.tapping_temp_c}°C</span>;
                       if (col === 'furnace_master') cellContent = <span className="text-slate-800 font-sans">{item.furnace_master}</span>;
                       
+                      const isEditing = editingCell?.id === item.id && editingCell?.col === col;
+                      
+                      if (isEditing) {
+                        return (
+                          <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                            <input
+                              autoFocus
+                              type="text"
+                              value={editValue}
+                              onChange={e => setEditValue(e.target.value)}
+                              onBlur={handleSaveCell}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSaveCell();
+                                if (e.key === 'Escape') setEditingCell(null);
+                              }}
+                              className="w-full min-w-[80px] px-2 py-1 bg-white border border-amber-500 rounded shadow-sm text-xs font-sans focus:outline-none"
+                            />
+                          </td>
+                        );
+                      }
+
                       return (
-                        <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                        <td 
+                          key={col} 
+                          className={`px-4 py-3 cursor-pointer hover:bg-amber-500/10 transition-colors ${alignRight ? 'text-right' : ''}`}
+                          onDoubleClick={() => handleEditCell(item.id, col, item[col])}
+                          title="Double click to edit"
+                        >
                           {cellContent}
                         </td>
                       );

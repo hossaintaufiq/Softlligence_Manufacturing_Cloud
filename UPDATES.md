@@ -12,6 +12,7 @@
 - Users check the exact columns they want to view, generating a real-time responsive data table that automatically updates and scales perfectly for **Excel Export**.
 
 **Flexible Input System (Smart Spreadsheets)**
+- **Inline Cell Editing:** Users can double-click on any data cell within the grid to edit its value directly. Changes automatically recalculate derived metrics (like net weight, yield, and total cost) in real-time without refreshing the page.
 - **Excel Clipboard Paste:** A powerful bulk-ingestion feature added directly to the operational grids. Users can copy hundreds of rows from Microsoft Excel, click anywhere on the web table, press `Ctrl+V`, and the system will parse the TSV (Tab-Separated Values) format, calculate relevant yields automatically, and insert all rows at once.
 - **Dynamic Form Schema:** The "Log New Record" modals were upgraded to support unstructured, dynamic data. Users can click `+ Add Custom Column` directly inside the input form. This appends a new text field instantly without needing a developer to alter the database schema or code. 
 
