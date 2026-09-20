@@ -17,6 +17,7 @@ interface ScrapRow {
   yard_location: string;
   moisture_deduction_pct?: number;
   quality_grade?: 'Premium Heavy' | 'Standard Medium' | 'Light / Kechi' | 'Direct Reduced';
+  [key: string]: any;
 }
 
 const STORAGE_KEY = 'steel_erp_scrap';
@@ -37,6 +38,9 @@ export default function ScrapSourcingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const DEFAULT_COLS = ['date', 'supplier_name', 'scrap_category', 'truck_no', 'gross_weight', 'value_tare', 'scrap_rcv_kg', 'rate_per_kg', 'total_cost', 'yard_location'];
+  const [colOrder, setColOrder] = useState<string[]>([]);
+
   // Form State
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -48,8 +52,12 @@ export default function ScrapSourcingPage() {
     rate_per_kg: '52.0',
     yard_location: 'Bay A (Heavy Stock)',
     moisture_deduction_pct: '0.5',
-    quality_grade: 'Premium Heavy' as const
+    quality_grade: 'Premium Heavy' as const,
+    custom_fields: {} as Record<string, string>
   });
+
+  const [newFieldName, setNewFieldName] = useState('');
+  const [isAddingField, setIsAddingField] = useState(false);
 
   const categories = [
     'HMS-1 (Heavy Melting)',
@@ -82,6 +90,10 @@ export default function ScrapSourcingPage() {
       setData(initialScrapData);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialScrapData));
     }
+    
+    const savedOrder = localStorage.getItem(`${STORAGE_KEY}_col_order`);
+    if (savedOrder) setColOrder(JSON.parse(savedOrder));
+    else setColOrder(DEFAULT_COLS);
   }, []);
 
   const saveToStorage = (updated: ScrapRow[]) => {
@@ -123,7 +135,8 @@ export default function ScrapSourcingPage() {
       total_cost: totalCostCalculated,
       yard_location: formData.yard_location,
       moisture_deduction_pct: moisturePct,
-      quality_grade: formData.quality_grade
+      quality_grade: formData.quality_grade,
+      ...formData.custom_fields
     };
 
     const updated = [newRow, ...data];
@@ -142,8 +155,50 @@ export default function ScrapSourcingPage() {
       rate_per_kg: '52.0',
       yard_location: 'Bay A (Heavy Stock)',
       moisture_deduction_pct: '0.5',
-      quality_grade: 'Premium Heavy'
+      quality_grade: 'Premium Heavy',
+      custom_fields: {}
     });
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pasteData = e.clipboardData.getData('text');
+    if (!pasteData) return;
+    
+    const rows = pasteData.split('\n').filter(r => r.trim());
+    if (rows.length === 0) return;
+    if (!rows[0].includes('\t')) return;
+    
+    e.preventDefault();
+
+    const newRecords: ScrapRow[] = rows.map((rowStr, idx) => {
+      const cols = rowStr.split('\t');
+      const gross = Number(cols[5]) || 0;
+      const tare = Number(cols[6]) || 0;
+      const rawNet = Math.max(0, gross - tare);
+      const mPct = Number(cols[11]) || 0;
+      const net = Math.round(rawNet * (1 - mPct / 100));
+      const rate = Number(cols[8]) || 52.0;
+      
+      return {
+        id: Date.now() + idx,
+        date: cols[0] || new Date().toISOString().split('T')[0],
+        supplier_name: cols[1] || 'Bulk Importer',
+        scrap_category: cols[2] || 'HMS-1 (Heavy Melting)',
+        quality_grade: (cols[3] as any) || 'Premium Heavy',
+        truck_no: cols[4] || `TRK-BULK-${Date.now()}-${idx}`,
+        gross_weight: gross,
+        value_tare: tare,
+        scrap_rcv_kg: net,
+        rate_per_kg: rate,
+        total_cost: Math.round(net * rate),
+        yard_location: cols[10] || 'Bay A (Heavy Stock)',
+        moisture_deduction_pct: mPct
+      };
+    });
+
+    const updated = [...newRecords, ...data];
+    saveToStorage(updated);
+    showToast(`${newRecords.length} records bulk pasted from Excel!`);
   };
 
   const handleDelete = (id: number) => {
@@ -166,6 +221,81 @@ export default function ScrapSourcingPage() {
       return matchesSearch && matchesCat;
     });
   }, [data, search, categoryFilter]);
+
+  const dynamicColumns = useMemo(() => {
+    if (data.length === 0) return [];
+    const baseKeys = Object.keys(initialScrapData[0]);
+    const currentKeys = Object.keys(data[0]);
+    return currentKeys.filter(k => !baseKeys.includes(k) && k !== 'custom_fields');
+  }, [data]);
+
+  const displayColumns = Array.from(new Set([...colOrder, ...dynamicColumns]));
+
+  const handleRowDrop = (e: React.DragEvent, targetId: number) => {
+    e.preventDefault();
+    const sourceId = Number(e.dataTransfer.getData('rowId'));
+    if (!sourceId || sourceId === targetId) return;
+
+    const newData = [...data];
+    const sourceIndex = newData.findIndex(d => d.id === sourceId);
+    const targetIndex = newData.findIndex(d => d.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [removed] = newData.splice(sourceIndex, 1);
+    newData.splice(targetIndex, 0, removed);
+    saveToStorage(newData);
+  };
+
+  const handleColDrop = (e: React.DragEvent, targetCol: string) => {
+    e.preventDefault();
+    const sourceCol = e.dataTransfer.getData('colKey');
+    if (!sourceCol || sourceCol === targetCol) return;
+    
+    const newOrder = [...displayColumns];
+    const srcIdx = newOrder.indexOf(sourceCol);
+    const tgtIdx = newOrder.indexOf(targetCol);
+    
+    newOrder.splice(srcIdx, 1);
+    newOrder.splice(tgtIdx, 0, sourceCol);
+    
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+  };
+
+  const deleteColumn = (colKey: string) => {
+    if (!confirm(`Delete column "${colKey}" and all its data permanently?`)) return;
+    const newData = data.map(row => {
+      const newRow = { ...row };
+      delete newRow[colKey];
+      return newRow;
+    });
+    saveToStorage(newData);
+    const newOrder = colOrder.filter(c => c !== colKey);
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+    showToast(`Column "${colKey}" deleted.`);
+  };
+
+  const renameColumn = (oldKey: string) => {
+    const newName = prompt(`Enter new name for column "${oldKey.replace(/_/g, ' ')}":`);
+    if (!newName || !newName.trim()) return;
+    const newKey = newName.trim().toLowerCase().replace(/ /g, '_');
+    
+    const newData = data.map(row => {
+      const newRow = { ...row };
+      if (newRow[oldKey] !== undefined) {
+        newRow[newKey] = newRow[oldKey];
+        delete newRow[oldKey];
+      }
+      return newRow;
+    });
+    saveToStorage(newData);
+    
+    const newOrder = displayColumns.map(c => c === oldKey ? newKey : c);
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+    showToast(`Column renamed to "${newName}".`);
+  };
 
   // Aggregated KPIs
   const totalScrapKg = filteredData.reduce((sum, d) => sum + Number(d.scrap_rcv_kg || 0), 0);
@@ -394,37 +524,83 @@ export default function ScrapSourcingPage() {
 
       {/* ENTERPRISE GRID TABLE VIEW */}
       {viewMode === 'table' && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+        <div 
+          className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20"
+          tabIndex={0}
+          onPaste={handlePaste}
+          title="Click here and press Ctrl+V to paste data from Excel"
+        >
+          <div className="bg-slate-50 text-xs text-slate-500 px-4 py-2 border-b border-slate-200 font-mono flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <strong>Pro Tip:</strong> Click anywhere on this table and press Ctrl+V to bulk paste rows from Excel.
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm font-sans border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
-                  <th className="px-4 py-3.5">Date</th>
-                  <th className="px-4 py-3.5">Supplier Name</th>
-                  <th className="px-4 py-3.5">Category</th>
-                  <th className="px-4 py-3.5">Truck No</th>
-                  <th className="px-4 py-3.5 text-right">Gross (kg)</th>
-                  <th className="px-4 py-3.5 text-right">Tare (kg)</th>
-                  <th className="px-4 py-3.5 text-right">Net Rcv (MT)</th>
-                  <th className="px-4 py-3.5 text-right">Rate (৳/kg)</th>
-                  <th className="px-4 py-3.5 text-right">Total Cost (৳)</th>
-                  <th className="px-4 py-3.5">Yard Bay</th>
+                  <th className="px-4 py-3.5 w-10"></th>
+                  {displayColumns.map(col => {
+                    const isCustom = dynamicColumns.includes(col);
+                    const mapping: Record<string, string> = { date: 'Date', supplier_name: 'Supplier Name', scrap_category: 'Category', truck_no: 'Truck No', gross_weight: 'Gross (kg)', value_tare: 'Tare (kg)', scrap_rcv_kg: 'Net Rcv (MT)', rate_per_kg: 'Rate (৳/kg)', total_cost: 'Total Cost (৳)', yard_location: 'Yard Bay' };
+                    const alignRight = ['gross_weight', 'value_tare', 'scrap_rcv_kg', 'rate_per_kg', 'total_cost'].includes(col);
+                    
+                    return (
+                      <th 
+                        key={col} 
+                        draggable
+                        onDragStart={e => e.dataTransfer.setData('colKey', col)}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleColDrop(e, col)}
+                        className={`px-4 py-3.5 cursor-move hover:bg-slate-100 transition-colors ${alignRight ? 'text-right' : ''}`}
+                      >
+                        <div className={`flex items-center space-x-2 ${alignRight ? 'justify-end' : ''}`}>
+                          <span>{mapping[col] || col.replace(/_/g, ' ')}</span>
+                          {isCustom && (
+                            <div className="flex space-x-1 opacity-50 hover:opacity-100 transition-opacity">
+                              <button onClick={() => renameColumn(col)} title="Rename" className="text-[#B48F48] hover:text-[#9E7A37]">✎</button>
+                              <button onClick={() => deleteColumn(col)} title="Delete" className="text-rose-500 hover:text-rose-700">✕</button>
+                            </div>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
                   <th className="px-4 py-3.5 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-xs">
                 {filteredData.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-4 py-3 text-slate-700">{item.date}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 font-sans">{item.supplier_name}</td>
-                    <td className="px-4 py-3 text-slate-600 font-sans">{item.scrap_category}</td>
-                    <td className="px-4 py-3 text-slate-500 font-semibold">{item.truck_no}</td>
-                    <td className="px-4 py-3 text-right">{item.gross_weight.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{item.value_tare.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-bold text-[#B48F48]">{(item.scrap_rcv_kg / 1000).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-right">৳{item.rate_per_kg}</td>
-                    <td className="px-4 py-3 text-right font-bold text-emerald-700">৳{item.total_cost.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-slate-700 font-sans">{item.yard_location}</td>
+                  <tr 
+                    key={item.id} 
+                    draggable
+                    onDragStart={e => e.dataTransfer.setData('rowId', String(item.id))}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleRowDrop(e, item.id)}
+                    className="hover:bg-slate-50/60 transition-colors group"
+                  >
+                    <td className="px-4 py-3 cursor-move text-slate-300 group-hover:text-[#B48F48] transition-colors" title="Drag to reorder">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /></svg>
+                    </td>
+                    {displayColumns.map(col => {
+                      const alignRight = ['gross_weight', 'value_tare', 'scrap_rcv_kg', 'rate_per_kg', 'total_cost'].includes(col);
+                      
+                      let cellContent: React.ReactNode = item[col];
+                      if (col === 'supplier_name') cellContent = <span className="font-semibold text-slate-900 font-sans">{item.supplier_name}</span>;
+                      if (col === 'scrap_category') cellContent = <span className="text-slate-600 font-sans">{item.scrap_category}</span>;
+                      if (col === 'truck_no') cellContent = <span className="text-slate-500 font-semibold">{item.truck_no}</span>;
+                      if (col === 'gross_weight') cellContent = (item.gross_weight || 0).toLocaleString();
+                      if (col === 'value_tare') cellContent = <span className="text-slate-400">{(item.value_tare || 0).toLocaleString()}</span>;
+                      if (col === 'scrap_rcv_kg') cellContent = <span className="font-bold text-[#B48F48]">{((item.scrap_rcv_kg || 0) / 1000).toFixed(2)}</span>;
+                      if (col === 'rate_per_kg') cellContent = `৳${item.rate_per_kg}`;
+                      if (col === 'total_cost') cellContent = <span className="font-bold text-emerald-700">৳{(item.total_cost || 0).toLocaleString()}</span>;
+                      if (col === 'yard_location') cellContent = <span className="text-slate-700 font-sans">{item.yard_location}</span>;
+                      
+                      return (
+                        <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                          {cellContent}
+                        </td>
+                      );
+                    })}
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => handleDelete(item.id)} className="text-rose-500 hover:text-rose-700 font-bold p-1">✕</button>
                     </td>
@@ -578,6 +754,57 @@ export default function ScrapSourcingPage() {
                   </div>
                 </div>
               )}
+
+              {/* Dynamic Fields Section */}
+              {Object.keys(formData.custom_fields).length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-150">
+                  {Object.keys(formData.custom_fields).map(field => (
+                    <div key={field}>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-mono uppercase capitalize">{field.replace(/_/g, ' ')}</label>
+                      <input
+                        type="text"
+                        value={formData.custom_fields[field]}
+                        onChange={e => setFormData({ ...formData, custom_fields: { ...formData.custom_fields, [field]: e.target.value }})}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] shadow-2xs"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Custom Field Button */}
+              <div className="pt-2">
+                {!isAddingField ? (
+                  <button type="button" onClick={() => setIsAddingField(true)} className="text-[#B48F48] font-bold text-xs hover:underline flex items-center">
+                    + Add Custom Column
+                  </button>
+                ) : (
+                  <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                    <input 
+                      type="text" 
+                      placeholder="Field Name (e.g., Driver Name)" 
+                      value={newFieldName}
+                      onChange={e => setNewFieldName(e.target.value)}
+                      className="flex-1 bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs"
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (newFieldName.trim()) {
+                          const key = newFieldName.trim().toLowerCase().replace(/ /g, '_');
+                          setFormData({ ...formData, custom_fields: { ...formData.custom_fields, [key]: '' }});
+                          setNewFieldName('');
+                          setIsAddingField(false);
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold text-xs hover:bg-emerald-700"
+                    >
+                      Add
+                    </button>
+                    <button type="button" onClick={() => setIsAddingField(false)} className="text-slate-500 font-bold px-2 text-xs hover:text-slate-700">Cancel</button>
+                  </div>
+                )}
+              </div>
 
               {/* Clean Modal Action Footer */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-150">

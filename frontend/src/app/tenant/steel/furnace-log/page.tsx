@@ -20,6 +20,7 @@ interface FurnaceRow {
   yield_pct: number;
   fe_si_alloy_kg?: number;
   fe_mn_alloy_kg?: number;
+  [key: string]: any;
 }
 
 const STORAGE_KEY = 'steel_erp_furnace';
@@ -41,6 +42,9 @@ export default function FurnaceLogPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const DEFAULT_COLS = ['date', 'shift_id', 'furnace_no', 'heat_no', 'scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c', 'furnace_master'];
+  const [colOrder, setColOrder] = useState<string[]>([]);
+
   // Form State
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -56,8 +60,12 @@ export default function FurnaceLogPage() {
     shift_id: 'A',
     furnace_master: 'Kabir Ahmed',
     fe_si_alloy_kg: '45',
-    fe_mn_alloy_kg: '65'
+    fe_mn_alloy_kg: '65',
+    custom_fields: {} as Record<string, string>
   });
+
+  const [newFieldName, setNewFieldName] = useState('');
+  const [isAddingField, setIsAddingField] = useState(false);
 
   const furnaceMasters = ['Kabir Ahmed', 'Zahirul Haque', 'Ataur Rahman', 'Shahidul Islam'];
 
@@ -73,6 +81,10 @@ export default function FurnaceLogPage() {
       setData(initialFurnaceLogs);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialFurnaceLogs));
     }
+    
+    const savedOrder = localStorage.getItem(`${STORAGE_KEY}_col_order`);
+    if (savedOrder) setColOrder(JSON.parse(savedOrder));
+    else setColOrder(DEFAULT_COLS);
   }, []);
 
   const saveToStorage = (updated: FurnaceRow[]) => {
@@ -115,7 +127,8 @@ export default function FurnaceLogPage() {
       furnace_master: formData.furnace_master,
       yield_pct: computedYield,
       fe_si_alloy_kg: Number(formData.fe_si_alloy_kg) || 0,
-      fe_mn_alloy_kg: Number(formData.fe_mn_alloy_kg) || 0
+      fe_mn_alloy_kg: Number(formData.fe_mn_alloy_kg) || 0,
+      ...formData.custom_fields
     };
 
     const updated = [newRow, ...data];
@@ -138,8 +151,50 @@ export default function FurnaceLogPage() {
       shift_id: 'A',
       furnace_master: 'Kabir Ahmed',
       fe_si_alloy_kg: '45',
-      fe_mn_alloy_kg: '65'
+      fe_mn_alloy_kg: '65',
+      custom_fields: {}
     });
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pasteData = e.clipboardData.getData('text');
+    if (!pasteData) return;
+    
+    const rows = pasteData.split('\n').filter(r => r.trim());
+    if (rows.length === 0) return;
+
+    // Only process if it looks like TSV data from Excel
+    if (!rows[0].includes('\t')) return;
+    
+    e.preventDefault();
+
+    const newRecords: FurnaceRow[] = rows.map((rowStr, idx) => {
+      const cols = rowStr.split('\t');
+      const scrapIn = Number(cols[4]) || 0;
+      const liquidOut = Number(cols[5]) || 0;
+      const yld = scrapIn > 0 ? parseFloat(((liquidOut / scrapIn) * 100).toFixed(2)) : 0;
+      
+      return {
+        id: Date.now() + idx,
+        date: cols[0] || new Date().toISOString().split('T')[0],
+        shift_id: cols[1] || 'A',
+        furnace_no: cols[2] || 'Furnace 01',
+        heat_no: cols[3] || `H-BULK-${Date.now()}-${idx}`,
+        scrap_input_kg: scrapIn,
+        liquid_steel_tapped_kg: liquidOut,
+        power_consumed_kwh: Number(cols[7]) || 0,
+        tapping_temp_c: Number(cols[9]) || 1615,
+        runtime_min: Number(cols[10]) || 120,
+        furnace_master: cols[11] || 'Unknown',
+        yield_pct: yld,
+        fe_si_alloy_kg: Number(cols[12]) || 0,
+        fe_mn_alloy_kg: Number(cols[13]) || 0
+      };
+    });
+
+    const updated = [...newRecords, ...data];
+    saveToStorage(updated);
+    showToast(`${newRecords.length} records bulk pasted from Excel!`);
   };
 
   const handleDelete = (id: number) => {
@@ -162,6 +217,81 @@ export default function FurnaceLogPage() {
       return matchesSearch && matchesFurnace && matchesShift;
     });
   }, [data, search, furnaceFilter, shiftFilter]);
+
+  const dynamicColumns = useMemo(() => {
+    if (data.length === 0) return [];
+    const baseKeys = Object.keys(initialFurnaceLogs[0]);
+    const currentKeys = Object.keys(data[0]);
+    return currentKeys.filter(k => !baseKeys.includes(k) && k !== 'custom_fields');
+  }, [data]);
+
+  const displayColumns = Array.from(new Set([...colOrder, ...dynamicColumns]));
+
+  const handleRowDrop = (e: React.DragEvent, targetId: number) => {
+    e.preventDefault();
+    const sourceId = Number(e.dataTransfer.getData('rowId'));
+    if (!sourceId || sourceId === targetId) return;
+
+    const newData = [...data];
+    const sourceIndex = newData.findIndex(d => d.id === sourceId);
+    const targetIndex = newData.findIndex(d => d.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [removed] = newData.splice(sourceIndex, 1);
+    newData.splice(targetIndex, 0, removed);
+    saveToStorage(newData);
+  };
+
+  const handleColDrop = (e: React.DragEvent, targetCol: string) => {
+    e.preventDefault();
+    const sourceCol = e.dataTransfer.getData('colKey');
+    if (!sourceCol || sourceCol === targetCol) return;
+    
+    const newOrder = [...displayColumns];
+    const srcIdx = newOrder.indexOf(sourceCol);
+    const tgtIdx = newOrder.indexOf(targetCol);
+    
+    newOrder.splice(srcIdx, 1);
+    newOrder.splice(tgtIdx, 0, sourceCol);
+    
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+  };
+
+  const deleteColumn = (colKey: string) => {
+    if (!confirm(`Delete column "${colKey}" and all its data permanently?`)) return;
+    const newData = data.map(row => {
+      const newRow = { ...row };
+      delete newRow[colKey];
+      return newRow;
+    });
+    saveToStorage(newData);
+    const newOrder = colOrder.filter(c => c !== colKey);
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+    showToast(`Column "${colKey}" deleted.`);
+  };
+
+  const renameColumn = (oldKey: string) => {
+    const newName = prompt(`Enter new name for column "${oldKey.replace(/_/g, ' ')}":`);
+    if (!newName || !newName.trim()) return;
+    const newKey = newName.trim().toLowerCase().replace(/ /g, '_');
+    
+    const newData = data.map(row => {
+      const newRow = { ...row };
+      if (newRow[oldKey] !== undefined) {
+        newRow[newKey] = newRow[oldKey];
+        delete newRow[oldKey];
+      }
+      return newRow;
+    });
+    saveToStorage(newData);
+    
+    const newOrder = displayColumns.map(c => c === oldKey ? newKey : c);
+    setColOrder(newOrder);
+    localStorage.setItem(`${STORAGE_KEY}_col_order`, JSON.stringify(newOrder));
+    showToast(`Column renamed to "${newName}".`);
+  };
 
   // Aggregated KPIs
   const totalHeats = filteredData.length;
@@ -421,37 +551,83 @@ export default function FurnaceLogPage() {
 
       {/* ENTERPRISE GRID TABLE VIEW */}
       {viewMode === 'table' && (
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+        <div 
+          className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+          tabIndex={0}
+          onPaste={handlePaste}
+          title="Click here and press Ctrl+V to paste data from Excel"
+        >
+          <div className="bg-slate-50 text-xs text-slate-500 px-4 py-2 border-b border-slate-200 font-mono flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <strong>Pro Tip:</strong> Click anywhere on this table and press Ctrl+V to bulk paste rows from Excel.
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm font-sans border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
-                  <th className="px-4 py-3.5">Date</th>
-                  <th className="px-4 py-3.5">Shift</th>
-                  <th className="px-4 py-3.5">Furnace</th>
-                  <th className="px-4 py-3.5">Heat No</th>
-                  <th className="px-4 py-3.5 text-right">Scrap In (kg)</th>
-                  <th className="px-4 py-3.5 text-right">Liquid Out (kg)</th>
-                  <th className="px-4 py-3.5 text-right">Yield %</th>
-                  <th className="px-4 py-3.5 text-right">Power (kWh)</th>
-                  <th className="px-4 py-3.5 text-right">Temp (°C)</th>
-                  <th className="px-4 py-3.5">Master</th>
+                  <th className="px-4 py-3.5 w-10"></th>
+                  {displayColumns.map(col => {
+                    const isCustom = dynamicColumns.includes(col);
+                    const mapping: Record<string, string> = { date: 'Date', shift_id: 'Shift', furnace_no: 'Furnace', heat_no: 'Heat No', scrap_input_kg: 'Scrap In (kg)', liquid_steel_tapped_kg: 'Liquid Out (kg)', yield_pct: 'Yield %', power_consumed_kwh: 'Power (kWh)', tapping_temp_c: 'Temp (°C)', furnace_master: 'Master' };
+                    const alignRight = ['scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c'].includes(col);
+                    
+                    return (
+                      <th 
+                        key={col} 
+                        draggable
+                        onDragStart={e => e.dataTransfer.setData('colKey', col)}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => handleColDrop(e, col)}
+                        className={`px-4 py-3.5 cursor-move hover:bg-slate-100 transition-colors ${alignRight ? 'text-right' : ''}`}
+                      >
+                        <div className={`flex items-center space-x-2 ${alignRight ? 'justify-end' : ''}`}>
+                          <span>{mapping[col] || col.replace(/_/g, ' ')}</span>
+                          {isCustom && (
+                            <div className="flex space-x-1 opacity-50 hover:opacity-100 transition-opacity">
+                              <button onClick={() => renameColumn(col)} title="Rename" className="text-[#B48F48] hover:text-[#9E7A37]">✎</button>
+                              <button onClick={() => deleteColumn(col)} title="Delete" className="text-rose-500 hover:text-rose-700">✕</button>
+                            </div>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
                   <th className="px-4 py-3.5 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-xs">
                 {filteredData.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-4 py-3 text-slate-700">{item.date}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 font-sans">{item.shift_id}</td>
-                    <td className="px-4 py-3 text-slate-600 font-sans">{item.furnace_no}</td>
-                    <td className="px-4 py-3 text-slate-900 font-bold">{item.heat_no}</td>
-                    <td className="px-4 py-3 text-right">{item.scrap_input_kg.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-bold text-amber-700">{item.liquid_steel_tapped_kg.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-bold text-emerald-600">{item.yield_pct}%</td>
-                    <td className="px-4 py-3 text-right">{item.power_consumed_kwh.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right text-rose-600 font-semibold">{item.tapping_temp_c}°C</td>
-                    <td className="px-4 py-3 text-slate-800 font-sans">{item.furnace_master}</td>
+                  <tr 
+                    key={item.id} 
+                    draggable
+                    onDragStart={e => e.dataTransfer.setData('rowId', String(item.id))}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => handleRowDrop(e, item.id)}
+                    className="hover:bg-slate-50/60 transition-colors group"
+                  >
+                    <td className="px-4 py-3 cursor-move text-slate-300 group-hover:text-amber-500 transition-colors" title="Drag to reorder">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /></svg>
+                    </td>
+                    {displayColumns.map(col => {
+                      const alignRight = ['scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c'].includes(col);
+                      
+                      let cellContent: React.ReactNode = item[col];
+                      if (col === 'shift_id') cellContent = <span className="font-semibold text-slate-900 font-sans">{item.shift_id}</span>;
+                      if (col === 'furnace_no') cellContent = <span className="text-slate-600 font-sans">{item.furnace_no}</span>;
+                      if (col === 'heat_no') cellContent = <span className="text-slate-900 font-bold">{item.heat_no}</span>;
+                      if (col === 'scrap_input_kg') cellContent = (item.scrap_input_kg || 0).toLocaleString();
+                      if (col === 'liquid_steel_tapped_kg') cellContent = <span className="font-bold text-amber-700">{(item.liquid_steel_tapped_kg || 0).toLocaleString()}</span>;
+                      if (col === 'yield_pct') cellContent = <span className="font-bold text-emerald-600">{item.yield_pct}%</span>;
+                      if (col === 'power_consumed_kwh') cellContent = (item.power_consumed_kwh || 0).toLocaleString();
+                      if (col === 'tapping_temp_c') cellContent = <span className="text-rose-600 font-semibold">{item.tapping_temp_c}°C</span>;
+                      if (col === 'furnace_master') cellContent = <span className="text-slate-800 font-sans">{item.furnace_master}</span>;
+                      
+                      return (
+                        <td key={col} className={`px-4 py-3 ${alignRight ? 'text-right' : ''}`}>
+                          {cellContent}
+                        </td>
+                      );
+                    })}
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => handleDelete(item.id)} className="text-rose-500 hover:text-rose-700 font-bold p-1">✕</button>
                     </td>
@@ -606,6 +782,57 @@ export default function FurnaceLogPage() {
                     className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
                   />
                 </div>
+              </div>
+
+              {/* Dynamic Fields Section */}
+              {Object.keys(formData.custom_fields).length > 0 && (
+                <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-100">
+                  {Object.keys(formData.custom_fields).map(field => (
+                    <div key={field}>
+                      <label className="text-xs font-semibold text-slate-700 uppercase font-mono capitalize">{field.replace(/_/g, ' ')}</label>
+                      <input
+                        type="text"
+                        value={formData.custom_fields[field]}
+                        onChange={e => setFormData({ ...formData, custom_fields: { ...formData.custom_fields, [field]: e.target.value }})}
+                        className="w-full mt-1.5 px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-sans text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Custom Field Button */}
+              <div className="pt-2">
+                {!isAddingField ? (
+                  <button type="button" onClick={() => setIsAddingField(true)} className="text-[#B48F48] font-bold text-xs hover:underline flex items-center">
+                    + Add Custom Column
+                  </button>
+                ) : (
+                  <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                    <input 
+                      type="text" 
+                      placeholder="Field Name (e.g., Note)" 
+                      value={newFieldName}
+                      onChange={e => setNewFieldName(e.target.value)}
+                      className="flex-1 bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-xs"
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (newFieldName.trim()) {
+                          const key = newFieldName.trim().toLowerCase().replace(/ /g, '_');
+                          setFormData({ ...formData, custom_fields: { ...formData.custom_fields, [key]: '' }});
+                          setNewFieldName('');
+                          setIsAddingField(false);
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold text-xs hover:bg-emerald-700"
+                    >
+                      Add
+                    </button>
+                    <button type="button" onClick={() => setIsAddingField(false)} className="text-slate-500 font-bold px-2 text-xs hover:text-slate-700">Cancel</button>
+                  </div>
+                )}
               </div>
 
               {/* Dynamic Calculation Result */}
