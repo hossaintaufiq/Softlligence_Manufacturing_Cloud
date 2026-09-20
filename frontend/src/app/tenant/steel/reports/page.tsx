@@ -80,7 +80,7 @@ export default function ReportsAndAnalyticsPage() {
   const [viewMode, setViewMode] = useState<'table' | 'charts'>('table');
 
   // Custom Builder State
-  const [customSource, setCustomSource] = useState<string>('');
+  const [customSources, setCustomSources] = useState<string[]>([]);
   const [customColumns, setCustomColumns] = useState<string[]>([]);
 
   // Active generation states - automatically derived from selection state
@@ -390,18 +390,18 @@ export default function ReportsAndAnalyticsPage() {
       return Object.values(categories);
     }
 
-    if (activeReportType === 'custom-builder' && customSource) {
-      let sourceData: any[] = [];
-      if (customSource === 'scrap') sourceData = scrap;
-      else if (customSource === 'furnace') sourceData = furnace;
-      else if (customSource === 'billet') sourceData = billet;
-      else if (customSource === 'rolling') sourceData = rolling;
-      else if (customSource === 'dispatch') sourceData = dispatch;
-      else if (customSource === 'downtime') sourceData = downtime;
-      else if (customSource === 'expenses') sourceData = expenses;
-      else if (customSource === 'quality') sourceData = quality;
+    if (activeReportType === 'custom-builder' && customSources.length > 0) {
+      let combinedData: any[] = [];
+      if (customSources.includes('scrap')) combinedData = [...combinedData, ...scrap];
+      if (customSources.includes('furnace')) combinedData = [...combinedData, ...furnace];
+      if (customSources.includes('billet')) combinedData = [...combinedData, ...billet];
+      if (customSources.includes('rolling')) combinedData = [...combinedData, ...rolling];
+      if (customSources.includes('dispatch')) combinedData = [...combinedData, ...dispatch];
+      if (customSources.includes('downtime')) combinedData = [...combinedData, ...downtime];
+      if (customSources.includes('expenses')) combinedData = [...combinedData, ...expenses];
+      if (customSources.includes('quality')) combinedData = [...combinedData, ...quality];
 
-      return sourceData.map(row => {
+      return combinedData.map(row => {
         const customRow: any = {};
         customColumns.forEach(col => {
           customRow[col] = row[col];
@@ -411,7 +411,7 @@ export default function ReportsAndAnalyticsPage() {
     }
 
     return [];
-  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData, customSource, customColumns]);
+  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData, customSources, customColumns]);
 
   // Export to Excel
   const handleExportExcel = () => {
@@ -1037,16 +1037,18 @@ export default function ReportsAndAnalyticsPage() {
                 <div className="p-4 bg-white rounded-xl space-y-4 font-sans text-sm border border-slate-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-bold text-slate-800 mb-2">1. Select Data Source</h4>
+                      <h4 className="font-bold text-slate-800 mb-2">1. Select Data Sources</h4>
                       <select
                         className="w-full bg-white border border-slate-300 px-3 py-2 rounded-lg"
-                        value={customSource}
                         onChange={(e) => {
-                          setCustomSource(e.target.value);
-                          setCustomColumns([]);
+                          const val = e.target.value;
+                          if (val && !customSources.includes(val)) {
+                            setCustomSources([...customSources, val]);
+                          }
+                          e.target.value = '';
                         }}
                       >
-                        <option value="">-- Choose Data Source --</option>
+                        <option value="">-- Add Data Source --</option>
                         <option value="scrap">Scrap Sourcing</option>
                         <option value="furnace">Furnace Melting</option>
                         <option value="billet">Billet CCM</option>
@@ -1056,24 +1058,35 @@ export default function ReportsAndAnalyticsPage() {
                         <option value="expenses">Expenses Ledger</option>
                         <option value="quality">Spectrometer QA</option>
                       </select>
+                      
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {customSources.map(src => {
+                          const labels: Record<string, string> = { scrap: 'Scrap Sourcing', furnace: 'Furnace Melting', billet: 'Billet CCM', rolling: 'Rolling Mill', dispatch: 'Sales Dispatch', downtime: 'Downtime Tracker', expenses: 'Expenses Ledger', quality: 'Spectrometer QA' };
+                          return (
+                            <span key={src} className="px-2.5 py-1 bg-[#B48F48] text-white text-xs font-semibold rounded-lg flex items-center space-x-1 shadow-sm">
+                              <span>{labels[src]}</span>
+                              <button onClick={() => setCustomSources(customSources.filter(s => s !== src))} className="hover:text-red-200 font-bold ml-1.5 transition-colors cursor-pointer">✕</button>
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
-                    {customSource && (
+                    {customSources.length > 0 && (
                       <div>
                         <h4 className="font-bold text-slate-800 mb-2">2. Select Columns</h4>
                         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-lg">
                           {(() => {
-                            let sampleRow = {};
-                            if (customSource === 'scrap' && scrapData.length) sampleRow = scrapData[0];
-                            if (customSource === 'furnace' && furnaceLogs.length) sampleRow = furnaceLogs[0];
-                            if (customSource === 'billet' && billetData.length) sampleRow = billetData[0];
-                            if (customSource === 'rolling' && rollingData.length) sampleRow = rollingData[0];
-                            if (customSource === 'dispatch' && dispatchData.length) sampleRow = dispatchData[0];
-                            if (customSource === 'downtime' && downtimeData.length) sampleRow = downtimeData[0];
-                            if (customSource === 'expenses' && expenseData.length) sampleRow = expenseData[0];
-                            if (customSource === 'quality' && qualityData.length) sampleRow = qualityData[0];
-                            const availableCols = Object.keys(sampleRow);
+                            let availableCols = new Set<string>();
+                            if (customSources.includes('scrap') && scrapData.length) Object.keys(scrapData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('furnace') && furnaceLogs.length) Object.keys(furnaceLogs[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('billet') && billetData.length) Object.keys(billetData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('rolling') && rollingData.length) Object.keys(rollingData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('dispatch') && dispatchData.length) Object.keys(dispatchData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('downtime') && downtimeData.length) Object.keys(downtimeData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('expenses') && expenseData.length) Object.keys(expenseData[0]).forEach(k => availableCols.add(k));
+                            if (customSources.includes('quality') && qualityData.length) Object.keys(qualityData[0]).forEach(k => availableCols.add(k));
                             
-                            return availableCols.map(col => (
+                            return Array.from(availableCols).map(col => (
                               <label key={col} className="flex items-center space-x-2 text-xs">
                                 <input 
                                   type="checkbox" 
@@ -1082,6 +1095,7 @@ export default function ReportsAndAnalyticsPage() {
                                     if (e.target.checked) setCustomColumns([...customColumns, col]);
                                     else setCustomColumns(customColumns.filter(c => c !== col));
                                   }}
+                                  className="accent-[#B48F48] cursor-pointer"
                                 />
                                 <span>{col}</span>
                               </label>

@@ -7,8 +7,9 @@
 **Custom Report Builder**
 - A new interactive report generation module that allows users to build their own bespoke reports on the fly.
 - Users can select a specific **Data Source** (e.g., Scrap Sourcing, Furnace Melting, Billet CCM).
-- Based on the chosen data source, the system dynamically displays a checklist of all available data columns (including dynamically added custom fields).
-- Users check the exact columns they want to view, generating a real-time responsive data table that scales perfectly for **Excel Export**.
+- **Data Merging**: Users can select multiple data sources to seamlessly merge related datasets (e.g., Scrap + Furnace) into a single, unified analytical view.
+- Based on the chosen data sources, the system dynamically displays a checklist of all available data columns (including dynamically added custom fields).
+- Users check the exact columns they want to view, generating a real-time responsive data table that automatically updates and scales perfectly for **Excel Export**.
 
 **Flexible Input System (Smart Spreadsheets)**
 - **Excel Clipboard Paste:** A powerful bulk-ingestion feature added directly to the operational grids. Users can copy hundreds of rows from Microsoft Excel, click anywhere on the web table, press `Ctrl+V`, and the system will parse the TSV (Tab-Separated Values) format, calculate relevant yields automatically, and insert all rows at once.
