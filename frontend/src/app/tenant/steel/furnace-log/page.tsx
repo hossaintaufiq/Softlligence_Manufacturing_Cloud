@@ -599,14 +599,19 @@ export default function FurnaceLogPage() {
                 {filteredData.map(item => (
                   <tr 
                     key={item.id} 
-                    draggable
-                    onDragStart={e => e.dataTransfer.setData('rowId', String(item.id))}
                     onDragOver={e => e.preventDefault()}
                     onDrop={e => handleRowDrop(e, item.id)}
                     className="hover:bg-slate-50/60 transition-colors group"
                   >
-                    <td className="px-4 py-3 cursor-move text-slate-300 group-hover:text-amber-500 transition-colors" title="Drag to reorder">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /></svg>
+                    <td className="px-4 py-3 text-slate-300 group-hover:text-amber-500 transition-colors">
+                      <div
+                        draggable
+                        onDragStart={e => e.dataTransfer.setData('rowId', String(item.id))}
+                        className="cursor-move p-1 inline-block"
+                        title="Drag to reorder"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" /></svg>
+                      </div>
                     </td>
                     {displayColumns.map(col => {
                       const alignRight = ['scrap_input_kg', 'liquid_steel_tapped_kg', 'yield_pct', 'power_consumed_kwh', 'tapping_temp_c'].includes(col);
