@@ -79,6 +79,10 @@ export default function ReportsAndAnalyticsPage() {
   const [endDate, setEndDate] = useState<string>('2026-08-31');
   const [viewMode, setViewMode] = useState<'table' | 'charts'>('table');
 
+  // Custom Builder State
+  const [customSource, setCustomSource] = useState<string>('');
+  const [customColumns, setCustomColumns] = useState<string[]>([]);
+
   // Active generation states - automatically derived from selection state
   const activeReportType = selectedReportType;
   const activeStartDate = startDate;
@@ -386,8 +390,28 @@ export default function ReportsAndAnalyticsPage() {
       return Object.values(categories);
     }
 
+    if (activeReportType === 'custom-builder' && customSource) {
+      let sourceData: any[] = [];
+      if (customSource === 'scrap') sourceData = scrap;
+      else if (customSource === 'furnace') sourceData = furnace;
+      else if (customSource === 'billet') sourceData = billet;
+      else if (customSource === 'rolling') sourceData = rolling;
+      else if (customSource === 'dispatch') sourceData = dispatch;
+      else if (customSource === 'downtime') sourceData = downtime;
+      else if (customSource === 'expenses') sourceData = expenses;
+      else if (customSource === 'quality') sourceData = quality;
+
+      return sourceData.map(row => {
+        const customRow: any = {};
+        customColumns.forEach(col => {
+          customRow[col] = row[col];
+        });
+        return customRow;
+      });
+    }
+
     return [];
-  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData]);
+  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData, customSource, customColumns]);
 
   // Export to Excel
   const handleExportExcel = () => {
@@ -428,6 +452,9 @@ export default function ReportsAndAnalyticsPage() {
     } else if (activeReportType === 'plant-breakdown') {
       headers = ['Breakdown Category', 'Melt Shop Minutes', 'Rolling Mill Minutes', 'Incidents Count'];
       rows = reportData.map((r: any) => [r.category, r.melt_shop_min, r.rolling_mill_min, r.incidents]);
+    } else if (activeReportType === 'custom-builder') {
+      headers = customColumns.map(c => c.replace(/_/g, ' ').toUpperCase());
+      rows = reportData.map((r: any) => customColumns.map(c => r[c]));
     }
 
     exportToExcel(headers, rows, filename);
@@ -598,7 +625,8 @@ export default function ReportsAndAnalyticsPage() {
               { id: 'billet-ccm-ledger', label: 'Billet CCM Casting Ledger' },
               { id: 'downtime-breakdown-tracker', label: 'Downtime & Breakdown Log' },
               { id: 'spectrometer-qa', label: 'Spectrometer Chemistry & QA' },
-              { id: 'plant-breakdown', label: 'Plant Breakdown Audit' }
+              { id: 'plant-breakdown', label: 'Plant Breakdown Audit' },
+              { id: 'custom-builder', label: 'Custom Report Builder (New)' }
             ].map(item => (
               <button 
                 key={item.id}
@@ -1002,6 +1030,95 @@ export default function ReportsAndAnalyticsPage() {
                     ))}
                   </tbody>
                 </table>
+              )}
+
+              {/* Custom Report Builder */}
+              {activeReportType === 'custom-builder' && (
+                <div className="p-4 bg-white rounded-xl space-y-4 font-sans text-sm border border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-bold text-slate-800 mb-2">1. Select Data Source</h4>
+                      <select
+                        className="w-full bg-white border border-slate-300 px-3 py-2 rounded-lg"
+                        value={customSource}
+                        onChange={(e) => {
+                          setCustomSource(e.target.value);
+                          setCustomColumns([]);
+                        }}
+                      >
+                        <option value="">-- Choose Data Source --</option>
+                        <option value="scrap">Scrap Sourcing</option>
+                        <option value="furnace">Furnace Melting</option>
+                        <option value="billet">Billet CCM</option>
+                        <option value="rolling">Rolling Mill</option>
+                        <option value="dispatch">Sales Dispatch</option>
+                        <option value="downtime">Downtime Tracker</option>
+                        <option value="expenses">Expenses Ledger</option>
+                        <option value="quality">Spectrometer QA</option>
+                      </select>
+                    </div>
+                    {customSource && (
+                      <div>
+                        <h4 className="font-bold text-slate-800 mb-2">2. Select Columns</h4>
+                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          {(() => {
+                            let sampleRow = {};
+                            if (customSource === 'scrap' && scrapData.length) sampleRow = scrapData[0];
+                            if (customSource === 'furnace' && furnaceLogs.length) sampleRow = furnaceLogs[0];
+                            if (customSource === 'billet' && billetData.length) sampleRow = billetData[0];
+                            if (customSource === 'rolling' && rollingData.length) sampleRow = rollingData[0];
+                            if (customSource === 'dispatch' && dispatchData.length) sampleRow = dispatchData[0];
+                            if (customSource === 'downtime' && downtimeData.length) sampleRow = downtimeData[0];
+                            if (customSource === 'expenses' && expenseData.length) sampleRow = expenseData[0];
+                            if (customSource === 'quality' && qualityData.length) sampleRow = qualityData[0];
+                            const availableCols = Object.keys(sampleRow);
+                            
+                            return availableCols.map(col => (
+                              <label key={col} className="flex items-center space-x-2 text-xs">
+                                <input 
+                                  type="checkbox" 
+                                  checked={customColumns.includes(col)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) setCustomColumns([...customColumns, col]);
+                                    else setCustomColumns(customColumns.filter(c => c !== col));
+                                  }}
+                                />
+                                <span>{col}</span>
+                              </label>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {customColumns.length > 0 && (
+                    <div className="overflow-x-auto mt-6">
+                      <table className="w-full text-left border-collapse font-mono">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-mono text-slate-500">
+                            {customColumns.map(col => (
+                              <th key={col} className={cellPadding}>{col.replace(/_/g, ' ')}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                          {reportData.length === 0 ? (
+                            <tr>
+                              <td colSpan={customColumns.length} className="text-center py-4 text-slate-400">No data generated in this range.</td>
+                            </tr>
+                          ) : reportData.map((row: any, idx: number) => (
+                            <tr key={idx} className="hover:bg-slate-50/40">
+                              {customColumns.map(col => (
+                                <td key={col} className={cellPadding}>{row[col]}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               )}
 
             </div>
