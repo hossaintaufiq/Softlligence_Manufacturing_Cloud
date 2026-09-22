@@ -1073,35 +1073,50 @@ export default function ReportsAndAnalyticsPage() {
                     </div>
                     {customSources.length > 0 && (
                       <div>
-                        <h4 className="font-bold text-slate-800 mb-2">2. Select Columns</h4>
-                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-lg">
-                          {(() => {
-                            let availableCols = new Set<string>();
-                            if (customSources.includes('scrap') && scrapData.length) Object.keys(scrapData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('furnace') && furnaceLogs.length) Object.keys(furnaceLogs[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('billet') && billetData.length) Object.keys(billetData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('rolling') && rollingData.length) Object.keys(rollingData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('dispatch') && dispatchData.length) Object.keys(dispatchData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('downtime') && downtimeData.length) Object.keys(downtimeData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('expenses') && expenseData.length) Object.keys(expenseData[0]).forEach(k => availableCols.add(k));
-                            if (customSources.includes('quality') && qualityData.length) Object.keys(qualityData[0]).forEach(k => availableCols.add(k));
-                            
-                            return Array.from(availableCols).map(col => (
-                              <label key={col} className="flex items-center space-x-2 text-xs">
-                                <input 
-                                  type="checkbox" 
-                                  checked={customColumns.includes(col)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) setCustomColumns([...customColumns, col]);
-                                    else setCustomColumns(customColumns.filter(c => c !== col));
-                                  }}
-                                  className="accent-[#B48F48] cursor-pointer"
-                                />
-                                <span>{col}</span>
-                              </label>
-                            ));
-                          })()}
-                        </div>
+                        {(() => {
+                          let availableCols = new Set<string>();
+                          if (customSources.includes('scrap') && scrapData.length) Object.keys(scrapData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('furnace') && furnaceLogs.length) Object.keys(furnaceLogs[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('billet') && billetData.length) Object.keys(billetData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('rolling') && rollingData.length) Object.keys(rollingData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('dispatch') && dispatchData.length) Object.keys(dispatchData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('downtime') && downtimeData.length) Object.keys(downtimeData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('expenses') && expenseData.length) Object.keys(expenseData[0]).forEach(k => availableCols.add(k));
+                          if (customSources.includes('quality') && qualityData.length) Object.keys(qualityData[0]).forEach(k => availableCols.add(k));
+                          
+                          const allCols = Array.from(availableCols);
+                          const isAllSelected = allCols.length > 0 && allCols.every(c => customColumns.includes(c));
+
+                          return (
+                            <>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-bold text-slate-800">2. Select Columns</h4>
+                                <button 
+                                  onClick={() => setCustomColumns(isAllSelected ? [] : allCols)}
+                                  className="text-xs font-semibold text-[#B48F48] hover:text-[#9E7A37] bg-amber-50 px-2.5 py-1 rounded-md transition-colors cursor-pointer border border-[#B48F48]/20"
+                                >
+                                  {isAllSelected ? 'Deselect All' : 'Select All'}
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                                {allCols.map(col => (
+                                  <label key={col} className="flex items-center space-x-2 text-xs">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={customColumns.includes(col)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) setCustomColumns([...customColumns, col]);
+                                        else setCustomColumns(customColumns.filter(c => c !== col));
+                                      }}
+                                      className="accent-[#B48F48] cursor-pointer"
+                                    />
+                                    <span>{col}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
