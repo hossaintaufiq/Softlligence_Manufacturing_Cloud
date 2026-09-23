@@ -398,7 +398,7 @@ export default function BilletCCMPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-3 pt-3">
+            <div className="flex flex-wrap justify-end gap-3 pt-3">
               <button 
                 onClick={() => setDialog(null)}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
@@ -420,9 +420,9 @@ export default function BilletCCMPage() {
       )}
 
       {/* CLEAN ENTERPRISE HEADER BAR */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Steel Production</span>
             <span className="text-slate-300">/</span>
             <span>Stage 03</span>
@@ -440,7 +440,7 @@ export default function BilletCCMPage() {
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={handleExportExcel}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex flex-wrap items-center justify-center gap-2"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -449,7 +449,7 @@ export default function BilletCCMPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex flex-wrap items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -463,17 +463,17 @@ export default function BilletCCMPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Billets Produced */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Billet Cast Total</span>
             <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Cast Output</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalOutputKg / 1000).toFixed(2)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
-            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 font-mono">
               <span>Charged: {(totalInputKg / 1000).toFixed(2)} MT</span>
               <span className="text-emerald-600 font-semibold">{filteredData.length} Heats</span>
             </div>
@@ -481,15 +481,15 @@ export default function BilletCCMPage() {
         </div>
 
         {/* Card 2: Casting Yield */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>CCM Casting Yield</span>
             <span className={`px-2 py-0.5 rounded-md border text-[11px] font-bold ${avgYield >= 97 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
               {avgYield >= 97 ? 'Optimal' : 'Below Target'}
             </span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgYield}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">%</span>
             </div>
@@ -498,13 +498,13 @@ export default function BilletCCMPage() {
         </div>
 
         {/* Card 3: Scull & Cropping Loss */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Scull & Crop Loss</span>
             <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Crop Scrap</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-rose-600 font-mono tracking-tight">{(totalScullKg / 1000).toFixed(2)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
@@ -513,13 +513,13 @@ export default function BilletCCMPage() {
         </div>
 
         {/* Card 4: Billet Yard Buffer */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Running Billet Stock</span>
             <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[11px] font-bold">Yard Buffer</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(latestStockKg / 1000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
@@ -530,7 +530,7 @@ export default function BilletCCMPage() {
       </div>
 
       {/* Controls & Filter Bar */}
-      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         
         {/* Search & Size Filter */}
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -559,7 +559,7 @@ export default function BilletCCMPage() {
 
         {/* View Toggle & Actions */}
         <div className="flex items-center gap-2">
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 font-sans text-xs">
+          <div className="bg-slate-100 p-1 rounded-xl flex flex-wrap items-center gap-1 font-sans text-xs">
             <button
               onClick={() => setViewMode('cards')}
               className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
@@ -595,7 +595,7 @@ export default function BilletCCMPage() {
           {filteredData.map((row) => (
             <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-[#C5A059]/40 transition-all relative overflow-hidden group space-y-4">
               
-              <div className="flex justify-between items-start">
+              <div className="flex flex-wrap justify-between gap-4 items-start">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-base font-bold text-slate-900">{row.heat_no}</span>
@@ -617,7 +617,7 @@ export default function BilletCCMPage() {
               </div>
 
               {/* Billet Size Badge */}
-              <div className="bg-slate-50 border border-slate-200/70 rounded-xl p-3.5 flex items-center justify-between">
+              <div className="bg-slate-50 border border-slate-200/70 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <span className="text-xs uppercase font-mono text-slate-400 font-semibold block">Section Size</span>
                   <span className="text-sm font-bold text-slate-900 font-sans">{row.billet_size_section}</span>
@@ -646,7 +646,7 @@ export default function BilletCCMPage() {
 
               {/* Yield Progress Bar */}
               <div>
-                <div className="flex justify-between text-xs font-mono mb-1">
+                <div className="flex flex-wrap justify-between gap-4 text-xs font-mono mb-1">
                   <span className="text-slate-500 font-sans">Casting Yield</span>
                   <span className="font-bold text-emerald-600">{row.billet_yield_pct}%</span>
                 </div>
@@ -659,7 +659,7 @@ export default function BilletCCMPage() {
               </div>
 
               {/* Footer info */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+              <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-500">
                 <span>Speed: {row.casting_speed || 1.85} m/min</span>
                 <span>Stock: <strong className="text-slate-900 font-bold">{(row.billet_stock_kg / 1000).toFixed(1)} MT</strong></span>
               </div>
@@ -877,7 +877,7 @@ export default function BilletCCMPage() {
           <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
             
             {/* Modal Header */}
-            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div className="px-7 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-white">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">Log CCM Heat Casting Run</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Record continuous casting parameters, billet length tonnage & losses</p>
@@ -1037,7 +1037,7 @@ export default function BilletCCMPage() {
 
               {/* Real-time Computed Summary */}
               {Number(formData.steel_tapped_input_kg) > 0 && Number(formData.billet_output_kg) > 0 && (
-                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
+                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
                   <div>
                     <span className="text-slate-600 font-sans block">Computed Casting Yield:</span>
                     <strong className="text-base font-bold text-[#B48F48] font-mono">

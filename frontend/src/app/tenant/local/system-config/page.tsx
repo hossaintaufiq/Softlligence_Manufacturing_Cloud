@@ -34,7 +34,7 @@ export default function SystemConfigPage() {
         <p className="text-[11px] text-slate-500">Add or remove alerts shown on the rolling ticker.</p>
       </div>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-        <form onSubmit={handleAdd} className="flex space-x-2">
+        <form onSubmit={handleAdd} className="flex flex-wrap gap-2">
           <input
             type="text"
             placeholder="e.g. Clearance sale promo banner..."
@@ -46,7 +46,7 @@ export default function SystemConfigPage() {
         </form>
         <div className="space-y-2">
           {alerts.map((alert, idx) => (
-            <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono">
+            <div key={idx} className="flex flex-wrap items-center justify-between gap-4 p-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono">
               <span className="truncate">{alert}</span>
               <button onClick={() => handleRemove(idx)} className="text-rose-600 font-bold ml-2">âœ•</button>
             </div>

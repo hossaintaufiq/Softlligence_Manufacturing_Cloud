@@ -35,11 +35,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   else if (pathname.includes('/profile')) activeTab = 'profile';
 
   const sidebarContent = (
-    <div className="flex flex-col h-full justify-between overflow-hidden">
+    <div className="flex flex-wrap flex-col h-full justify-between gap-4 overflow-hidden">
       <div className="flex flex-col">
         {/* Sidebar Header Brand */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-white to-slate-50/40">
-          <div className="flex items-center space-x-3">
+        <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-white to-slate-50/40">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#FAF6EE] border border-[#C5A059]/20 flex items-center justify-center shadow-xs">
               <svg className="w-4 h-4 text-[#B48F48]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
@@ -184,9 +184,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link 
           href="/admin/profile"
           onClick={() => setIsSidebarOpen(false)}
-          className="flex items-center justify-between mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all"
+          className="flex flex-wrap items-center justify-between gap-4 mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all"
         >
-          <div className="flex items-center space-x-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#FAF6EE] border border-[#C5A059]/30 flex items-center justify-center font-bold text-[10px] text-[#B48F48]">
               {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </div>
@@ -200,7 +200,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
         <button
           onClick={logout}
-          className="w-full py-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[10px] font-bold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1"
+          className="w-full py-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[10px] font-bold rounded-xl transition-all shadow-xs flex flex-wrap items-center justify-center gap-1"
         >
           <span>Sign Out</span>
         </button>
@@ -212,7 +212,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-hidden relative">
       
       {/* DESKTOP SIDEBAR NAVIGATION */}
-      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">
+      <aside className="hidden lg:flex flex-wrap w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between gap-4 flex-shrink-0 z-10">
         {sidebarContent}
       </aside>
 
@@ -237,8 +237,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 h-full flex flex-col overflow-hidden">
         
         {/* Top Header Breadcrumbs */}
-        <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex items-center justify-between px-6 flex-shrink-0">
-          <div className="flex items-center space-x-3">
+        <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex flex-wrap items-center justify-between gap-4 px-6 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-3">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="block lg:hidden p-1 text-slate-500 hover:bg-slate-100 rounded-lg focus:outline-none"
@@ -247,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-400 font-mono">
               <span>SMC</span>
               <span>/</span>
               <span>SUPER ADMIN</span>

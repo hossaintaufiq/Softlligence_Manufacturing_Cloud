@@ -114,9 +114,9 @@ export default function SteelProfilePage() {
     <div className="space-y-6 animate-fade-in text-slate-800 pb-12">
       
       {/* Enterprise Header Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Softlligence Enterprise</span>
             <span>•</span>
             <span>Plant Admin & Operations Configuration</span>
@@ -127,9 +127,9 @@ export default function SteelProfilePage() {
           </p>
         </div>
         
-        <div className="flex items-center space-x-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {saveSuccess && (
-            <div className="px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-xl flex items-center space-x-1.5 animate-fade-in font-mono">
+            <div className="px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-xl flex flex-wrap items-center gap-1.5 animate-fade-in font-mono">
               <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -144,7 +144,7 @@ export default function SteelProfilePage() {
           </button>
           <button 
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center space-x-2 cursor-pointer"
+            className="px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex flex-wrap items-center gap-2 cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -157,7 +157,7 @@ export default function SteelProfilePage() {
       {/* Hardware Spec Top KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Installed Capacity</span>
             <span className="p-2 bg-amber-50 rounded-xl text-[#B48F48]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@ export default function SteelProfilePage() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">SEC Energy Target</span>
             <span className="p-2 bg-amber-50 rounded-xl text-[#B48F48]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@ export default function SteelProfilePage() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Casting Yield Target</span>
             <span className="p-2 bg-amber-50 rounded-xl text-[#B48F48]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ export default function SteelProfilePage() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Target Rebar Grade</span>
             <span className="p-2 bg-amber-50 rounded-xl text-[#B48F48]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -210,7 +210,7 @@ export default function SteelProfilePage() {
       </div>
 
       {/* Navigation Pills */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 pb-3 font-sans">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 font-sans">
         <button
           onClick={() => setActiveTab('hardware')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -344,8 +344,8 @@ export default function SteelProfilePage() {
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center space-x-3">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-wrap flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-100 text-[#B48F48] flex items-center justify-center font-bold font-mono text-xs">
                   PLC
                 </div>
@@ -354,7 +354,7 @@ export default function SteelProfilePage() {
                   <p className="text-xs text-slate-500 font-sans">Siemens S7-1500 / Modbus TCP • Polls kWh, Tapping Temp & Melt Cycle</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
                   value={config.furnacePlcIp} 
@@ -367,8 +367,8 @@ export default function SteelProfilePage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center space-x-3">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-wrap flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold font-mono text-xs">
                   OES
                 </div>
@@ -377,7 +377,7 @@ export default function SteelProfilePage() {
                   <p className="text-xs text-slate-500 font-sans">SpectroLab / Thermo ARL • Auto-pulls C, Si, Mn, S, P % chemistry sparks</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
                   value={config.spectroOesIp} 
@@ -390,8 +390,8 @@ export default function SteelProfilePage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center space-x-3">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-wrap flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-mono text-xs">
                   GATE
                 </div>
@@ -400,7 +400,7 @@ export default function SteelProfilePage() {
                   <p className="text-xs text-slate-500 font-sans">Mettler Toledo IND570 Terminal • Inbound Scrap & Outbound Rebar Gross/Tare</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
                   value={config.weighbridgeIp} 
@@ -413,8 +413,8 @@ export default function SteelProfilePage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center space-x-3">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-wrap flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold font-mono text-xs">
                   RTU
                 </div>
@@ -423,7 +423,7 @@ export default function SteelProfilePage() {
                   <p className="text-xs text-slate-500 font-sans">Schneider PowerLogic ION9000 • Substation kWh, kVARh, Power Factor (0.98)</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <input 
                   type="text" 
                   value={config.substationRtuIp} 
@@ -549,7 +549,7 @@ export default function SteelProfilePage() {
       {/* TAB 4: Operations Diagnostic Logbook */}
       {activeTab === 'logbook' && (
         <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-5 animate-fade-in">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+          <div className="flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 font-sans">Chief Metallurgist & Plant GM Operational Logbook</h3>
               <p className="text-xs text-slate-500 font-sans mt-0.5">Maintain shift handover directives, refractory relining schedules, and equipment recalibrations.</p>

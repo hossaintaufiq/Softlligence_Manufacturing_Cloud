@@ -64,7 +64,7 @@ export default function LoginPage() {
         <div className="relative max-w-lg w-full space-y-6 z-10 flex flex-col items-center text-center">
           
           {/* Top Logo Stub */}
-          <div className="flex items-center space-x-3 bg-white/85 border border-slate-200/80 shadow-sm px-4 py-2 rounded-full">
+          <div className="flex flex-wrap items-center gap-3 bg-white/85 border border-slate-200/80 shadow-sm px-4 py-2 rounded-full">
             <span className="text-[#C5A059] text-sm">✨</span>
             <span className="text-xs font-black tracking-tight text-slate-800 uppercase font-mono">
               Softlligence Manufacturing Cloud
@@ -144,7 +144,7 @@ export default function LoginPage() {
           </div>
           {/* Error Alert Box */}
           {error && (
-            <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-[11px] font-bold rounded-xl flex items-center space-x-2 animate-shake">
+            <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-[11px] font-bold rounded-xl flex flex-wrap items-center gap-2 animate-shake">
               <svg className="w-4 h-4 flex-shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -193,7 +193,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-xs flex items-center justify-center space-x-2 mt-1"
+              className="w-full py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-xs flex flex-wrap items-center justify-center gap-2 mt-1"
             >
               {isSubmitting ? (
                 <>

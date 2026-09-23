@@ -160,14 +160,14 @@ export default function SubscriptionsDashboard() {
       </div>
 
       {/* Action Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3 gap-3">
+      <div className="flex flex-wrap flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3 gap-3">
         <div>
           <h2 className="text-base font-extrabold text-slate-900">Corporate Tenant Workspaces</h2>
           <p className="text-[11px] text-slate-500 mt-0.5">Provision, inspect, and toggle isolated workspace nodes.</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-3.5 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 active:scale-[0.98] flex items-center justify-center space-x-1 font-mono uppercase tracking-wider"
+          className="px-3.5 py-2 bg-[#C5A059] hover:bg-[#B48F48] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 active:scale-[0.98] flex flex-wrap items-center justify-center gap-1 font-mono uppercase tracking-wider"
         >
           <span>+ Provision Workspace</span>
         </button>
@@ -299,7 +299,7 @@ export default function SubscriptionsDashboard() {
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 animate-zoom-in text-slate-800">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3 mb-4">
               <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Provision New Node</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-700">✕</button>
             </div>
@@ -367,7 +367,7 @@ export default function SubscriptionsDashboard() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}

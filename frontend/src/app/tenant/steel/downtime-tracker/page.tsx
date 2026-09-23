@@ -345,7 +345,7 @@ export default function DowntimeTrackerPage() {
                 }}
               />
             )}
-            <div className="flex justify-end space-x-3 pt-3">
+            <div className="flex flex-wrap justify-end gap-3 pt-3">
               <button 
                 onClick={() => setDialog(null)}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-xs font-semibold rounded-xl transition-all cursor-pointer bg-white"
@@ -367,9 +367,9 @@ export default function DowntimeTrackerPage() {
       )}
 
       {/* CLEAN ENTERPRISE HEADER BAR */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Steel Production</span>
             <span className="text-slate-300">/</span>
             <span>Plant Reliability</span>
@@ -387,7 +387,7 @@ export default function DowntimeTrackerPage() {
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={handleExportExcel}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex flex-wrap items-center justify-center gap-2"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -396,7 +396,7 @@ export default function DowntimeTrackerPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex flex-wrap items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -410,17 +410,17 @@ export default function DowntimeTrackerPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Downtime */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Total Downtime</span>
             <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Total Stoppage</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-rose-600 font-mono tracking-tight">{totalDowntimeMin}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 font-mono">
               <span>{(totalDowntimeMin / 60).toFixed(1)} Total Hours</span>
               <span className="text-slate-700 font-semibold">{filteredData.length} Incident Logs</span>
             </div>
@@ -428,13 +428,13 @@ export default function DowntimeTrackerPage() {
         </div>
 
         {/* Card 2: Meltshop Breakdown */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Meltshop Outages</span>
             <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Furnace / CCM</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{totalBilletDown}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
@@ -443,13 +443,13 @@ export default function DowntimeTrackerPage() {
         </div>
 
         {/* Card 3: Rolling Mill Breakdown */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Rolling Mill Outages</span>
             <span className="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 text-[11px] font-bold">Stands & Rolls</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{totalRollingDown}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
@@ -458,17 +458,17 @@ export default function DowntimeTrackerPage() {
         </div>
 
         {/* Card 4: Critical Tickets & MTTR */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between h-36">
-          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
+          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Mean Time to Repair</span>
             <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[11px] font-bold">MTTR</span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex flex-wrap items-baseline gap-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgMTTR}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Mins</span>
             </div>
-            <div className="mt-1 flex items-center justify-between text-xs text-slate-500 font-mono">
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 font-mono">
               <span>Critical Issues: {criticalCount}</span>
               <span className="text-emerald-600 font-semibold">100% Resolved</span>
             </div>
@@ -478,7 +478,7 @@ export default function DowntimeTrackerPage() {
       </div>
 
       {/* Controls & Filter Bar */}
-      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         
         {/* Search & Category Filter */}
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -507,7 +507,7 @@ export default function DowntimeTrackerPage() {
 
         {/* View Mode & Actions */}
         <div className="flex items-center gap-2">
-          <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 font-sans text-xs">
+          <div className="bg-slate-100 p-1 rounded-xl flex flex-wrap items-center gap-1 font-sans text-xs">
             <button
               onClick={() => setViewMode('cards')}
               className={`px-3.5 py-2 font-semibold rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
@@ -541,10 +541,10 @@ export default function DowntimeTrackerPage() {
       {viewMode === 'cards' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map((row) => (
-            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-[#C5A059]/40 transition-all relative overflow-hidden group flex flex-col justify-between space-y-4">
+            <div key={row.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-[#C5A059]/40 transition-all relative overflow-hidden group flex flex-wrap flex-col justify-between space-y-4">
               
               <div>
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex flex-wrap justify-between gap-4 items-start mb-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
@@ -607,7 +607,7 @@ export default function DowntimeTrackerPage() {
               </div>
 
               {/* Card Footer */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-500">
                 <span>By: {row.technician || 'Eng. Maintenance Lead'}</span>
                 <span className="text-emerald-600 font-bold">✓ RESOLVED</span>
               </div>
@@ -818,7 +818,7 @@ export default function DowntimeTrackerPage() {
           <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
             
             {/* Modal Header */}
-            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div className="px-7 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-white">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">Log Breakdown & Maintenance Ticket</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Record machinery shutdown, outage duration, root cause diagnosis & repairs</p>

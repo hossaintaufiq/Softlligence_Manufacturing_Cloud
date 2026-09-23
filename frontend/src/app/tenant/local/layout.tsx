@@ -49,8 +49,8 @@ export default function LocalLayout({ children }: { children: React.ReactNode })
   const sidebarElement = (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Sidebar Header */}
-      <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-white to-slate-50/40 flex-shrink-0">
-        <div className="flex items-center space-x-3">
+      <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-white to-slate-50/40 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-500/20 flex items-center justify-center shadow-xs">
             <svg className="w-4 h-4 text-indigo-650" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
@@ -86,8 +86,8 @@ export default function LocalLayout({ children }: { children: React.ReactNode })
 
       {/* Footer Profile */}
       <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
-        <Link href="/tenant/local/profile" onClick={() => setIsSidebarOpen(false)} className="flex items-center justify-between mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all">
-          <div className="flex items-center space-x-2.5">
+        <Link href="/tenant/local/profile" onClick={() => setIsSidebarOpen(false)} className="flex flex-wrap items-center justify-between gap-4 mb-3.5 cursor-pointer hover:bg-slate-100/50 p-1 rounded-xl transition-all">
+          <div className="flex flex-wrap items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-500/30 flex items-center justify-center font-bold text-[10px] text-indigo-650">
               {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </div>
@@ -97,7 +97,7 @@ export default function LocalLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </Link>
-        <button onClick={logout} className="w-full py-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[10px] font-bold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1">
+        <button onClick={logout} className="w-full py-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[10px] font-bold rounded-xl transition-all shadow-xs flex flex-wrap items-center justify-center gap-1">
           <span>Sign Out</span>
         </button>
       </div>
@@ -106,19 +106,19 @@ export default function LocalLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-800 font-sans overflow-hidden relative">
-      <aside className="hidden lg:flex w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between flex-shrink-0 z-10">{sidebarElement}</aside>
+      <aside className="hidden lg:flex flex-wrap w-64 h-full bg-white border-r border-slate-200/80 flex-col justify-between gap-4 flex-shrink-0 z-10">{sidebarElement}</aside>
       {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden" />}
       <aside className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 transform lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>{sidebarElement}</aside>
 
       <div className="flex-1 h-full flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex items-center justify-between px-6 flex-shrink-0">
-          <div className="flex items-center space-x-3">
+        <header className="h-14 border-b border-slate-200/60 bg-white/50 backdrop-blur-xs flex flex-wrap items-center justify-between gap-4 px-6 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-3">
             <button onClick={() => setIsSidebarOpen(true)} className="block lg:hidden p-1 text-slate-500 hover:bg-slate-100 rounded-lg focus:outline-none">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-400 font-mono">
               <span>SMC</span>
               <span>/</span>
               <span className="truncate max-w-[85px]">{(user.tenantName || 'Workspace').toUpperCase()}</span>
@@ -126,8 +126,8 @@ export default function LocalLayout({ children }: { children: React.ReactNode })
               <span className="text-slate-850 capitalize font-bold">{(activeTab || '').replace('-', ' ')}</span>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/tenant/local/profile" className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/tenant/local/profile" className="flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs">
               <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[9px] text-indigo-650 border border-slate-200">
                 {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>

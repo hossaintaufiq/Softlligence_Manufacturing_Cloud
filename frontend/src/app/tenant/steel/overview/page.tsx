@@ -535,15 +535,15 @@ export default function SteelOverviewDashboard() {
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#C5A059]/40 flex items-center space-x-3 animate-zoom-in">
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#C5A059]/40 flex flex-wrap items-center gap-3 animate-zoom-in">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-xs font-bold font-mono tracking-wide">{toastMessage}</span>
         </div>
       )}
 
       {/* TOP HEADER: Plant Identity, Live Shift Ticker & Quick Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-750 gap-6">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap flex-col lg:flex-row justify-between items-start lg:items-center bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-750 gap-6">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#B48F48] to-[#C5A059] p-0.5 shadow-lg shadow-[#C5A059]/20 flex items-center justify-center">
             <div className="w-full h-full bg-slate-950/40 rounded-[14px] flex items-center justify-center backdrop-blur-xs">
               <svg className="w-7 h-7 text-[#F5E6C8]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -552,13 +552,13 @@ export default function SteelOverviewDashboard() {
             </div>
           </div>
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">Hi-Tech Steel Manufacturing Hub</h1>
               <span className="bg-[#FAF6EE]/15 text-[#F5E6C8] border border-[#C5A059]/30 text-[10px] font-black uppercase px-2 py-0.5 rounded-md tracking-widest font-mono">
                 500W / 550D TMT
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-1 flex items-center space-x-2 font-mono">
+            <p className="text-xs text-slate-300 mt-1 flex flex-wrap items-center gap-2 font-mono">
               <span>Integrated EAF/IF Smelting</span>
               <span>•</span>
               <span>2-Strand CCM Billet Caster</span>
@@ -571,7 +571,7 @@ export default function SteelOverviewDashboard() {
         {/* Live Status Bar & Actions */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Active Shift Ticker */}
-          <div className="bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
+          <div className="bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-2xl flex flex-wrap items-center gap-3">
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-widest">Active Shift</span>
               <span className="text-xs font-black text-[#F5E6C8] font-mono">Shift A (06:00 - 14:00)</span>
@@ -602,7 +602,7 @@ export default function SteelOverviewDashboard() {
           {/* Quick Heat Entry Modal Trigger */}
           <button
             onClick={() => setIsQuickHeatModalOpen(true)}
-            className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-black px-4 py-2.5 rounded-2xl text-xs flex items-center space-x-2 shadow-lg shadow-[#C5A059]/25 transition-all cursor-pointer"
+            className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-black px-4 py-2.5 rounded-2xl text-xs flex flex-wrap items-center gap-2 shadow-lg shadow-[#C5A059]/25 transition-all cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -614,15 +614,15 @@ export default function SteelOverviewDashboard() {
 
       {/* MASS BALANCE & STEEL PIPELINE FLOW */}
       <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+        <div className="flex flex-wrap flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="w-2.5 h-2.5 bg-[#C5A059] rounded-full"></span>
               <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest font-mono">Steel Manufacturing Mass Balance Pipeline</h2>
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5">End-to-end metallurgical conversion flow from raw scrap to certified finished deformed rebars.</p>
           </div>
-          <div className="flex items-center space-x-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
             <span className="text-slate-400">Plant Conversion Yield:</span>
             <span className="bg-[#FAF6EE] text-[#B48F48] border border-[#C5A059]/30 px-2.5 py-1 rounded-xl font-black text-xs">
               {overallMassBalancePct}% Overall Yield
@@ -641,7 +641,7 @@ export default function SteelOverviewDashboard() {
             }`}
             onClick={() => setActivePipelineStage('scrap')}
           >
-            <div className="flex items-center justify-between text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
               <span>01. Sourcing</span>
               <span className="text-[#B48F48] bg-white px-2 py-0.5 rounded-md border border-[#C5A059]/20">Yard Ready</span>
             </div>
@@ -650,7 +650,7 @@ export default function SteelOverviewDashboard() {
               <span className="text-xl font-black text-slate-900 font-mono">{(totalScrapKg / 1000).toFixed(1)} MT</span>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">HMS-1, Shredded, DRI</p>
             </div>
-            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex justify-between items-center text-[10px] font-mono">
+            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap justify-between gap-4 items-center text-[10px] font-mono">
               <span className="text-slate-500">Avg Cost:</span>
               <span className="font-bold text-slate-700">৳53.2/kg</span>
             </div>
@@ -665,7 +665,7 @@ export default function SteelOverviewDashboard() {
             }`}
             onClick={() => setActivePipelineStage('furnace')}
           >
-            <div className="flex items-center justify-between text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
               <span>02. Smelting</span>
               <span className="text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded-md border border-amber-200">1620°C Liquid</span>
             </div>
@@ -674,7 +674,7 @@ export default function SteelOverviewDashboard() {
               <span className="text-xl font-black text-amber-700 font-mono">{(totalLiquidSteelKg / 1000).toFixed(1)} MT</span>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Melting Yield: {avgMeltingYield}%</p>
             </div>
-            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex justify-between items-center text-[10px] font-mono">
+            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap justify-between gap-4 items-center text-[10px] font-mono">
               <span className="text-amber-600 font-medium">Slag/Burning Loss:</span>
               <span className="font-bold text-rose-600">-{((totalScrapKg - totalLiquidSteelKg)/1000).toFixed(1)}t</span>
             </div>
@@ -688,7 +688,7 @@ export default function SteelOverviewDashboard() {
             }`}
             onClick={() => setActivePipelineStage('ccm')}
           >
-            <div className="flex items-center justify-between text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
               <span>03. Casting</span>
               <span className="text-indigo-700 bg-indigo-100/60 px-2 py-0.5 rounded-md border border-indigo-200">CCM Strands</span>
             </div>
@@ -697,7 +697,7 @@ export default function SteelOverviewDashboard() {
               <span className="text-xl font-black text-indigo-700 font-mono">{(totalBilletKg / 1000).toFixed(1)} MT</span>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Casting Yield: {avgBilletYield}%</p>
             </div>
-            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex justify-between items-center text-[10px] font-mono">
+            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap justify-between gap-4 items-center text-[10px] font-mono">
               <span className="text-indigo-600 font-medium">Scull & End Cut:</span>
               <span className="font-bold text-slate-700">-{((totalLiquidSteelKg - totalBilletKg)/1000).toFixed(1)}t</span>
             </div>
@@ -711,7 +711,7 @@ export default function SteelOverviewDashboard() {
             }`}
             onClick={() => setActivePipelineStage('rolling')}
           >
-            <div className="flex items-center justify-between text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
               <span>04. Rolling</span>
               <span className="text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-md border border-emerald-200">10-25mm</span>
             </div>
@@ -720,7 +720,7 @@ export default function SteelOverviewDashboard() {
               <span className="text-xl font-black text-emerald-700 font-mono">{(totalRebarKg / 1000).toFixed(1)} MT</span>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Rolling Yield: {avgRollingYield}%</p>
             </div>
-            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex justify-between items-center text-[10px] font-mono">
+            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap justify-between gap-4 items-center text-[10px] font-mono">
               <span className="text-emerald-600 font-medium">Scale & Cobble Loss:</span>
               <span className="font-bold text-slate-700">-{((totalBilletKg - totalRebarKg)/1000).toFixed(1)}t</span>
             </div>
@@ -734,7 +734,7 @@ export default function SteelOverviewDashboard() {
             }`}
             onClick={() => setActivePipelineStage('dispatch')}
           >
-            <div className="flex items-center justify-between text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-black text-slate-400 font-mono uppercase tracking-wider">
               <span>05. Dispatch</span>
               <span className="text-cyan-700 bg-cyan-100/60 px-2 py-0.5 rounded-md border border-cyan-200">Challans</span>
             </div>
@@ -743,7 +743,7 @@ export default function SteelOverviewDashboard() {
               <span className="text-xl font-black text-cyan-700 font-mono">{(totalDispatchKg / 1000).toFixed(1)} MT</span>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Total Revenue Invoiced</p>
             </div>
-            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex justify-between items-center text-[10px] font-mono">
+            <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap justify-between gap-4 items-center text-[10px] font-mono">
               <span className="text-slate-500">Value:</span>
               <span className="font-black text-cyan-800">৳{(totalRevenueBdt / 100000).toFixed(1)} Lakh</span>
             </div>
@@ -754,7 +754,7 @@ export default function SteelOverviewDashboard() {
 
       {/* FILTER & METRIC CONTROLS BAR */}
       <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
           </svg>
@@ -812,21 +812,21 @@ export default function SteelOverviewDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* KPI 1: Liquid Steel Smelted */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-col justify-between h-40 hover:border-[#C5A059]/40 hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-40 hover:border-[#C5A059]/40 hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Liquid Steel Melted</p>
             <span className="text-[#B48F48] bg-[#FAF6EE] px-2.5 py-1 rounded-lg text-[10px] font-black font-mono uppercase border border-[#C5A059]/20">
               {filteredData.furnace.length} Heats
             </span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-2">
+            <div className="flex flex-wrap items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                 {(totalLiquidSteelKg / 1000).toFixed(1)}
               </h3>
               <span className="text-xs font-bold text-slate-400 font-mono">MT</span>
             </div>
-            <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap justify-between gap-4 items-center mt-3 pt-2 border-t border-slate-100">
               <span className="text-[10px] text-emerald-600 font-bold font-mono flex items-center">
                 <span className="mr-1">▲</span> Melting Yield: {avgMeltingYield}%
               </span>
@@ -837,21 +837,21 @@ export default function SteelOverviewDashboard() {
         </div>
 
         {/* KPI 2: Specific Power Consumption (SEC) */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-col justify-between h-40 hover:border-amber-400 hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-40 hover:border-amber-400 hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Specific Power (SEC)</p>
             <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg text-[10px] font-black font-mono uppercase border border-emerald-200">
               Optimal
             </span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-2">
+            <div className="flex flex-wrap items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                 {secKwhMt}
               </h3>
               <span className="text-xs font-bold text-slate-400 font-mono">kWh / MT</span>
             </div>
-            <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap justify-between gap-4 items-center mt-3 pt-2 border-t border-slate-100">
               <span className="text-[10px] text-emerald-600 font-bold font-mono flex items-center">
                 Target: &lt;550 kWh/MT
               </span>
@@ -862,21 +862,21 @@ export default function SteelOverviewDashboard() {
         </div>
 
         {/* KPI 3: Finished Rebar Rolled */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-col justify-between h-40 hover:border-emerald-400 hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-40 hover:border-emerald-400 hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Rebar Rolled Output</p>
             <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg text-[10px] font-black font-mono uppercase border border-emerald-200">
               Grade 500W
             </span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-2">
+            <div className="flex flex-wrap items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                 {(totalRebarKg / 1000).toFixed(1)}
               </h3>
               <span className="text-xs font-bold text-slate-400 font-mono">MT</span>
             </div>
-            <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap justify-between gap-4 items-center mt-3 pt-2 border-t border-slate-100">
               <span className="text-[10px] text-emerald-600 font-bold font-mono flex items-center">
                 <span className="mr-1">▲</span> Rolling Yield: {avgRollingYield}%
               </span>
@@ -887,21 +887,21 @@ export default function SteelOverviewDashboard() {
         </div>
 
         {/* KPI 4: Dispatches & Revenue Realization */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-col justify-between h-40 hover:border-cyan-400 hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-40 hover:border-cyan-400 hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Invoiced Revenue</p>
             <span className="text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-lg text-[10px] font-black font-mono uppercase border border-cyan-200">
               Sales Hub
             </span>
           </div>
           <div>
-            <div className="flex items-baseline space-x-2">
+            <div className="flex flex-wrap items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tight">
                 ৳{(totalRevenueBdt / 100000).toFixed(1)}
               </h3>
               <span className="text-xs font-bold text-slate-400 font-mono">Lakh</span>
             </div>
-            <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap justify-between gap-4 items-center mt-3 pt-2 border-t border-slate-100">
               <span className="text-[10px] text-cyan-600 font-bold font-mono flex items-center">
                 Shipped: {(totalDispatchKg / 1000).toFixed(1)} MT
               </span>
@@ -918,9 +918,9 @@ export default function SteelOverviewDashboard() {
         
         {/* Main Interactive SVG Chart */}
         <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4 lg:col-span-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 gap-3">
+          <div className="flex flex-wrap flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 gap-3">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#C5A059] rounded-full"></span>
                 <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider font-mono">
                   {chartMetric === 'tonnage' && 'Steel Manufacturing Throughput Trend (Metric Tonnes)'}
@@ -970,50 +970,50 @@ export default function SteelOverviewDashboard() {
           </div>
 
           {/* Interactive Legend */}
-          <div className="flex flex-wrap items-center justify-between text-[10px] font-mono font-bold text-slate-500 px-1">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] font-mono font-bold text-slate-500 px-1">
             {chartMetric === 'tonnage' && (
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-1.5">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-[#C5A059] rounded-full"></span>
                   <span className="text-slate-800">Liquid Steel (MT)</span>
                 </span>
-                <span className="flex items-center space-x-1.5">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-indigo-500 rounded-full"></span>
                   <span className="text-slate-800">CCM Billets (MT)</span>
                 </span>
-                <span className="flex items-center space-x-1.5">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-emerald-500 rounded-full"></span>
                   <span className="text-slate-800">Finished Rebars (MT)</span>
                 </span>
               </div>
             )}
             {chartMetric === 'yield' && (
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-1.5">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-amber-500 rounded-full"></span>
                   <span className="text-slate-800">Melting Yield (%)</span>
                 </span>
-                <span className="flex items-center space-x-1.5">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-emerald-500 rounded-full"></span>
                   <span className="text-slate-800">Rolling Yield (%)</span>
                 </span>
               </div>
             )}
             {chartMetric === 'sec' && (
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-1.5">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-amber-500 rounded-full"></span>
                   <span className="text-slate-800">Electricity SEC (kWh/MT)</span>
                 </span>
-                <span className="flex items-center space-x-1.5">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-0.5 border-t border-dashed border-rose-400"></span>
                   <span className="text-rose-500">Benchmark Ceiling (560 kWh/MT)</span>
                 </span>
               </div>
             )}
             {chartMetric === 'revenue' && (
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-1.5">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex flex-wrap items-center gap-1.5">
                   <span className="w-3 h-1 bg-cyan-500 rounded-full"></span>
                   <span className="text-slate-800">Invoice Dispatches (৳ Lakh)</span>
                 </span>
@@ -1137,30 +1137,30 @@ export default function SteelOverviewDashboard() {
                   transform: 'translateX(-50%)'
                 }}
               >
-                <div className="flex justify-between items-center border-b border-slate-700 pb-1.5 mb-2 gap-4">
+                <div className="flex flex-wrap justify-between items-center border-b border-slate-700 pb-1.5 mb-2 gap-4">
                   <span className="font-black text-[#F5E6C8]">{timeSeries[hoveredPointIdx].date}</span>
                   <span className="text-[10px] text-slate-400 uppercase font-bold">{timeSeries[hoveredPointIdx].heats} Heats Logged</span>
                 </div>
                 <div className="space-y-1 text-[11px]">
-                  <div className="flex justify-between space-x-4">
+                  <div className="flex flex-wrap justify-between gap-4">
                     <span className="text-slate-400">Liquid Steel:</span>
                     <span className="font-bold text-[#C5A059]">{(timeSeries[hoveredPointIdx].liquidKg / 1000).toFixed(1)} MT</span>
                   </div>
-                  <div className="flex justify-between space-x-4">
+                  <div className="flex flex-wrap justify-between gap-4">
                     <span className="text-slate-400">Billet Cast:</span>
                     <span className="font-bold text-indigo-400">{(timeSeries[hoveredPointIdx].billetKg / 1000).toFixed(1)} MT</span>
                   </div>
-                  <div className="flex justify-between space-x-4">
+                  <div className="flex flex-wrap justify-between gap-4">
                     <span className="text-slate-400">Rebar Rolled:</span>
                     <span className="font-bold text-emerald-400">{(timeSeries[hoveredPointIdx].rebarKg / 1000).toFixed(1)} MT</span>
                   </div>
-                  <div className="flex justify-between space-x-4 pt-1 border-t border-slate-800">
+                  <div className="flex flex-wrap justify-between gap-4 pt-1 border-t border-slate-800">
                     <span className="text-slate-400">Specific SEC:</span>
                     <span className="font-bold text-amber-400">
                       {timeSeries[hoveredPointIdx].billetKg > 0 ? (timeSeries[hoveredPointIdx].powerKwh / (timeSeries[hoveredPointIdx].billetKg / 1000)).toFixed(0) : 540} kWh/MT
                     </span>
                   </div>
-                  <div className="flex justify-between space-x-4">
+                  <div className="flex flex-wrap justify-between gap-4">
                     <span className="text-slate-400">Dispatches:</span>
                     <span className="font-bold text-cyan-400">৳{(timeSeries[hoveredPointIdx].revenueBdt / 100000).toFixed(1)} Lakh</span>
                   </div>
@@ -1170,7 +1170,7 @@ export default function SteelOverviewDashboard() {
           </div>
 
           {/* Date Ticks on Bottom */}
-          <div className="flex justify-between text-[9px] font-bold text-slate-400 font-mono px-2 pt-2 border-t border-slate-100">
+          <div className="flex flex-wrap justify-between gap-4 text-[9px] font-bold text-slate-400 font-mono px-2 pt-2 border-t border-slate-100">
             {timeSeries.map((p, idx) => (
               <span key={idx} className={hoveredPointIdx === idx ? 'text-[#B48F48] font-black' : ''}>
                 {p.date.slice(5)}
@@ -1181,7 +1181,7 @@ export default function SteelOverviewDashboard() {
 
         {/* Finished Rebar Size & Grade Production Matrix */}
         <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
             <div>
               <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider font-mono">Rebar Diameter Mix</h3>
               <p className="text-[10px] text-slate-400">Production distribution by finished rod size.</p>
@@ -1194,15 +1194,15 @@ export default function SteelOverviewDashboard() {
           <div className="space-y-3.5 pt-1">
             {rebarSizeBreakdown.map((item, idx) => (
               <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs">
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap justify-between gap-4 items-center text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span className="font-black text-slate-800 font-mono">{item.size} Rebar</span>
                     <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
                       {item.grade}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 font-mono text-xs font-bold">
+                  <div className="flex flex-wrap items-center gap-2 font-mono text-xs font-bold">
                     <span className="text-slate-800">{(item.kg / 1000).toFixed(1)} MT</span>
                     <span className="text-slate-400">({item.pct}%)</span>
                   </div>
@@ -1218,7 +1218,7 @@ export default function SteelOverviewDashboard() {
           </div>
 
           {/* Quick Yard Inventory Stock Link */}
-          <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
             <span className="text-slate-500">Finished Goods Yard Stock:</span>
             <Link href="/tenant/steel/yard-inventory" className="text-[#B48F48] font-black hover:underline flex items-center">
               <span>198.5 MT Ready</span>
@@ -1231,9 +1231,9 @@ export default function SteelOverviewDashboard() {
 
       {/* LIVE DIGITAL TWIN: MELTSHOP, CCM CASTER & ROLLING MILL TELEMETRY */}
       <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+        <div className="flex flex-wrap flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping"></span>
               <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest font-mono">
                 Live Meltshop, Caster & Rolling Mill Digital Twin
@@ -1241,7 +1241,7 @@ export default function SteelOverviewDashboard() {
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">Real-time telemetry and supervisory monitoring of induction furnaces, continuous caster and rebar finishing lines.</p>
           </div>
-          <div className="flex items-center space-x-2 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
             <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-xl font-bold border border-emerald-200 flex items-center">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block mr-1.5 animate-pulse"></span>
               Sensors Online (4/4 Units)
@@ -1254,7 +1254,7 @@ export default function SteelOverviewDashboard() {
           
           {/* Unit 1: Furnace 01 */}
           <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50 hover:bg-white hover:border-[#C5A059]/40 hover:shadow-sm transition-all space-y-3">
-            <div className="flex justify-between items-start">
+            <div className="flex flex-wrap justify-between gap-4 items-start">
               <div>
                 <h4 className="text-xs font-black text-slate-850">{furnace1.name}</h4>
                 <p className="text-[9px] text-slate-400 font-mono">15 Ton Crucible • Acid Lining</p>
@@ -1276,7 +1276,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <div className="space-y-1 text-[10px] font-mono">
-              <div className="flex justify-between text-slate-500">
+              <div className="flex flex-wrap justify-between gap-4 text-slate-500">
                 <span>Crucible Heat Life:</span>
                 <span className="font-bold text-slate-800">{furnace1.liningHeats} / {furnace1.maxLiningHeats} Heats</span>
               </div>
@@ -1288,7 +1288,7 @@ export default function SteelOverviewDashboard() {
 
           {/* Unit 2: Furnace 02 */}
           <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50 hover:bg-white hover:border-amber-400/40 hover:shadow-sm transition-all space-y-3">
-            <div className="flex justify-between items-start">
+            <div className="flex flex-wrap justify-between gap-4 items-start">
               <div>
                 <h4 className="text-xs font-black text-slate-850">{furnace2.name}</h4>
                 <p className="text-[9px] text-slate-400 font-mono">15 Ton Crucible • Basic Lining</p>
@@ -1310,7 +1310,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <div className="space-y-1 text-[10px] font-mono">
-              <div className="flex justify-between text-slate-500">
+              <div className="flex flex-wrap justify-between gap-4 text-slate-500">
                 <span>Crucible Heat Life:</span>
                 <span className="font-bold text-slate-800">{furnace2.liningHeats} / {furnace2.maxLiningHeats} Heats</span>
               </div>
@@ -1322,7 +1322,7 @@ export default function SteelOverviewDashboard() {
 
           {/* Unit 3: CCM Continuous Caster */}
           <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50 hover:bg-white hover:border-indigo-400/40 hover:shadow-sm transition-all space-y-3">
-            <div className="flex justify-between items-start">
+            <div className="flex flex-wrap justify-between gap-4 items-start">
               <div>
                 <h4 className="text-xs font-black text-slate-850">{ccmCaster.name}</h4>
                 <p className="text-[9px] text-slate-400 font-mono">2-Strand Curved Mould Caster</p>
@@ -1344,7 +1344,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <div className="space-y-1 text-[10px] font-mono">
-              <div className="flex justify-between text-slate-500">
+              <div className="flex flex-wrap justify-between gap-4 text-slate-500">
                 <span>Active Section:</span>
                 <span className="font-bold text-slate-800">{ccmCaster.billetSection}</span>
               </div>
@@ -1356,7 +1356,7 @@ export default function SteelOverviewDashboard() {
 
           {/* Unit 4: Rebar Rolling Mill */}
           <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50/50 hover:bg-white hover:border-emerald-400/40 hover:shadow-sm transition-all space-y-3">
-            <div className="flex justify-between items-start">
+            <div className="flex flex-wrap justify-between gap-4 items-start">
               <div>
                 <h4 className="text-xs font-black text-slate-850">{rollingMill.name}</h4>
                 <p className="text-[9px] text-slate-400 font-mono">18 Continuous Stands • TMT Quench</p>
@@ -1378,7 +1378,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <div className="space-y-1 text-[10px] font-mono">
-              <div className="flex justify-between text-slate-500">
+              <div className="flex flex-wrap justify-between gap-4 text-slate-500">
                 <span>Active Section:</span>
                 <span className="font-bold text-slate-800">{rollingMill.activeSize}</span>
               </div>
@@ -1396,9 +1396,9 @@ export default function SteelOverviewDashboard() {
         
         {/* Quality Spectrometer Heat Map & Compliance Audit */}
         <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4 lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
                 <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider font-mono">
                   Optical Emission Spectro (OES) Chemistry & Grade 500W Compliance
@@ -1451,7 +1451,7 @@ export default function SteelOverviewDashboard() {
             </table>
           </div>
 
-          <div className="bg-[#FAF6EE]/50 border border-[#C5A059]/20 rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono gap-2">
+          <div className="bg-[#FAF6EE]/50 border border-[#C5A059]/20 rounded-2xl p-3 flex flex-wrap flex-col sm:flex-row sm:items-center justify-between text-xs font-mono gap-2">
             <span className="text-slate-600">Standard Formula: <strong className="text-slate-850">CE = C + Mn/6 + (Cr+Mo+V)/5 + (Ni+Cu)/15</strong></span>
             <span className="text-emerald-700 font-bold">All Heats 100% Compliant (CE ≤ 0.42%)</span>
           </div>
@@ -1459,7 +1459,7 @@ export default function SteelOverviewDashboard() {
 
         {/* Downtime & Overall Equipment Effectiveness (OEE) Hub */}
         <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
             <div>
               <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider font-mono">Downtime & OEE Index</h3>
               <p className="text-[10px] text-slate-400">Plant availability & breakdown tracking.</p>
@@ -1470,7 +1470,7 @@ export default function SteelOverviewDashboard() {
           </div>
 
           {/* OEE Score Display */}
-          <div className="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between">
+          <div className="bg-slate-900 text-white p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
             <div>
               <span className="text-[10px] text-[#C5A059] font-black uppercase tracking-widest font-mono">Overall OEE</span>
               <div className="text-2xl font-black font-mono text-white mt-0.5">{oeeScore}%</div>
@@ -1483,13 +1483,13 @@ export default function SteelOverviewDashboard() {
 
           {/* Downtime Breakdown Progress Bars */}
           <div className="space-y-3 pt-1 text-xs font-mono">
-            <div className="flex justify-between text-slate-600">
+            <div className="flex flex-wrap justify-between gap-4 text-slate-600">
               <span className="font-bold">Total Recorded Downtime:</span>
               <span className="font-black text-rose-600">{totalDowntimeMin} mins</span>
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+              <div className="flex flex-wrap justify-between gap-4 text-[10px] text-slate-500 font-bold">
                 <span>Induction Melt Shop:</span>
                 <span>{totalMeltDowntime} mins</span>
               </div>
@@ -1499,7 +1499,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+              <div className="flex flex-wrap justify-between gap-4 text-[10px] text-slate-500 font-bold">
                 <span>Hot Rolling Mill Stands:</span>
                 <span>{totalMillDowntime} mins</span>
               </div>
@@ -1520,8 +1520,8 @@ export default function SteelOverviewDashboard() {
       {isQuickHeatModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200/90 animate-zoom-in space-y-5 my-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-[#B48F48] flex items-center justify-center font-bold border border-amber-500/20">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -1639,14 +1639,14 @@ export default function SteelOverviewDashboard() {
               </div>
 
               {/* Dynamic Yield & SEC calculation strip */}
-              <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-3.5 flex justify-between items-center text-xs font-mono">
+              <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-3.5 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
                 <span className="text-slate-600 font-medium">Calculated Smelting Yield:</span>
                 <span className="font-bold text-[#B48F48] text-sm">
                   {newHeat.scrap_input_kg > 0 ? ((newHeat.liquid_steel_tapped_kg / newHeat.scrap_input_kg) * 100).toFixed(2) : 0}%
                 </span>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+              <div className="flex flex-wrap justify-end gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsQuickHeatModalOpen(false)}

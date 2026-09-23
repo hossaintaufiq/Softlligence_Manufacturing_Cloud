@@ -86,8 +86,8 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
       {/* Sidebar Content (layered above overlay) */}
       <div className="relative z-10 flex flex-col h-full overflow-hidden">
         {/* Sidebar Header */}
-        <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/30 backdrop-blur-md flex-shrink-0">
-          <div className="flex items-center space-x-3.5">
+        <div className="p-5 border-b border-white/10 flex flex-wrap items-center justify-between gap-4 bg-black/30 backdrop-blur-md flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A059] to-[#9E7A37] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-900/30 font-black">
               <svg className="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
@@ -135,8 +135,8 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* System Version Footer Strip (No Admin) */}
-        <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between text-[11px] text-slate-400 font-mono flex-shrink-0">
-          <div className="flex items-center space-x-2">
+        <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-md flex flex-wrap items-center justify-between gap-4 text-[11px] text-slate-400 font-mono flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Steel Core v4.2</span>
           </div>
@@ -147,10 +147,10 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-900 font-sans overflow-auto relative min-w-[1280px]">
+    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-900 font-sans overflow-auto relative">
       
       {/* Sidebar - Always visible in desktop layout */}
-      <aside className="flex w-68 h-full border-r border-slate-900/40 flex-col justify-between flex-shrink-0 z-10 shadow-xl">
+      <aside className="flex flex-wrap w-68 h-full border-r border-slate-900/40 flex-col justify-between gap-4 flex-shrink-0 z-10 shadow-xl">
         {sidebarElement}
       </aside>
 
@@ -158,9 +158,9 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 h-full flex flex-col overflow-hidden">
         
         {/* Header with Top-Right Admin & User Profile Controls */}
-        <header className="h-16 border-b border-slate-200/80 bg-white/90 backdrop-blur-md flex items-center justify-between px-8 flex-shrink-0 z-10">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2.5 text-xs font-medium text-slate-500 font-mono">
+        <header className="h-16 border-b border-slate-200/80 bg-white/90 backdrop-blur-md flex flex-wrap items-center justify-between gap-4 px-8 flex-shrink-0 z-10">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-slate-500 font-mono">
               <span className="text-slate-400">Softlligence Enterprise</span>
               <span className="text-slate-300">/</span>
               <span className="text-slate-600 font-semibold">{user.tenantName || 'Hi-Tech Steel Mills Ltd'}</span>
@@ -172,7 +172,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
           </div>
           
           {/* Header Controls: Telemetry Status, Profile Pill, Admin Badge & Sign Out */}
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full flex items-center gap-1.5 text-xs font-semibold text-emerald-700 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Live MES Online
@@ -181,7 +181,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             {/* Admin Profile Pill */}
             <Link 
               href="/tenant/steel/profile" 
-              className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all"
+              className="flex flex-wrap items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all"
               title="Admin User Profile & Preferences"
             >
               <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center font-bold text-xs text-[#B48F48] border border-amber-200 shadow-xs">
@@ -196,7 +196,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             {/* Sign Out Button in Top Right */}
             <button 
               onClick={logout} 
-              className="p-2 md:px-3 md:py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer"
+              className="p-2 md:px-3 md:py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-xs font-semibold rounded-xl transition-all shadow-xs flex flex-wrap items-center gap-1.5 cursor-pointer"
               title="Sign Out Session"
             >
               <svg className="w-4 h-4 text-slate-400 group-hover:text-rose-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
