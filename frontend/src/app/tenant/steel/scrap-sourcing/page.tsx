@@ -353,16 +353,16 @@ export default function ScrapSourcingPage() {
       
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#C5A059] flex flex-wrap items-center gap-3 animate-zoom-in">
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-[#C5A059] flex items-center space-x-3 animate-zoom-in">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-sm font-semibold font-mono tracking-wide">{toastMessage}</span>
         </div>
       )}
 
       {/* CLEAN ENTERPRISE PAGE HEADER */}
-      <div className="flex flex-wrap flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono">
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono">
             <span>Raw Material Sourcing</span>
             <span>•</span>
             <span className="text-slate-500">Stage 01</span>
@@ -377,7 +377,7 @@ export default function ScrapSourcingPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center space-x-3">
           <button
             onClick={handleExportExcel}
             className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
@@ -389,7 +389,7 @@ export default function ScrapSourcingPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex flex-wrap items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center space-x-2 shadow-sm transition-all cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -403,13 +403,13 @@ export default function ScrapSourcingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Total Intake Volume</span>
             <span className="text-[#B48F48] bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200 font-bold">Yard Net</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1.5">
+            <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalScrapKg / 1000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
@@ -418,13 +418,13 @@ export default function ScrapSourcingPage() {
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Cumulative Value</span>
             <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 font-bold">Cost</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1.5">
+            <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">৳{(totalCostBdt / 100000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">Lakh</span>
             </div>
@@ -433,8 +433,8 @@ export default function ScrapSourcingPage() {
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Active Yard Locations</span>
             <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200 font-bold">Bays</span>
           </div>
@@ -445,8 +445,8 @@ export default function ScrapSourcingPage() {
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Vendor Reliability</span>
             <span className="text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded border border-cyan-200 font-bold">Suppliers</span>
           </div>
@@ -460,7 +460,7 @@ export default function ScrapSourcingPage() {
 
       {/* FILTER & VIEW CONTROLS */}
       <div className="bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+        <div className="flex items-center space-x-3 flex-1 min-w-[260px]">
           <div className="relative w-full max-w-md">
             <input
               type="text"
@@ -506,7 +506,7 @@ export default function ScrapSourcingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map(item => (
             <div key={item.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex items-start justify-between">
                 <div>
                   <span className="text-xs font-semibold text-slate-400 font-mono uppercase">{item.date} • {item.truck_no}</span>
                   <h3 className="text-base font-bold text-slate-900 mt-0.5 font-sans">{item.supplier_name}</h3>
@@ -520,21 +520,21 @@ export default function ScrapSourcingPage() {
               </div>
 
               <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70 space-y-2 font-mono text-xs">
-                <div className="flex flex-wrap justify-between gap-4">
+                <div className="flex justify-between">
                   <span className="text-slate-500 font-sans">Category:</span>
                   <span className="font-semibold text-slate-800">{item.scrap_category}</span>
                 </div>
-                <div className="flex flex-wrap justify-between gap-4">
+                <div className="flex justify-between">
                   <span className="text-slate-500 font-sans">Net Weight:</span>
                   <span className="font-bold text-[#B48F48]">{(item.scrap_rcv_kg / 1000).toFixed(2)} MT ({item.scrap_rcv_kg} kg)</span>
                 </div>
-                <div className="flex flex-wrap justify-between gap-4 text-slate-400">
+                <div className="flex justify-between text-slate-400">
                   <span className="font-sans">Gross / Tare:</span>
                   <span>{item.gross_weight} kg / {item.value_tare} kg</span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-mono pt-1">
+              <div className="flex justify-between items-center text-xs font-mono pt-1">
                 <div>
                   <span className="text-slate-400 font-sans block">Yard Bay:</span>
                   <p className="font-semibold text-slate-800">{item.yard_location}</p>
@@ -545,7 +545,7 @@ export default function ScrapSourcingPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
+              <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
                 <span className="text-slate-500">Rate: ৳{item.rate_per_kg}/kg</span>
                 <button
                   onClick={() => handleDelete(item.id)}
@@ -593,7 +593,7 @@ export default function ScrapSourcingPage() {
                         <div className={`flex items-center space-x-2 ${alignRight ? 'justify-end' : ''}`}>
                           <span>{mapping[col] || col.replace(/_/g, ' ')}</span>
                           {isCustom && (
-                            <div className="flex flex-wrap gap-1 opacity-50 hover:opacity-100 transition-opacity">
+                            <div className="flex space-x-1 opacity-50 hover:opacity-100 transition-opacity">
                               <button onClick={() => renameColumn(col)} title="Rename" className="text-[#B48F48] hover:text-[#9E7A37]">✎</button>
                               <button onClick={() => deleteColumn(col)} title="Delete" className="text-rose-500 hover:text-rose-700">✕</button>
                             </div>
@@ -686,7 +686,7 @@ export default function ScrapSourcingPage() {
           <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in">
             
             {/* Crisp Modal Header */}
-            <div className="px-7 py-5 border-b border-slate-150 flex flex-wrap items-center justify-between gap-4 bg-white">
+            <div className="px-7 py-5 border-b border-slate-150 flex items-center justify-between bg-white">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 font-sans">Weighbridge Scrap Consignment Intake</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Record gross and tare weighbridge weights to compute net melt feedstock.</p>
@@ -811,7 +811,7 @@ export default function ScrapSourcingPage() {
 
               {/* Real-time Dynamic Calculation Summary */}
               {rawNet > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
                   <div>
                     <span className="text-slate-500 font-sans block">Net Calculated Weight:</span>
                     <strong className="text-base font-bold text-[#B48F48] font-mono">{netScrapCalculated.toLocaleString()} KG ({(netScrapCalculated/1000).toFixed(2)} MT)</strong>
@@ -847,7 +847,7 @@ export default function ScrapSourcingPage() {
                     + Add Custom Column
                   </button>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                  <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
                     <input 
                       type="text" 
                       placeholder="Field Name (e.g., Driver Name)" 
@@ -875,7 +875,7 @@ export default function ScrapSourcingPage() {
               </div>
 
               {/* Clean Modal Action Footer */}
-              <div className="flex flex-wrap justify-end gap-3 pt-4 border-t border-slate-150">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-150">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

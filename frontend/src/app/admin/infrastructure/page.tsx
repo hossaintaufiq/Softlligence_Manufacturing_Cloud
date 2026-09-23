@@ -39,13 +39,13 @@ export default function InfrastructurePage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm flex flex-wrap flex-col justify-between">
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm flex flex-col justify-between">
           <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">SLA & Latency</h4>
-          <div className="flex flex-wrap items-center justify-between text-xs gap-3">
+          <div className="flex items-center justify-between text-xs gap-3">
             <span className="text-slate-500 font-medium">Gateway Latency</span>
             <span className="font-extrabold text-[#B48F48] font-mono">14ms (Optimal)</span>
           </div>
-          <div className="flex flex-wrap items-center justify-between text-xs gap-3">
+          <div className="flex items-center justify-between text-xs gap-3">
             <span className="text-slate-500 font-medium">Monthly SLA target</span>
             <span className="font-extrabold text-emerald-600 font-mono">99.99%</span>
           </div>

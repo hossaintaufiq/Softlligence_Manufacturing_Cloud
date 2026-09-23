@@ -101,14 +101,14 @@ export default function AdminProfilePage() {
       </div>
 
       {profileError && (
-        <div className="p-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-xs font-bold rounded-xl flex flex-wrap items-center gap-2 animate-shake">
+        <div className="p-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-700 text-xs font-bold rounded-xl flex items-center space-x-2 animate-shake">
           <span>⚠️</span>
           <span>{profileError}</span>
         </div>
       )}
 
       {profileSuccess && (
-        <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 text-xs font-bold rounded-xl flex flex-wrap items-center gap-2">
+        <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 text-xs font-bold rounded-xl flex items-center space-x-2">
           <span>✨</span>
           <span>{profileSuccess}</span>
         </div>
@@ -118,7 +118,7 @@ export default function AdminProfilePage() {
         
         {/* Section 1: Account Parameters */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 pb-3.5">
+          <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
             <span className="text-base">👤</span>
             <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Account Profile Parameters</h3>
           </div>
@@ -151,7 +151,7 @@ export default function AdminProfilePage() {
 
         {/* Section 2: Platform Aesthetics & Preferences */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 pb-3.5">
+          <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
             <span className="text-base">⚙️</span>
             <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Layout Aesthetics & Navigation</h3>
           </div>
@@ -207,7 +207,7 @@ export default function AdminProfilePage() {
 
         {/* Section 3: Password Credentials */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 pb-3.5">
+          <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
             <span className="text-base">🔐</span>
             <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Password Verification & Update</h3>
           </div>
@@ -254,7 +254,7 @@ export default function AdminProfilePage() {
           <button
             type="submit"
             disabled={isUpdatingProfile}
-            className="px-6 py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-amber-500/10 active:scale-[0.98] disabled:opacity-50 flex flex-wrap items-center justify-center gap-2 font-mono uppercase tracking-wider"
+            className="px-6 py-3 bg-[#C5A059] hover:bg-[#B48F48] text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-amber-500/10 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center space-x-2 font-mono uppercase tracking-wider"
           >
             {isUpdatingProfile ? (
               <>

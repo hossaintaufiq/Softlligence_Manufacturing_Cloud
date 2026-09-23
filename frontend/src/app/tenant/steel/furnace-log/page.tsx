@@ -350,16 +350,16 @@ export default function FurnaceLogPage() {
       
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex flex-wrap items-center gap-3 animate-zoom-in">
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex items-center space-x-3 animate-zoom-in">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-xs font-semibold font-mono tracking-wide">{toastMessage}</span>
         </div>
       )}
 
       {/* CLEAN ENTERPRISE HEADER BAR */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Steel Production</span>
             <span className="text-slate-300">/</span>
             <span>Stage 02</span>
@@ -377,7 +377,7 @@ export default function FurnaceLogPage() {
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={handleExportExcel}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -386,7 +386,7 @@ export default function FurnaceLogPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -400,13 +400,13 @@ export default function FurnaceLogPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Liquid Steel Output</span>
             <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Tapped</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1.5">
+            <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{(totalLiquidTappedKg / 1000).toFixed(1)}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">MT</span>
             </div>
@@ -415,13 +415,13 @@ export default function FurnaceLogPage() {
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Melting Yield Efficiency</span>
             <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px] font-bold">Yield</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1.5">
+            <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgYield}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">%</span>
             </div>
@@ -430,13 +430,13 @@ export default function FurnaceLogPage() {
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Specific Power (SEC)</span>
             <span className="text-[#B48F48] bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] font-bold">Electricity</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1.5">
+            <div className="flex items-baseline space-x-1.5">
               <span className="text-3xl font-bold text-slate-900 font-mono tracking-tight">{avgSec}</span>
               <span className="text-sm font-semibold text-slate-500 font-mono">kWh / MT</span>
             </div>
@@ -445,8 +445,8 @@ export default function FurnaceLogPage() {
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-wrap flex-col justify-between gap-4 h-36">
-          <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-semibold uppercase text-slate-500 font-mono">
+        <div className="bg-white border border-slate-200/90 p-5 rounded-2xl shadow-xs flex flex-col justify-between h-36">
+          <div className="flex justify-between items-center text-xs font-semibold uppercase text-slate-500 font-mono">
             <span>Thermal Index</span>
             <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[11px] font-bold">Bath Temp</span>
           </div>
@@ -460,7 +460,7 @@ export default function FurnaceLogPage() {
 
       {/* FILTER & VIEW CONTROLS */}
       <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+        <div className="flex items-center space-x-3 flex-1 min-w-[260px]">
           <div className="relative w-full max-w-md">
             <input
               type="text"
@@ -517,7 +517,7 @@ export default function FurnaceLogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredData.map(item => (
             <div key={item.id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all space-y-4 relative group">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex items-start justify-between">
                 <div>
                   <span className="text-xs font-semibold text-slate-400 font-mono uppercase">{item.date} • Shift {item.shift_id}</span>
                   <h3 className="text-base font-bold text-slate-900 mt-0.5">{item.heat_no}</h3>
@@ -528,15 +528,15 @@ export default function FurnaceLogPage() {
               </div>
 
               <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70 space-y-2 font-mono text-xs">
-                <div className="flex flex-wrap justify-between gap-4">
+                <div className="flex justify-between">
                   <span className="text-slate-500 font-sans">Scrap Input:</span>
                   <span className="font-semibold text-slate-800">{(item.scrap_input_kg / 1000).toFixed(2)} MT ({item.scrap_input_kg} kg)</span>
                 </div>
-                <div className="flex flex-wrap justify-between gap-4">
+                <div className="flex justify-between">
                   <span className="text-slate-500 font-sans">Liquid Steel Tapped:</span>
                   <span className="font-bold text-amber-700">{(item.liquid_steel_tapped_kg / 1000).toFixed(2)} MT ({item.liquid_steel_tapped_kg} kg)</span>
                 </div>
-                <div className="flex flex-wrap justify-between gap-4 text-slate-500">
+                <div className="flex justify-between text-slate-500">
                   <span className="font-sans">Power Consumption:</span>
                   <span>{item.power_consumed_kwh.toLocaleString()} kWh</span>
                 </div>
@@ -544,7 +544,7 @@ export default function FurnaceLogPage() {
 
               {/* Yield Progress Bar */}
               <div>
-                <div className="flex flex-wrap justify-between gap-4 text-xs font-mono mb-1">
+                <div className="flex justify-between text-xs font-mono mb-1">
                   <span className="text-slate-500 font-sans">Melting Yield:</span>
                   <span className="font-bold text-emerald-600">{item.yield_pct}%</span>
                 </div>
@@ -556,7 +556,7 @@ export default function FurnaceLogPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-between gap-4 items-center text-xs font-mono pt-1">
+              <div className="flex justify-between items-center text-xs font-mono pt-1">
                 <div>
                   <span className="text-slate-400 font-sans block">Tapping Temp:</span>
                   <p className="font-semibold text-rose-600">{item.tapping_temp_c}°C</p>
@@ -567,7 +567,7 @@ export default function FurnaceLogPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
+              <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
                 <span className="text-slate-500 font-sans">Heat Runtime: {item.runtime_min} mins</span>
                 <button
                   onClick={() => handleDelete(item.id)}
@@ -615,7 +615,7 @@ export default function FurnaceLogPage() {
                         <div className={`flex items-center space-x-2 ${alignRight ? 'justify-end' : ''}`}>
                           <span>{mapping[col] || col.replace(/_/g, ' ')}</span>
                           {isCustom && (
-                            <div className="flex flex-wrap gap-1 opacity-50 hover:opacity-100 transition-opacity">
+                            <div className="flex space-x-1 opacity-50 hover:opacity-100 transition-opacity">
                               <button onClick={() => renameColumn(col)} title="Rename" className="text-[#B48F48] hover:text-[#9E7A37]">✎</button>
                               <button onClick={() => deleteColumn(col)} title="Delete" className="text-rose-500 hover:text-rose-700">✕</button>
                             </div>
@@ -708,7 +708,7 @@ export default function FurnaceLogPage() {
           <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-zoom-in my-8">
             
             {/* Header */}
-            <div className="px-7 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-white">
+            <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">Record Tapped Furnace Heat</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Log crucible inputs, tapping temperature, and electricity consumption.</p>
@@ -871,7 +871,7 @@ export default function FurnaceLogPage() {
                     + Add Custom Column
                   </button>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                  <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
                     <input 
                       type="text" 
                       placeholder="Field Name (e.g., Note)" 
@@ -900,7 +900,7 @@ export default function FurnaceLogPage() {
 
               {/* Dynamic Calculation Result */}
               {scrapInKg > 0 && liquidOutKg > 0 && (
-                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex flex-wrap justify-between gap-4 items-center text-xs font-mono">
+                <div className="bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex justify-between items-center text-xs font-mono">
                   <div>
                     <span className="text-slate-600 font-sans block">Computed Melting Yield:</span>
                     <strong className="text-base font-bold text-emerald-700 font-mono">{computedYield}%</strong>
@@ -912,7 +912,7 @@ export default function FurnaceLogPage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

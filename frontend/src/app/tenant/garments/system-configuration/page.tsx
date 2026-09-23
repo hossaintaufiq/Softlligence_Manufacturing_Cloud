@@ -96,7 +96,7 @@ export default function SystemConfigurationPage() {
 
       {/* Section 2: Overview Ticker Alerts Configuration */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 pb-3.5">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3.5">
           <svg className="w-4 h-4 text-[#B48F48]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
@@ -111,7 +111,7 @@ export default function SystemConfigurationPage() {
             <p className="text-xs text-slate-400 font-mono py-2 italic">No active alerts configured. The rolling ticker is currently hidden on the Overview page.</p>
           ) : (
             alerts.map((alertText, index) => (
-              <div key={index} className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 border border-slate-150 rounded-xl px-3 py-2 text-xs font-mono">
+              <div key={index} className="flex items-center justify-between bg-slate-50 border border-slate-150 rounded-xl px-3 py-2 text-xs font-mono">
                 <span className="truncate max-w-[85%] text-slate-800 font-semibold">{alertText}</span>
                 <button
                   onClick={() => handleRemoveAlert(index)}
@@ -125,7 +125,7 @@ export default function SystemConfigurationPage() {
         </div>
 
         {/* Add alert form */}
-        <form onSubmit={handleAddAlert} className="flex flex-wrap items-center gap-3 pt-2">
+        <form onSubmit={handleAddAlert} className="flex items-center space-x-3 pt-2">
           <input
             type="text"
             value={newAlert}

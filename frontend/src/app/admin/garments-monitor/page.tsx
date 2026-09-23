@@ -209,7 +209,7 @@ export default function GarmentsMonitorPage() {
 
                       {/* Sync State */}
                       <td className={tableCellPadding}>
-                        <div className="flex flex-wrap items-center gap-1.5">
+                        <div className="flex items-center space-x-1.5">
                           <span className={`w-1.5 h-1.5 rounded-full ${tenant.status === 'suspended' ? 'bg-slate-400' : 'bg-emerald-500 animate-pulse'}`} />
                           <span className="text-[10px] font-bold text-slate-500 font-mono tracking-wide uppercase">{tenant.status === 'suspended' ? 'Suspended' : metric.syncState}</span>
                         </div>

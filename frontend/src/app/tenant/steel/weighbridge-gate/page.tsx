@@ -282,7 +282,7 @@ export default function WeighbridgeGatePage() {
                 }}
               />
             )}
-            <div className="flex flex-wrap justify-end gap-3 pt-3 border-t border-slate-100">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
               <button 
                 onClick={() => setDialog(null)}
                 className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer bg-white"
@@ -304,9 +304,9 @@ export default function WeighbridgeGatePage() {
       )}
 
       {/* Enterprise Header Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Plant Gate Operations</span>
             <span>•</span>
             <span>Weighbridge Terminal 01</span>
@@ -314,16 +314,16 @@ export default function WeighbridgeGatePage() {
           <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Weighbridge Gate Control</h1>
           <p className="text-sm text-slate-500 font-sans mt-0.5">Automated gross-tare-net weight tracking for incoming scrap loads and outgoing rebar consignments.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleAddColumn}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
             <span>+ Add Column</span>
           </button>
           <button 
             onClick={handleExportExcel}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -332,7 +332,7 @@ export default function WeighbridgeGatePage() {
           </button>
           <button 
             onClick={handleAddRow}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -345,22 +345,22 @@ export default function WeighbridgeGatePage() {
       {/* 4 Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Total Tickets</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">24h Shift</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{data.length}</span>
             <span className="text-xs text-slate-400 font-mono">Vehicles</span>
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Inward Scrap Net</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Raw In</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
               {(data.filter(r => r.material_type === 'Raw Scrap Inward').reduce((acc, r) => acc + (Number(r.net_weight_kg) || 0), 0) / 1000).toFixed(1)}
             </span>
@@ -369,11 +369,11 @@ export default function WeighbridgeGatePage() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Outward Rebar Net</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">Sales Out</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">
               {(data.filter(r => r.material_type === 'Finished Rod Outward').reduce((acc, r) => acc + (Number(r.net_weight_kg) || 0), 0) / 1000).toFixed(1)}
             </span>
@@ -382,11 +382,11 @@ export default function WeighbridgeGatePage() {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Scale Calibration</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Verified</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">±0.02%</span>
             <span className="text-xs text-emerald-600 font-mono font-medium">Certified 60T</span>
           </div>

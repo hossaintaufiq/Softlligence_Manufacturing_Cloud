@@ -191,9 +191,9 @@ export default function PowerUtilitiesPage() {
     <div className="space-y-6 animate-fade-in text-slate-800">
       
       {/* Enterprise Header Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
+          <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Energy Management</span>
             <span>•</span>
             <span>33kV Substation & Gas Manifold</span>
@@ -201,10 +201,10 @@ export default function PowerUtilitiesPage() {
           <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Power Grid & Energy Utilities</h1>
           <p className="text-sm text-slate-500 font-sans mt-0.5">Continuous telemetry monitoring for 33kV high-voltage substation feeds, peak load kVA, specific energy consumption (SEC), and natural gas combustion.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
             onClick={handleExportCSV}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -213,7 +213,7 @@ export default function PowerUtilitiesPage() {
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex flex-wrap items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -226,44 +226,44 @@ export default function PowerUtilitiesPage() {
       {/* 4 Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Total Power Consumed</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-50 text-amber-700 border border-amber-200">Substation</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{totalPower.toLocaleString()}</span>
             <span className="text-xs text-slate-400 font-mono">kWh Units</span>
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Specific Power (SEC)</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">Efficiency</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{avgSEC}</span>
             <span className="text-xs text-emerald-600 font-mono font-medium">kWh / MT</span>
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Gas Consumption</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-blue-50 text-blue-700 border border-blue-200">Reheating</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">{totalGas.toLocaleString()}</span>
             <span className="text-xs text-slate-400 font-mono">Nm³ Normal</span>
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Est Utility Cost</span>
             <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-rose-50 text-rose-700 border border-rose-200">Power + Gas</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-3xl font-bold font-mono tracking-tight text-slate-900">৳{(totalCost / 1000).toFixed(0)}k</span>
             <span className="text-xs text-rose-600 font-mono font-medium">BDT Total</span>
           </div>
@@ -377,7 +377,7 @@ export default function PowerUtilitiesPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white border border-slate-200/90 p-6 rounded-2xl w-full max-w-4xl shadow-2xl space-y-4 relative overflow-hidden flex flex-col max-h-[90vh] my-8 animate-zoom-in">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">Log Energy & Utility Meters</h3>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">Record electrical kilowatt-hours and natural gas units for unit cost analysis.</p>
@@ -429,11 +429,11 @@ export default function PowerUtilitiesPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-between gap-4 items-center pt-3 border-t border-slate-100">
+              <div className="flex justify-between items-center pt-3 border-t border-slate-100">
                 <button type="button" onClick={addModalRow} className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer">
                   + Add Date
                 </button>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex space-x-3">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer">
                     Cancel
                   </button>

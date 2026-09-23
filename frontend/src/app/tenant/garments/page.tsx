@@ -46,7 +46,7 @@ export default function GarmentsOverviewPage() {
       
       {/* Title */}
       <div>
-        <h1 className="text-xl font-black text-slate-900 tracking-tight flex flex-wrap items-center gap-2">
+        <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
           <svg className="w-5 h-5 text-[#B48F48]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
           </svg>
@@ -57,7 +57,7 @@ export default function GarmentsOverviewPage() {
 
       {/* Ticker */}
       {alerts.length > 0 && (
-        <div className="relative overflow-hidden w-full bg-rose-50/70 border border-rose-200/50 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-4 text-xs text-rose-800 font-bold font-mono shadow-2xs">
+        <div className="relative overflow-hidden w-full bg-rose-50/70 border border-rose-200/50 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-rose-800 font-bold font-mono shadow-2xs">
           <style>{`
             @keyframes marquee {
               0% { transform: translateX(0%); }
@@ -70,14 +70,14 @@ export default function GarmentsOverviewPage() {
             }
           `}</style>
           
-          <div className="flex flex-wrap items-center gap-2 mr-4 bg-rose-50/10 z-10 pr-2 shrink-0">
+          <div className="flex items-center space-x-2 mr-4 bg-rose-50/10 z-10 pr-2 shrink-0">
             <span className="animate-pulse">🚨</span>
             <span className="text-[10px] uppercase font-black tracking-wider text-rose-900">CRITICAL TICKER:</span>
           </div>
           
           <div className="flex-1 overflow-hidden relative h-5 flex items-center">
             <div 
-              className="marquee-content flex flex-wrap gap-8"
+              className="marquee-content flex space-x-8"
               style={{ animationPlayState: isTickerScrolling ? 'running' : 'paused' }}
             >
               <span>{marqueeText}</span>
@@ -96,37 +96,37 @@ export default function GarmentsOverviewPage() {
 
       {/* KPI Cards */}
       <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${gridGap}`}>
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Active styles</p>
             <span className="text-[#C5A059] bg-[#FAF6EE] p-1.5 rounded-lg border border-[#C5A059]/10">👚</span>
           </div>
           <div>
             <h3 className="text-2xl font-extrabold text-slate-950 font-mono leading-none">{activeStyles.length}</h3>
-            <p className="text-[9px] text-[#B48F48] font-bold font-mono mt-2.5 flex flex-wrap items-center gap-1">
+            <p className="text-[9px] text-[#B48F48] font-bold font-mono mt-2.5 flex items-center space-x-1">
               <span>➔ VIEW DIRECTORY</span>
             </p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Daily sewing output</p>
             <span className="text-indigo-650 bg-indigo-50 p-1.5 rounded-lg border border-indigo-200/20">🧵</span>
           </div>
           <div>
-            <div className="flex flex-wrap items-baseline gap-1">
+            <div className="flex items-baseline space-x-1">
               <h3 className="text-2xl font-extrabold text-slate-950 font-mono leading-none">{totalActualOutput.toLocaleString()}</h3>
               <span className="text-xs text-slate-450 font-semibold">Pcs</span>
             </div>
-            <p className="text-[9px] text-emerald-600 font-bold font-mono mt-2.5 flex flex-wrap items-center gap-1">
+            <p className="text-[9px] text-emerald-600 font-bold font-mono mt-2.5 flex items-center space-x-1">
               <span>📈 {avgEfficiency}% AVERAGE EFFICIENCY</span>
             </p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Fabric Stock Volume</p>
             <span className="text-emerald-600 bg-emerald-50 p-1.5 rounded-lg">📦</span>
           </div>
@@ -136,14 +136,14 @@ export default function GarmentsOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Export Letter of Credits</p>
             <span className="text-amber-600 bg-amber-50 p-1.5 rounded-lg">🚢</span>
           </div>
           <div>
             <h3 className="text-2xl font-extrabold text-slate-950 font-mono leading-none">$505,000</h3>
-            <p className="text-[9px] text-emerald-600 font-extrabold font-mono mt-2.5 flex flex-wrap items-center gap-1">
+            <p className="text-[9px] text-emerald-600 font-extrabold font-mono mt-2.5 flex items-center space-x-1">
               <span>✓ APPROVED & FULLY ADVISED</span>
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function GarmentsOverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono">Sewing Floor Outputs & Efficiency</h3>
               <Link href="/tenant/garments/garments-production" className="text-[9px] font-bold text-[#B48F48] hover:underline font-mono">VIEW LOGS →</Link>
             </div>
@@ -164,7 +164,7 @@ export default function GarmentsOverviewPage() {
                 const completionPct = Math.min(100, Math.round((line.actual / line.target) * 100));
                 return (
                   <div key={idx} className="space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-4 text-xs font-semibold">
+                    <div className="flex items-center justify-between text-xs font-semibold">
                       <span className="text-slate-900 font-extrabold">{line.line} ({line.styleNo})</span>
                       <span className="font-mono text-slate-900">{line.actual} / {line.target} Pcs</span>
                     </div>
@@ -199,7 +199,7 @@ export default function GarmentsOverviewPage() {
                 </linearGradient>
               </defs>
             </svg>
-            <div className="flex flex-wrap justify-between gap-4 text-[8px] font-bold text-slate-400 font-mono pt-2 px-1">
+            <div className="flex justify-between text-[8px] font-bold text-slate-400 font-mono pt-2 px-1">
               <span>MON (85%)</span>
               <span>TUE (87%)</span>
               <span>WED (86%)</span>
@@ -220,7 +220,7 @@ export default function GarmentsOverviewPage() {
                 const fillPct = Math.round((stock.qty / stock.max) * 100);
                 return (
                   <div key={idx} className="space-y-1.5">
-                    <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-900 truncate">{stock.name}</span>
                       <span className="font-mono font-bold text-slate-800">{stock.qty} Kgs</span>
                     </div>

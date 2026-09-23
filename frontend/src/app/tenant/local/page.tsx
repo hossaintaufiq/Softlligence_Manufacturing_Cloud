@@ -24,9 +24,9 @@ export default function LocalOverviewPage() {
     <div className="space-y-6 sm:space-y-8 animate-fade-in text-slate-800">
       
       {/* Title */}
-      <div className="flex flex-wrap justify-between gap-4 items-center">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight flex flex-wrap items-center gap-2">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
             <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
             </svg>
@@ -38,8 +38,8 @@ export default function LocalOverviewPage() {
 
       {/* KPI Cards */}
       <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${gridGap}`}>
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Daily Store Sales</p>
             <span className="text-emerald-600 bg-emerald-50 p-1.5 rounded-lg">💰</span>
           </div>
@@ -49,8 +49,8 @@ export default function LocalOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Store Foot Traffic</p>
             <span className="text-[#C5A059] bg-[#FAF6EE] p-1.5 rounded-lg">👥</span>
           </div>
@@ -60,8 +60,8 @@ export default function LocalOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Active Products</p>
             <span className="text-indigo-600 bg-indigo-50 p-1.5 rounded-lg">🏷️</span>
           </div>
@@ -71,8 +71,8 @@ export default function LocalOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-wrap flex-col justify-between gap-4 h-32 group">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/85 p-5 rounded-2xl shadow-sm hover:border-[#C5A059]/30 transition-all flex flex-col justify-between h-32 group">
+          <div className="flex items-center justify-between">
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest font-mono">Feedback Rating</p>
             <span className="text-amber-500 bg-amber-50 p-1.5 rounded-lg">⭐</span>
           </div>
@@ -90,7 +90,7 @@ export default function LocalOverviewPage() {
             <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider font-mono border-b border-slate-100 pb-3">Daily Retail Transactions</h3>
             <div className="space-y-3.5">
               {salesLedger.map((trx, idx) => (
-                <div key={idx} className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
+                <div key={idx} className="flex items-start justify-between border-b border-slate-50 pb-2.5 last:border-0 last:pb-0">
                   <div>
                     <p className="text-xs font-bold text-slate-900">{trx.customer}</p>
                     <p className="text-[10px] text-slate-400 font-mono">{trx.ref} • Time: {trx.time}</p>
@@ -119,7 +119,7 @@ export default function LocalOverviewPage() {
                 </linearGradient>
               </defs>
             </svg>
-            <div className="flex flex-wrap justify-between gap-4 text-[8px] font-bold text-slate-400 font-mono pt-2 px-1">
+            <div className="flex justify-between text-[8px] font-bold text-slate-400 font-mono pt-2 px-1">
               <span>08:00 (12)</span>
               <span>10:00 (45)</span>
               <span>12:00 (150)</span>
@@ -138,7 +138,7 @@ export default function LocalOverviewPage() {
             <div className="space-y-4 pt-1">
               {businessMetrics.map((cat, idx) => (
                 <div key={idx} className="space-y-1.5">
-                  <div className="flex flex-wrap items-center justify-between gap-4 text-xs font-semibold">
+                  <div className="flex items-center justify-between text-xs font-semibold">
                     <span className="text-slate-900 truncate">{cat.category}</span>
                     <span className="font-mono text-slate-850 font-bold">${cat.value.toLocaleString()} ({cat.share}%)</span>
                   </div>
