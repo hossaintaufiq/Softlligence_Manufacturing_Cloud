@@ -48,8 +48,19 @@ A premium, real-time dashboard aggregating telemetry and operations feeds:
 
 ```text
 Softlligence_Manufacturing_Cloud/
-├── backend/                       # Placed for future microservice integrations
-└── frontend/                      # Main full-stack client codebase
+├── backend/                       # Express + TypeScript Industrial ERP REST API
+│   ├── src/
+│   │   ├── config/                # Environment variables & constants
+│   │   ├── controllers/           # Module business logic (Steel, Garments, Local, Auth, Admin)
+│   │   ├── db/                    # JSON persistent database & transactional relational triggers
+│   │   ├── middlewares/           # CORS, Auth/JWT, Tenant, Rate Limiting, Logger, Error Handler
+│   │   ├── routes/                # Modular REST route definitions
+│   │   ├── types/                 # Shared TypeScript interfaces & DTOs
+│   │   ├── app.ts                 # Express application pipeline setup
+│   │   └── server.ts              # HTTP server entrypoint with graceful shutdown
+│   ├── .env                       # Backend environment configuration
+│   └── package.json
+└── frontend/                      # Main Next.js client codebase
     ├── public/                    # Static assets & public resources
     └── src/
         ├── context/               # Global state contexts (User, Auth)
@@ -62,10 +73,6 @@ Softlligence_Manufacturing_Cloud/
                 ├── garments/      # Merchandising & Commercial ERP
                 ├── local/         # Local Store Operations & CRM
                 └── steel/         # Steel Plant ERP Pages
-                    ├── overview/  # Enriched Control Hub & Live Telemetry
-                    ├── reports/   # Print-ready Reporting Console
-                    ├── ...        # 9 Sheet Modules (CCM, Furnace log, etc.)
-                    └── layout.tsx # Scale viewport wrapper (1280px locking)
 ```
 
 ---
@@ -76,24 +83,32 @@ Softlligence_Manufacturing_Cloud/
 * Node.js (v18.x or later)
 * npm (v9.x or later)
 
-### Installation
-1. Clone the repository and navigate to the frontend folder:
-   ```bash
-   cd frontend
-   ```
-2. Install npm dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the local development server:
-   ```bash
-   npm run dev
-   ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Building for Production
-To compile and check for static type correctness:
+### 1. Starting the Backend API
+Navigate to the `backend` directory, install packages, and start the development server:
 ```bash
-npm run build
+cd backend
+npm install
+npm run dev
 ```
-This builds an optimized production bundle successfully with zero static errors.
+* **Base URL:** `http://localhost:5000`
+* **Health Check:** `http://localhost:5000/api/health`
+
+### 2. Starting the Frontend
+In a separate terminal, navigate to the `frontend` directory:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+* **Frontend Web App:** `http://localhost:3000`
+
+---
+
+## 🛡️ Backend Middleware Architecture
+1. **`corsMiddleware`**: Whitelists frontend clients with cross-origin credentials and preflight handling.
+2. **`loggerMiddleware`**: Color-coded HTTP request logger with latency tracking (`X-Request-Id`).
+3. **`rateLimiter`**: In-memory IP-based rate limiting protecting against abuse.
+4. **`authMiddleware`**: JWT bearer token verification and role guards (`super-admin`, `tenant-admin`).
+5. **`tenantMiddleware`**: Multi-tenant isolation parser (`x-tenant-id`) for multi-tenant accounts.
+6. **`validator`**: Zod request schema validation.
+7. **`errorHandler` & `notFoundHandler`**: Standardized JSON error response handler.

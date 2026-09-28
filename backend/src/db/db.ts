@@ -1,0 +1,583 @@
+import fs from 'fs';
+import path from 'path';
+import {
+  DatabaseSchema,
+  ScrapRow,
+  FurnaceRow,
+  BilletRow,
+  RollingRow,
+  DispatchRow,
+  DowntimeRow,
+  EnergyRow,
+  WeighbridgeRow,
+  QualityRow,
+  SteelInventory,
+  ExpenseRow,
+  ShiftRow,
+  User,
+  Tenant,
+  GarmentOrder,
+  GarmentInventoryItem,
+  LocalOrder,
+  LocalInventoryItem,
+} from '../types';
+import { config } from '../config';
+
+const DB_FILE_PATH = config.dbPath;
+
+// Initial Seeding Data
+export const INITIAL_SEEDS: DatabaseSchema = {
+  users: [
+    {
+      id: 'usr-admin-1',
+      email: 'admin@softlligence.com',
+      name: 'System Administrator',
+      role: 'super-admin',
+      passwordHash: 'admin123', // In demo/local, can be plaintext or bcrypt
+      preferences: { density: 'cozy', defaultTab: 'subscriptions' },
+      createdAt: '2026-08-01T00:00:00Z',
+    },
+    {
+      id: 'usr-steel-1',
+      email: 'manager@steel.com',
+      name: 'James Sterling',
+      role: 'tenant-admin',
+      tenantId: 'steelmill',
+      tenantName: 'Acme Steel Mill',
+      passwordHash: 'steel123',
+      preferences: { density: 'cozy', defaultTab: 'overview' },
+      createdAt: '2026-08-20T00:00:00Z',
+    },
+    {
+      id: 'usr-garments-1',
+      email: 'manager@acme.com',
+      name: 'Sarah Jenkins',
+      role: 'tenant-admin',
+      tenantId: 'acme',
+      tenantName: 'Acme Garments ERP',
+      passwordHash: 'manager123',
+      preferences: { density: 'cozy', defaultTab: 'overview' },
+      createdAt: '2026-08-01T00:00:00Z',
+    },
+    {
+      id: 'usr-local-1',
+      email: 'manager@local.com',
+      name: 'Claire Adams',
+      role: 'tenant-admin',
+      tenantId: 'localbiz',
+      tenantName: 'Apex Local Business',
+      passwordHash: 'local123',
+      preferences: { density: 'cozy', defaultTab: 'overview' },
+      createdAt: '2026-08-20T00:00:00Z',
+    },
+  ],
+  tenants: [
+    {
+      id: 'steelmill',
+      name: 'Acme Steel Mill',
+      slug: 'steelmill',
+      status: 'active',
+      planCode: 'Enterprise',
+      createdAt: '2026-08-20',
+      businessType: 'steel',
+    },
+    {
+      id: 'acme',
+      name: 'Acme Garments ERP',
+      slug: 'acme',
+      status: 'active',
+      planCode: 'Enterprise',
+      createdAt: '2026-08-01',
+      businessType: 'garments',
+    },
+    {
+      id: 'localbiz',
+      name: 'Apex Local Business',
+      slug: 'localbiz',
+      status: 'active',
+      planCode: 'Standard',
+      createdAt: '2026-08-20',
+      businessType: 'local',
+    },
+    {
+      id: 'manchester',
+      name: 'Manchester Foundries',
+      slug: 'manchester',
+      status: 'active',
+      planCode: 'Growth',
+      createdAt: '2026-08-10',
+      businessType: 'steel',
+    },
+    {
+      id: 'globalalloys',
+      name: 'Global Alloys LLC',
+      slug: 'globalalloys',
+      status: 'suspended',
+      planCode: 'Standard',
+      createdAt: '2026-08-12',
+      businessType: 'steel',
+    },
+  ],
+  steel: {
+    scrap: [
+      { id: 1, date: '2026-08-20', supplier_name: 'Metal Recyclers Corp', scrap_category: 'LC Scrap', scrap_rcv_kg: 15000, truck_no: 'TR-1024', gross_weight: 24500, value_tare: 9500, rate_per_kg: 42, total_cost: 630000, yard_location: 'Bay A' },
+      { id: 2, date: '2026-08-21', supplier_name: 'Apex Scrap Suppliers', scrap_category: 'Rolling Kechi', scrap_rcv_kg: 12800, truck_no: 'TR-8812', gross_weight: 22000, value_tare: 9200, rate_per_kg: 44, total_cost: 563200, yard_location: 'Bay B' },
+      { id: 3, date: '2026-08-22', supplier_name: 'Alpha Alloys', scrap_category: 'Plate Cutting', scrap_rcv_kg: 9500, truck_no: 'TR-5034', gross_weight: 18500, value_tare: 9000, rate_per_kg: 40, total_cost: 380000, yard_location: 'Bay A' }
+    ],
+    furnace: [
+      { id: 1, date: '2026-08-20', furnace_no: 'Furnace 01', heat_no: 'H-260820A', scrap_input_kg: 12000, runtime_min: 52, used_patching_powder_kg: 150, used_patching_forma_kg: 1, tapping_temp_c: 1540, liquid_steel_tapped_kg: 10800, power_consumed_kwh: 7200, shift_id: 'A', furnace_master: 'Kabir Ahmed' },
+      { id: 2, date: '2026-08-21', furnace_no: 'Furnace 01', heat_no: 'H-260821A', scrap_input_kg: 13000, runtime_min: 55, used_patching_powder_kg: 180, used_patching_forma_kg: 1, tapping_temp_c: 1560, liquid_steel_tapped_kg: 11440, power_consumed_kwh: 7800, shift_id: 'B', furnace_master: 'Zahirul Haque' },
+      { id: 3, date: '2026-08-22', furnace_no: 'Furnace 02', heat_no: 'H-260822A', scrap_input_kg: 11500, runtime_min: 48, used_patching_powder_kg: 120, used_patching_forma_kg: 0, tapping_temp_c: 1550, liquid_steel_tapped_kg: 10465, power_consumed_kwh: 6900, shift_id: 'C', furnace_master: 'Ataur Rahman' }
+    ],
+    billet: [
+      { id: 1, date: '2026-08-20', billet_size_section: '100x100mm x 6m', billet_output_kg: 10500, scull_loss_kg: 1500, billet_yield_pct: 87.5, billet_stock_kg: 50000, heat_no: 'H-260820A' },
+      { id: 2, date: '2026-08-21', billet_size_section: '130x130mm x 6m', billet_output_kg: 11100, scull_loss_kg: 1900, billet_yield_pct: 85.38, billet_stock_kg: 61100, heat_no: 'H-260821A' },
+      { id: 3, date: '2026-08-22', billet_size_section: '100x100mm x 6m', billet_output_kg: 10200, scull_loss_kg: 1300, billet_yield_pct: 88.7, billet_stock_kg: 71300, heat_no: 'H-260822A' }
+    ],
+    rolling: [
+      { id: 1, date: '2026-08-20', billet_input_kg: 10000, rod_size: '12MM', rod_production_kg: 9600, rod_loss_kg: 400, rod_yield_pct: 96, rod_stock_kg: 145000 },
+      { id: 2, date: '2026-08-21', billet_input_kg: 11000, rod_size: '16MM', rod_production_kg: 10580, rod_loss_kg: 420, rod_yield_pct: 96.18, rod_stock_kg: 155580 },
+      { id: 3, date: '2026-08-22', billet_input_kg: 10000, rod_size: '20MM', rod_production_kg: 9550, rod_loss_kg: 450, rod_yield_pct: 95.5, rod_stock_kg: 165130 }
+    ],
+    dispatch: [
+      { id: 1, date: '2026-08-20', customer_name: 'Metro Infrastructures', contact_info: 'info@metroinfra.com', challan_no: 'CH-77801', rod_size: '12MM', dispatch_qty_kg: 8000, rate_per_kg: 65, total_selling_price: 520000, truck_details: 'TR-2005 / Driver Jamal', payment_terms: 'LC 30 Days', delivery_status: 'Delivered' },
+      { id: 2, date: '2026-08-21', customer_name: 'Bengal Housing Ltd', contact_info: '01712-334455', challan_no: 'CH-77802', rod_size: '16MM', dispatch_qty_kg: 10000, rate_per_kg: 66, total_selling_price: 660000, truck_details: 'TR-1025 / Driver Milon', payment_terms: 'Cash on Delivery', delivery_status: 'Delivered' },
+      { id: 3, date: '2026-08-22', customer_name: 'Apex Bridges', contact_info: 'dispatch@apex.org', challan_no: 'CH-77803', rod_size: '20MM', dispatch_qty_kg: 9000, rate_per_kg: 68, total_selling_price: 612000, truck_details: 'TR-3088 / Driver Rahim', payment_terms: 'Post Dated Cheque', delivery_status: 'In-Transit' }
+    ],
+    downtime: [
+      { id: 1, date: '2026-08-20', billet_breakdown_min: 45, rolling_breakdown_min: 0, breakdown_category: 'Electrical', root_cause_notes: 'CCM mold stirrer sensor replacement', shift_code: 'A', action_taken: 'Replaced inductive sensor' },
+      { id: 2, date: '2026-08-21', billet_breakdown_min: 0, rolling_breakdown_min: 90, breakdown_category: 'Roll Changing', root_cause_notes: 'Scheduled changeover to 16MM guide rolls', shift_code: 'B', action_taken: 'Replaced 12mm sizing blocks' },
+      { id: 3, date: '2026-08-22', billet_breakdown_min: 30, rolling_breakdown_min: 0, breakdown_category: 'Mechanical', root_cause_notes: 'Ladle slide-gate nozzle alignment checks', shift_code: 'C', action_taken: 'Re-aligned cylinder guides' }
+    ],
+    energy: [
+      { id: 1, date: '2026-08-20', power_consumption_kw: 12500, gas_consumption_nm3: 2100, power_consumed_per_kg: 1.30, gas_consumed_per_kg: 0.22, peak_demand_kva: 3400, furnace_kwh_per_mt: 595, rolling_kwh_per_mt: 651 },
+      { id: 2, date: '2026-08-21', power_consumption_kw: 12800, gas_consumption_nm3: 2250, power_consumed_per_kg: 1.21, gas_consumed_per_kg: 0.21, peak_demand_kva: 3500, furnace_kwh_per_mt: 576, rolling_kwh_per_mt: 604 },
+      { id: 3, date: '2026-08-22', power_consumption_kw: 12100, gas_consumption_nm3: 2050, power_consumed_per_kg: 1.27, gas_consumed_per_kg: 0.21, peak_demand_kva: 3300, furnace_kwh_per_mt: 593, rolling_kwh_per_mt: 633 }
+    ],
+    weighbridge: [
+      { id: 1, ticket_no: 'WB-260820-001', date_time: '2026-08-20 09:30', vehicle_no: 'TR-1024', party_name: 'Metal Recyclers Corp', material_type: 'Raw Scrap Inward', gross_weight_kg: 24500, tare_weight_kg: 9500, net_weight_kg: 15000, operator_signature: 'Masum Billah' },
+      { id: 2, ticket_no: 'WB-260820-002', date_time: '2026-08-20 16:15', vehicle_no: 'TR-2005', party_name: 'Metro Infrastructures', material_type: 'Finished Rod Outward', gross_weight_kg: 16500, tare_weight_kg: 8500, net_weight_kg: 8000, operator_signature: 'Masum Billah' },
+      { id: 3, ticket_no: 'WB-260821-001', date_time: '2026-08-21 10:45', vehicle_no: 'TR-8812', party_name: 'Apex Scrap Suppliers', material_type: 'Raw Scrap Inward', gross_weight_kg: 22000, tare_weight_kg: 9200, net_weight_kg: 12800, operator_signature: 'S. K. Dev' }
+    ],
+    quality: [
+      { id: 1, heat_no: 'H-260820A', testing_date: '2026-08-20', pct_c: 0.22, pct_mn: 0.85, pct_si: 0.24, pct_s: 0.035, pct_p: 0.038, pct_ce: 0.37, yield_strength_n_mm2: 520, tensile_strength_n_mm2: 635, elongation_pct: 18, bend_test_result: 'Approved', nominal_mass_g_m: 0.888 },
+      { id: 2, heat_no: 'H-260821A', testing_date: '2026-08-21', pct_c: 0.24, pct_mn: 0.90, pct_si: 0.26, pct_s: 0.040, pct_p: 0.042, pct_ce: 0.40, yield_strength_n_mm2: 535, tensile_strength_n_mm2: 650, elongation_pct: 17, bend_test_result: 'Approved', nominal_mass_g_m: 1.580 },
+      { id: 3, heat_no: 'H-260822A', testing_date: '2026-08-22', pct_c: 0.21, pct_mn: 0.82, pct_si: 0.22, pct_s: 0.030, pct_p: 0.032, pct_ce: 0.35, yield_strength_n_mm2: 512, tensile_strength_n_mm2: 622, elongation_pct: 19, bend_test_result: 'Approved', nominal_mass_g_m: 2.470 }
+    ],
+    inventory: {
+      raw_scrap_mt: 382.5,
+      billet_yard_mt: 145.2,
+      rebar_10mm_mt: 42.0,
+      rebar_12mm_mt: 74.8,
+      rebar_16mm_mt: 98.4,
+      rebar_20mm_mt: 86.5,
+      rebar_25mm_mt: 55.2,
+      rebar_32mm_mt: 28.0,
+      store_patching_powder_kg: 5000,
+      store_patching_forma_qty: 25,
+      store_rolls_qty: 12,
+      store_guides_qty: 48
+    },
+    expenses: [
+      { id: 1, date: '2026-08-20', expenses: 45000, category: 'Spares & Refractory', voucher_no: 'PV-10255', payment_method: 'Bank Transfer', remarks: 'Purchased secondary guide rolls' },
+      { id: 2, date: '2026-08-21', expenses: 820000, category: 'Electricity Bill', voucher_no: 'PV-10256', payment_method: 'Pay Order', remarks: 'August industrial line billing' },
+      { id: 3, date: '2026-08-22', expenses: 630000, category: 'Scrap Procurement', voucher_no: 'SP-99120', payment_method: 'Letter of Credit', remarks: 'Procurement invoice raw scrap weight' }
+    ],
+    shifts: [
+      { id: 1, date: '2026-08-20', shift_id: 'Shift A', shift_supervisor: 'Aminul Islam', furnace_tapper_melters: 'Karim / Sabuj', ccm_operators: 'Rafiqul / Sumon', roll_turners_feeders: 'Milon / Sajal', total_crew_strength: 24, shift_output_mt: 10.5 },
+      { id: 2, date: '2026-08-21', shift_id: 'Shift B', shift_supervisor: 'Jafar Ahmed', furnace_tapper_melters: 'Selim / Alam', ccm_operators: 'Faruk / Jamil', roll_turners_feeders: 'Rubel / Hasan', total_crew_strength: 22, shift_output_mt: 11.1 },
+      { id: 3, date: '2026-08-22', shift_id: 'Shift C', shift_supervisor: 'Tariqul Bari', furnace_tapper_melters: 'Sohag / Imran', ccm_operators: 'Nayan / Sohel', roll_turners_feeders: 'Nasir / Al-Amin', total_crew_strength: 23, shift_output_mt: 10.2 }
+    ]
+  },
+  garments: {
+    orders: [
+      { id: 1, orderNo: 'ORD-GM-1001', buyerName: 'H&M Global Sourcing', styleNo: 'ST-9982', itemType: 'Men Crewneck T-Shirt', quantityPcs: 25000, unitPriceUsd: 2.85, totalValueUsd: 71250, targetShipDate: '2026-09-30', status: 'Sewing' },
+      { id: 2, orderNo: 'ORD-GM-1002', buyerName: 'Zara Inditex', styleNo: 'ZR-4410', itemType: 'Women Slim Denim Jacket', quantityPcs: 12000, unitPriceUsd: 8.50, totalValueUsd: 102000, targetShipDate: '2026-10-15', status: 'Cutting' },
+      { id: 3, orderNo: 'ORD-GM-1003', buyerName: 'Target USA', styleNo: 'TG-1029', itemType: 'Kids Fleece Hoodie', quantityPcs: 18500, unitPriceUsd: 4.20, totalValueUsd: 77700, targetShipDate: '2026-10-05', status: 'Finishing' }
+    ],
+    inventory: [
+      { id: 1, materialCode: 'FAB-CTN-180', description: '100% Combed Cotton Single Jersey 180 GSM Navy Blue', category: 'Fabric', stockQty: 4500, unit: 'KG', reorderLevel: 1000 },
+      { id: 2, materialCode: 'TRM-ZIP-YKK', description: 'YKK #5 Antique Brass Zipper 24 inch', category: 'Trims', stockQty: 8500, unit: 'PCS', reorderLevel: 2000 },
+      { id: 3, materialCode: 'THD-POL-402', description: 'Astra 40/2 100% Spun Polyester Sewing Thread', category: 'Thread', stockQty: 1200, unit: 'Cones', reorderLevel: 300 }
+    ]
+  },
+  local: {
+    orders: [
+      {
+        id: 1,
+        invoiceNo: 'INV-LOC-8001',
+        customerName: 'Rahim Traders',
+        customerPhone: '+880 1711-223344',
+        date: '2026-08-20',
+        items: [
+          { itemId: 1, itemName: 'Industrial Safety Helmet Yellow', qty: 20, unitPrice: 450, subtotal: 9000 },
+          { itemId: 2, itemName: 'Heavy Duty Welding Gloves', qty: 15, unitPrice: 320, subtotal: 4800 }
+        ],
+        totalAmount: 13800,
+        paymentMode: 'Cash',
+        status: 'Paid'
+      },
+      {
+        id: 2,
+        invoiceNo: 'INV-LOC-8002',
+        customerName: 'Green Engineering Works',
+        customerPhone: '+880 1819-556677',
+        date: '2026-08-21',
+        items: [
+          { itemId: 3, itemName: 'Cutting Discs 4 inch (Pack of 25)', qty: 10, unitPrice: 1250, subtotal: 12500 }
+        ],
+        totalAmount: 12500,
+        paymentMode: 'Mobile Banking',
+        status: 'Paid'
+      }
+    ],
+    inventory: [
+      { id: 1, sku: 'SF-HLM-YEL', name: 'Industrial Safety Helmet Yellow', category: 'Safety Gear', costPrice: 320, sellingPrice: 450, stockQty: 150 },
+      { id: 2, sku: 'SF-GLV-WLD', name: 'Heavy Duty Welding Gloves', category: 'Safety Gear', costPrice: 220, sellingPrice: 320, stockQty: 85 },
+      { id: 3, sku: 'TL-CUT-04P', name: 'Cutting Discs 4 inch (Pack of 25)', category: 'Abrasives & Tools', costPrice: 950, sellingPrice: 1250, stockQty: 40 }
+    ]
+  }
+};
+
+// Database Initialization & CRUD Operations
+export class DatabaseManager {
+  private static instance: DatabaseManager;
+
+  private constructor() {
+    this.init();
+  }
+
+  public static getInstance(): DatabaseManager {
+    if (!DatabaseManager.instance) {
+      DatabaseManager.instance = new DatabaseManager();
+    }
+    return DatabaseManager.instance;
+  }
+
+  public init(): DatabaseSchema {
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    if (fs.existsSync(DB_FILE_PATH)) {
+      try {
+        const content = fs.readFileSync(DB_FILE_PATH, 'utf-8');
+        return JSON.parse(content) as DatabaseSchema;
+      } catch (err) {
+        console.warn('Existing database corrupted or invalid JSON. Re-seeding database...');
+      }
+    }
+
+    this.write(INITIAL_SEEDS);
+    return INITIAL_SEEDS;
+  }
+
+  public read(): DatabaseSchema {
+    if (!fs.existsSync(DB_FILE_PATH)) {
+      return this.init();
+    }
+    try {
+      const content = fs.readFileSync(DB_FILE_PATH, 'utf-8');
+      return JSON.parse(content) as DatabaseSchema;
+    } catch {
+      return this.init();
+    }
+  }
+
+  public write(data: DatabaseSchema): void {
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  }
+
+  public resetToSeeds(): DatabaseSchema {
+    this.write(INITIAL_SEEDS);
+    return INITIAL_SEEDS;
+  }
+
+  // -------------------------------------------------------------
+  // Steel Manufacturing Operations & Relational Triggers
+  // -------------------------------------------------------------
+
+  public addScrapRow(row: Omit<ScrapRow, 'id' | 'total_cost'>): ScrapRow {
+    const db = this.read();
+    const total_cost = row.scrap_rcv_kg * row.rate_per_kg;
+    const newRow: ScrapRow = {
+      ...row,
+      id: db.steel.scrap.length > 0 ? Math.max(...db.steel.scrap.map(r => r.id)) + 1 : 1,
+      total_cost
+    };
+
+    db.steel.scrap.push(newRow);
+    // Trigger: Add scrap to yard raw scrap inventory (MT)
+    db.steel.inventory.raw_scrap_mt = parseFloat((db.steel.inventory.raw_scrap_mt + (row.scrap_rcv_kg / 1000)).toFixed(2));
+    this.write(db);
+    return newRow;
+  }
+
+  public addFurnaceRow(row: Omit<FurnaceRow, 'id'>): FurnaceRow {
+    const db = this.read();
+    const newRow: FurnaceRow = {
+      ...row,
+      id: db.steel.furnace.length > 0 ? Math.max(...db.steel.furnace.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.furnace.push(newRow);
+    // Trigger: Deduct charged scrap from raw scrap yard
+    db.steel.inventory.raw_scrap_mt = parseFloat((db.steel.inventory.raw_scrap_mt - (row.scrap_input_kg / 1000)).toFixed(2));
+    // Deduct patching powder and refractory forma from stores
+    db.steel.inventory.store_patching_powder_kg = Math.max(0, db.steel.inventory.store_patching_powder_kg - row.used_patching_powder_kg);
+    db.steel.inventory.store_patching_forma_qty = Math.max(0, db.steel.inventory.store_patching_forma_qty - row.used_patching_forma_kg);
+
+    this.write(db);
+    return newRow;
+  }
+
+  public addBilletRow(row: Omit<BilletRow, 'id' | 'scull_loss_kg' | 'billet_yield_pct' | 'billet_stock_kg'>): BilletRow {
+    const db = this.read();
+    const furnaceHeat = db.steel.furnace.find(f => f.heat_no === row.heat_no);
+    const scrapInput = furnaceHeat ? furnaceHeat.scrap_input_kg : row.billet_output_kg + 1000;
+
+    const scull_loss_kg = Math.max(0, scrapInput - row.billet_output_kg);
+    const billet_yield_pct = parseFloat(((row.billet_output_kg / scrapInput) * 100).toFixed(2));
+
+    const prevStockKg = db.steel.billet.length > 0 ? db.steel.billet[db.steel.billet.length - 1].billet_stock_kg : 40000;
+    const rollingInputToday = db.steel.rolling
+      .filter(r => r.date === row.date)
+      .reduce((sum, r) => sum + r.billet_input_kg, 0);
+
+    const billet_stock_kg = prevStockKg + row.billet_output_kg - rollingInputToday;
+
+    const newRow: BilletRow = {
+      ...row,
+      scull_loss_kg,
+      billet_yield_pct,
+      billet_stock_kg,
+      id: db.steel.billet.length > 0 ? Math.max(...db.steel.billet.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.billet.push(newRow);
+    db.steel.inventory.billet_yard_mt = parseFloat((db.steel.inventory.billet_yard_mt + (row.billet_output_kg / 1000)).toFixed(2));
+
+    this.write(db);
+    return newRow;
+  }
+
+  public addRollingRow(row: Omit<RollingRow, 'id' | 'rod_loss_kg' | 'rod_yield_pct' | 'rod_stock_kg'>): RollingRow {
+    const db = this.read();
+    const rod_loss_kg = Math.max(0, row.billet_input_kg - row.rod_production_kg);
+    const rod_yield_pct = parseFloat(((row.rod_production_kg / row.billet_input_kg) * 100).toFixed(2));
+
+    const prevStockKg = db.steel.rolling.length > 0 ? db.steel.rolling[db.steel.rolling.length - 1].rod_stock_kg : 120000;
+    const dispatchToday = db.steel.dispatch
+      .filter(d => d.date === row.date && d.rod_size === row.rod_size)
+      .reduce((sum, d) => sum + d.dispatch_qty_kg, 0);
+
+    const rod_stock_kg = prevStockKg + row.rod_production_kg - dispatchToday;
+
+    const newRow: RollingRow = {
+      ...row,
+      rod_loss_kg,
+      rod_yield_pct,
+      rod_stock_kg,
+      id: db.steel.rolling.length > 0 ? Math.max(...db.steel.rolling.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.rolling.push(newRow);
+    db.steel.inventory.billet_yard_mt = parseFloat((db.steel.inventory.billet_yard_mt - (row.billet_input_kg / 1000)).toFixed(2));
+
+    const sizeKey = `rebar_${row.rod_size.toLowerCase()}_mt` as keyof SteelInventory;
+    if (sizeKey in db.steel.inventory) {
+      (db.steel.inventory[sizeKey] as number) = parseFloat(((db.steel.inventory[sizeKey] as number) + (row.rod_production_kg / 1000)).toFixed(2));
+    }
+
+    this.write(db);
+    return newRow;
+  }
+
+  public addDispatchRow(row: Omit<DispatchRow, 'id' | 'total_selling_price'>): DispatchRow {
+    const db = this.read();
+    const total_selling_price = row.dispatch_qty_kg * row.rate_per_kg;
+
+    const newRow: DispatchRow = {
+      ...row,
+      id: db.steel.dispatch.length > 0 ? Math.max(...db.steel.dispatch.map(r => r.id)) + 1 : 1,
+      total_selling_price
+    };
+
+    db.steel.dispatch.push(newRow);
+    const sizeKey = `rebar_${row.rod_size.toLowerCase()}_mt` as keyof SteelInventory;
+    if (sizeKey in db.steel.inventory) {
+      (db.steel.inventory[sizeKey] as number) = parseFloat(((db.steel.inventory[sizeKey] as number) - (row.dispatch_qty_kg / 1000)).toFixed(2));
+    }
+
+    this.write(db);
+    return newRow;
+  }
+
+  public addDowntimeRow(row: Omit<DowntimeRow, 'id'>): DowntimeRow {
+    const db = this.read();
+    const newRow: DowntimeRow = {
+      ...row,
+      id: db.steel.downtime.length > 0 ? Math.max(...db.steel.downtime.map(r => r.id)) + 1 : 1
+    };
+    db.steel.downtime.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public addEnergyRow(row: Omit<EnergyRow, 'id' | 'power_consumed_per_kg' | 'gas_consumed_per_kg' | 'furnace_kwh_per_mt' | 'rolling_kwh_per_mt'>): EnergyRow {
+    const db = this.read();
+    const dailyBilletOutputKg = db.steel.billet.filter(b => b.date === row.date).reduce((sum, b) => sum + b.billet_output_kg, 0);
+    const dailyRodProductionKg = db.steel.rolling.filter(r => r.date === row.date).reduce((sum, r) => sum + r.rod_production_kg, 0);
+
+    const totalProductionKg = dailyRodProductionKg > 0 ? dailyRodProductionKg : 16000;
+    const totalBilletTons = dailyBilletOutputKg > 0 ? dailyBilletOutputKg / 1000 : 18.5;
+    const totalRodTons = dailyRodProductionKg > 0 ? dailyRodProductionKg / 1000 : 16.2;
+
+    const power_consumed_per_kg = parseFloat((row.power_consumption_kw / totalProductionKg).toFixed(4));
+    const gas_consumed_per_kg = parseFloat((row.gas_consumption_nm3 / totalProductionKg).toFixed(4));
+    const furnace_kwh_per_mt = parseFloat((row.power_consumption_kw / totalBilletTons).toFixed(2));
+    const rolling_kwh_per_mt = parseFloat((row.power_consumption_kw / totalRodTons).toFixed(2));
+
+    const newRow: EnergyRow = {
+      ...row,
+      power_consumed_per_kg,
+      gas_consumed_per_kg,
+      furnace_kwh_per_mt,
+      rolling_kwh_per_mt,
+      id: db.steel.energy.length > 0 ? Math.max(...db.steel.energy.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.energy.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public addWeighbridgeRow(row: Omit<WeighbridgeRow, 'id' | 'net_weight_kg'>): WeighbridgeRow {
+    const db = this.read();
+    const net_weight_kg = row.gross_weight_kg - row.tare_weight_kg;
+
+    const newRow: WeighbridgeRow = {
+      ...row,
+      net_weight_kg,
+      id: db.steel.weighbridge.length > 0 ? Math.max(...db.steel.weighbridge.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.weighbridge.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public addQualityRow(row: Omit<QualityRow, 'id' | 'pct_ce'>): QualityRow {
+    const db = this.read();
+    const pct_ce = parseFloat((row.pct_c + row.pct_mn / 6 + row.pct_si / 24).toFixed(3));
+
+    const newRow: QualityRow = {
+      ...row,
+      pct_ce,
+      id: db.steel.quality.length > 0 ? Math.max(...db.steel.quality.map(r => r.id)) + 1 : 1
+    };
+
+    db.steel.quality.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public addExpenseRow(row: Omit<ExpenseRow, 'id'>): ExpenseRow {
+    const db = this.read();
+    const newRow: ExpenseRow = {
+      ...row,
+      id: db.steel.expenses.length > 0 ? Math.max(...db.steel.expenses.map(r => r.id)) + 1 : 1
+    };
+    db.steel.expenses.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public addShiftRow(row: Omit<ShiftRow, 'id'>): ShiftRow {
+    const db = this.read();
+    const newRow: ShiftRow = {
+      ...row,
+      id: db.steel.shifts.length > 0 ? Math.max(...db.steel.shifts.map(r => r.id)) + 1 : 1
+    };
+    db.steel.shifts.push(newRow);
+    this.write(db);
+    return newRow;
+  }
+
+  public updateSteelInventory(inventory: SteelInventory): SteelInventory {
+    const db = this.read();
+    db.steel.inventory = { ...inventory };
+    this.write(db);
+    return db.steel.inventory;
+  }
+
+  // -------------------------------------------------------------
+  // Garments Operations
+  // -------------------------------------------------------------
+
+  public addGarmentOrder(order: Omit<GarmentOrder, 'id' | 'totalValueUsd'>): GarmentOrder {
+    const db = this.read();
+    const totalValueUsd = parseFloat((order.quantityPcs * order.unitPriceUsd).toFixed(2));
+    const newOrder: GarmentOrder = {
+      ...order,
+      id: db.garments.orders.length > 0 ? Math.max(...db.garments.orders.map(o => o.id)) + 1 : 1,
+      totalValueUsd,
+    };
+    db.garments.orders.push(newOrder);
+    this.write(db);
+    return newOrder;
+  }
+
+  public addGarmentInventoryItem(item: Omit<GarmentInventoryItem, 'id'>): GarmentInventoryItem {
+    const db = this.read();
+    const newItem: GarmentInventoryItem = {
+      ...item,
+      id: db.garments.inventory.length > 0 ? Math.max(...db.garments.inventory.map(i => i.id)) + 1 : 1,
+    };
+    db.garments.inventory.push(newItem);
+    this.write(db);
+    return newItem;
+  }
+
+  // -------------------------------------------------------------
+  // Local Store Operations
+  // -------------------------------------------------------------
+
+  public addLocalOrder(order: Omit<LocalOrder, 'id'>): LocalOrder {
+    const db = this.read();
+    const newOrder: LocalOrder = {
+      ...order,
+      id: db.local.orders.length > 0 ? Math.max(...db.local.orders.map(o => o.id)) + 1 : 1,
+    };
+    db.local.orders.push(newOrder);
+
+    // Deduct stock quantities from local store inventory
+    order.items.forEach(orderedItem => {
+      const inv = db.local.inventory.find(i => i.id === orderedItem.itemId);
+      if (inv) {
+        inv.stockQty = Math.max(0, inv.stockQty - orderedItem.qty);
+      }
+    });
+
+    this.write(db);
+    return newOrder;
+  }
+
+  public addLocalInventoryItem(item: Omit<LocalInventoryItem, 'id'>): LocalInventoryItem {
+    const db = this.read();
+    const newItem: LocalInventoryItem = {
+      ...item,
+      id: db.local.inventory.length > 0 ? Math.max(...db.local.inventory.map(i => i.id)) + 1 : 1,
+    };
+    db.local.inventory.push(newItem);
+    this.write(db);
+    return newItem;
+  }
+}
+
+export const dbManager = DatabaseManager.getInstance();

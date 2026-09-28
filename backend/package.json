@@ -1,0 +1,42 @@
+{
+  "name": "softlligence-manufacturing-cloud-backend",
+  "version": "1.0.0",
+  "description": "Industrial ERP REST API & Microservice Backend for Softlligence Manufacturing Cloud",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.17.19",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "keywords": [
+    "erp",
+    "manufacturing",
+    "steel",
+    "garments",
+    "multi-tenant",
+    "express",
+    "api"
+  ],
+  "author": "Softlligence",
+  "license": "MIT"
+}
