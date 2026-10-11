@@ -114,22 +114,22 @@ export default function SteelProfilePage() {
     <div className="space-y-6 animate-fade-in text-slate-800 pb-12">
       
       {/* Enterprise Header Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div>
           <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Softlligence Enterprise</span>
             <span>•</span>
             <span>Plant Admin & Operations Configuration</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Steel Mill Profile & SCADA Master</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-sans tracking-tight">Steel Mill Profile & SCADA Master</h1>
           <p className="text-sm text-slate-500 font-sans mt-0.5">
             Configure induction smelting capacities, BDS/ASTM chemistry baselines, IoT Modbus gateways, and plant diagnostic logbooks.
           </p>
         </div>
         
-        <div className="flex items-center space-x-3 w-full md:w-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           {saveSuccess && (
-            <div className="px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-xl flex items-center space-x-1.5 animate-fade-in font-mono">
+            <div className="col-span-full md:col-auto px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-xl flex items-center justify-center space-x-1.5 animate-fade-in font-mono">
               <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -138,13 +138,13 @@ export default function SteelProfilePage() {
           )}
           <button 
             onClick={handleReset}
-            className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap text-center"
           >
             Reset Defaults
           </button>
           <button 
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center space-x-2 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2 cursor-pointer whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />

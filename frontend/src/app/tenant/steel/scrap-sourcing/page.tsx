@@ -360,7 +360,7 @@ export default function ScrapSourcingPage() {
       )}
 
       {/* CLEAN ENTERPRISE PAGE HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs">
         <div>
           <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono">
             <span>Raw Material Sourcing</span>
@@ -369,7 +369,7 @@ export default function ScrapSourcingPage() {
             <span>•</span>
             <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono">Weighbridge Active</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-1 font-sans">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1 font-sans">
             Scrap Yard Sourcing & Logistics
           </h1>
           <p className="text-sm text-slate-500 mt-1 font-sans">
@@ -377,10 +377,10 @@ export default function ScrapSourcingPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <button
             onClick={handleExportExcel}
-            className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
+            className="w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -389,7 +389,7 @@ export default function ScrapSourcingPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-5 py-2.5 rounded-xl text-sm flex items-center space-x-2 shadow-sm transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold rounded-xl text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm transition-all cursor-pointer whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

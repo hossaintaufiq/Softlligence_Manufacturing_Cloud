@@ -567,9 +567,9 @@ export default function SteelOverviewDashboard() {
         </div>
 
         {/* Live Status Bar & Actions */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full xl:w-auto">
           {/* Active Shift Ticker */}
-          <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl flex items-center space-x-3">
+          <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl flex items-center justify-between sm:justify-start space-x-3 w-full sm:w-auto">
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-400 font-bold font-mono uppercase tracking-wider">Active Shift</span>
               <span className="text-xs font-bold text-slate-800 font-mono">Shift A (06:00 - 14:00)</span>
@@ -587,7 +587,7 @@ export default function SteelOverviewDashboard() {
               setIsLiveSimulating(!isLiveSimulating);
               showToast(isLiveSimulating ? '⏸ Telemetry paused' : '▶ Telemetry resumed');
             }}
-            className={`px-3.5 py-2 rounded-xl font-mono text-xs font-semibold flex items-center space-x-2 transition-all border cursor-pointer ${
+            className={`flex-1 sm:flex-none justify-center px-3.5 py-2 rounded-xl font-mono text-xs font-semibold flex items-center space-x-2 transition-all border cursor-pointer whitespace-nowrap ${
               isLiveSimulating
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -600,7 +600,7 @@ export default function SteelOverviewDashboard() {
           {/* Quick Heat Entry Modal Trigger */}
           <button
             onClick={() => setIsQuickHeatModalOpen(true)}
-            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-xs transition-all cursor-pointer"
+            className="w-full sm:w-auto justify-center bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-4 py-2.5 sm:py-2 rounded-xl text-xs flex items-center space-x-2 shadow-xs transition-all cursor-pointer whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

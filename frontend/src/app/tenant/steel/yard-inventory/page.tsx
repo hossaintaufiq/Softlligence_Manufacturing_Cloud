@@ -197,20 +197,20 @@ export default function YardInventoryPage() {
     <div className="space-y-6 animate-fade-in text-slate-800">
       
       {/* Enterprise Header Bar */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-5">
         <div>
           <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Material Logistics & Yard</span>
             <span>•</span>
             <span>Stockroom & Bay Allocation</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Finished Yard & Stock Inventory</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-sans tracking-tight">Finished Yard & Stock Inventory</h1>
           <p className="text-sm text-slate-500 font-sans mt-0.5">Real-time balances for raw scrap feedstocks, continuous cast billets, finished deformed rebar bundles, and ferroalloys.</p>
         </div>
-        <div className="flex items-center space-x-3 w-full md:w-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <button 
             onClick={handleExportCSV}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -219,7 +219,7 @@ export default function YardInventoryPage() {
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center space-x-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

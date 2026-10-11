@@ -357,7 +357,7 @@ export default function FurnaceLogPage() {
       )}
 
       {/* CLEAN ENTERPRISE HEADER BAR */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-5">
         <div>
           <div className="flex items-center space-x-2 text-xs font-semibold text-[#B48F48] uppercase tracking-wider font-mono mb-1.5">
             <span>Steel Production</span>
@@ -366,7 +366,7 @@ export default function FurnaceLogPage() {
             <span className="text-slate-300">/</span>
             <span className="bg-amber-100/70 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-mono text-[11px]">Induction Smelting & Refining</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-sans tracking-tight">
             Induction Furnace Heat & Smelting Log
           </h1>
           <p className="text-sm text-slate-500 font-sans mt-0.5">
@@ -374,10 +374,10 @@ export default function FurnaceLogPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           <button
             onClick={handleExportExcel}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -386,7 +386,7 @@ export default function FurnaceLogPage() {
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
