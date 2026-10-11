@@ -100,7 +100,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
               <p className="text-[11px] text-[#C5A059] font-mono font-semibold tracking-wide uppercase mt-0.5">Manufacturing Cloud</p>
             </div>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="block lg:hidden text-slate-400 hover:text-white">✕</button>
+          <button onClick={() => setIsSidebarOpen(false)} aria-label="Close menu" className="lg:hidden w-9 h-9 -mr-1 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-white/10">✕</button>
         </div>
 
         {/* Grouped Sidebar Sections - Clean, No Scrollbar */}
@@ -116,7 +116,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
                     key={idx}
                     href={link.href}
                     onClick={() => setIsSidebarOpen(false)}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-150 relative ${
+                    className={`w-full flex items-center space-x-3 px-3 py-2.5 lg:py-2 rounded-xl text-[14px] lg:text-[13.5px] font-medium transition-all duration-150 relative ${
                       activeTab === link.activeKey 
                         ? 'bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5 text-amber-200 font-semibold border border-amber-400/40 shadow-sm' 
                         : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -149,33 +149,54 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="h-screen w-screen flex bg-[#FAF9F6] text-slate-900 font-sans overflow-auto relative min-w-[1280px]">
+    <div className="h-[100dvh] w-full flex bg-[#FAF9F6] text-slate-900 font-sans overflow-hidden relative">
       
-      {/* Sidebar - Always visible in desktop layout */}
-      <aside className="flex w-68 h-full border-r border-slate-900/40 flex-col justify-between flex-shrink-0 z-10 shadow-xl">
+      {/* Sidebar - Always visible on desktop (lg+) */}
+      <aside className="hidden lg:flex w-68 h-full border-r border-slate-900/40 flex-col justify-between flex-shrink-0 z-10 shadow-xl">
+        {sidebarElement}
+      </aside>
+
+      {/* Mobile / Tablet: backdrop + slide-in drawer */}
+      <div
+        onClick={() => setIsSidebarOpen(false)}
+        className={`fixed inset-0 bg-slate-950/50 backdrop-blur-[2px] z-40 lg:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      />
+      <aside
+        className={`fixed top-0 bottom-0 left-0 w-[82vw] max-w-[300px] z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-out lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         {sidebarElement}
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 h-full flex flex-col overflow-hidden">
+      <div className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">
         
         {/* Header with Top-Right Admin & User Profile Controls */}
-        <header className="h-16 border-b border-slate-200/80 bg-white/90 backdrop-blur-md flex items-center justify-between px-8 flex-shrink-0 z-10">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2.5 text-xs font-medium text-slate-500 font-mono">
-              <span className="text-slate-400">Softlligence Enterprise</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-600 font-semibold">{user.tenantName || 'Hi-Tech Steel Mills Ltd'}</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-900 font-bold capitalize bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md font-sans">
+        <header className="h-14 lg:h-16 border-b border-slate-200/80 bg-white/90 backdrop-blur-md flex items-center justify-between gap-2 px-3 sm:px-5 lg:px-8 flex-shrink-0 z-10">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            {/* Hamburger (mobile / tablet) */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Open menu"
+              className="lg:hidden w-10 h-10 -ml-1 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 active:bg-slate-200 flex-shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center space-x-2.5 text-xs font-medium text-slate-500 font-mono min-w-0">
+              <span className="text-slate-400 hidden xl:inline">Softlligence Enterprise</span>
+              <span className="text-slate-300 hidden xl:inline">/</span>
+              <span className="text-slate-600 font-semibold hidden md:inline truncate max-w-[200px]">{user.tenantName || 'Hi-Tech Steel Mills Ltd'}</span>
+              <span className="text-slate-300 hidden md:inline">/</span>
+              <span className="text-slate-900 font-bold capitalize bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md font-sans truncate">
                 {(activeTab || '').replace('-', ' ')}
               </span>
             </div>
           </div>
           
           {/* Header Controls: Telemetry Status, Profile Pill, Admin Badge & Sign Out */}
-          <div className="flex items-center space-x-3">
-            <div className="px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full flex items-center gap-1.5 text-xs font-semibold text-emerald-700 font-mono">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="hidden md:flex px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full items-center gap-1.5 text-xs font-semibold text-emerald-700 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Live MES Online
             </div>
@@ -183,13 +204,13 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
             {/* Admin Profile Pill */}
             <Link 
               href="/tenant/steel/profile" 
-              className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all"
+              className="flex items-center space-x-2.5 p-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all"
               title="Admin User Profile & Preferences"
             >
               <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center font-bold text-xs text-[#B48F48] border border-amber-200 shadow-xs">
                 {user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
-              <div className="text-left leading-tight hidden sm:block">
+              <div className="text-left leading-tight hidden lg:block">
                 <span className="text-xs font-bold text-slate-900 block">{user.name}</span>
                 <span className="text-[10px] font-mono text-amber-700 font-semibold">Plant Admin</span>
               </div>
@@ -210,7 +231,7 @@ export default function SteelLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content Page Container */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-[#FAF9F6]">
+        <main className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-5 lg:p-8 bg-[#FAF9F6]">
           {children}
         </main>
       </div>

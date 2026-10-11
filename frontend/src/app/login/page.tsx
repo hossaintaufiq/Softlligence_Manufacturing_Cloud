@@ -53,7 +53,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen flex bg-white font-sans text-slate-800 overflow-hidden select-none">
+    <div className="h-[100dvh] w-full flex bg-white font-sans text-slate-800 overflow-hidden select-none">
       
       {/* LEFT SIDE: Professional Manufacturing Panel (Hidden on Mobile) */}
       <div className="hidden lg:flex lg:w-7/12 h-full bg-gradient-to-br from-slate-50 via-slate-100 to-[#FAF6EE] relative items-center justify-center p-8 border-r border-slate-200/60 overflow-hidden">
@@ -127,12 +127,12 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE: Professional Gold-Accent Login Form */}
-      <div className="w-full lg:w-5/12 h-full flex items-center justify-center p-6 sm:p-10 md:p-12 bg-white relative overflow-hidden">
+      <div className="w-full lg:w-5/12 h-full flex justify-center p-5 sm:p-10 md:p-12 bg-white relative overflow-y-auto overflow-x-hidden">
         
         {/* Soft Background Grid Accent */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(197,160,89,0.03),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(197,160,89,0.03),transparent_50%)] pointer-events-none" />
 
-        <div className="w-full max-w-sm space-y-6 relative z-10">
+        <div className="w-full max-w-sm space-y-6 relative z-10 my-auto py-4">
           {/* Workspace access header */}
           <div className="space-y-1">
             <h1 className="text-2xl font-black text-slate-900 leading-tight">

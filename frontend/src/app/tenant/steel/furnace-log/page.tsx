@@ -722,7 +722,7 @@ export default function FurnaceLogPage() {
             </div>
 
             <form onSubmit={handleCreateHeat} className="p-7 space-y-4 text-xs font-sans">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Heat Log Date</label>
                   <input
@@ -746,7 +746,7 @@ export default function FurnaceLogPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Heat Serial Number</label>
                   <input
@@ -781,7 +781,7 @@ export default function FurnaceLogPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Scrap Input (KG)</label>
                   <input
@@ -817,7 +817,7 @@ export default function FurnaceLogPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 uppercase font-mono">Tapping Temp (°C)</label>
                   <input
@@ -849,7 +849,7 @@ export default function FurnaceLogPage() {
 
               {/* Dynamic Fields Section */}
               {Object.keys(formData.custom_fields).length > 0 && (
-                <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-100">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100">
                   {Object.keys(formData.custom_fields).map(field => (
                     <div key={field}>
                       <label className="text-xs font-semibold text-slate-700 uppercase font-mono capitalize">{field.replace(/_/g, ' ')}</label>

@@ -36,6 +36,25 @@ input, select, textarea {
   letter-spacing: -0.005em;
 }
 
+/* ---------- Mobile usability ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+button, a, [role="button"], select, input[type="checkbox"], input[type="date"] {
+  touch-action: manipulation; /* removes 300ms tap delay / double-tap zoom */
+}
+
+@media (max-width: 639px) {
+  /* Prevent iOS Safari from auto-zooming when an input is focused */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Custom Smooth Micro-Animations */
 @keyframes fadeIn {
   from {

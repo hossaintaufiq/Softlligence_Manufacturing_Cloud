@@ -834,7 +834,7 @@ export default function DowntimeTrackerPage() {
             {/* Modal Body */}
             <form onSubmit={handleAddIncidentSubmit} className="p-7 space-y-4 text-xs font-sans">
               
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Date</label>
                   <input 
@@ -872,7 +872,7 @@ export default function DowntimeTrackerPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Equipment / Asset</label>
                   <select
@@ -896,7 +896,7 @@ export default function DowntimeTrackerPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Melt Shop (Min)</label>
                   <input 

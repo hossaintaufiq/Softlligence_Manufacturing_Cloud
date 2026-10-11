@@ -1539,7 +1539,7 @@ export default function SteelOverviewDashboard() {
             </div>
 
             <form onSubmit={handleAddQuickHeat} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Furnace Station</label>
                   <select
@@ -1564,7 +1564,7 @@ export default function SteelOverviewDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Scrap Charged (KG)</label>
                   <input
@@ -1599,7 +1599,7 @@ export default function SteelOverviewDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider font-mono mb-1">Power Units (kWh)</label>
                   <input

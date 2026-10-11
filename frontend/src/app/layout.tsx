@@ -16,8 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport = {
-  width: "1280",
+  width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {

@@ -810,7 +810,7 @@ export default function RollingMillPage() {
             {/* Modal Body */}
             <form onSubmit={handleAddRollingSubmit} className="p-7 space-y-4 text-xs font-sans">
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Date</label>
                   <input 
@@ -836,7 +836,7 @@ export default function RollingMillPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Rebar Finished Size</label>
                   <select
@@ -860,7 +860,7 @@ export default function RollingMillPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Billet Input (KG)</label>
                   <input 
@@ -914,7 +914,7 @@ export default function RollingMillPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase mb-1 font-mono">Speed (m/s)</label>
                   <input 

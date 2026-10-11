@@ -339,7 +339,7 @@ export default function SubscriptionsDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider font-mono">Industry Module Type</label>
                   <select
