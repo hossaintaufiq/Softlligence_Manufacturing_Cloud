@@ -541,24 +541,22 @@ export default function SteelOverviewDashboard() {
         </div>
       )}
 
-      {/* TOP HEADER: Plant Identity, Live Shift Ticker & Quick Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-750 gap-6">
+      {/* TOP HEADER: Plant Identity, Live Shift Ticker & Quick Controls (Clean Executive Design) */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white border border-slate-200/90 p-6 rounded-2xl shadow-xs gap-6">
         <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#B48F48] to-[#C5A059] p-0.5 shadow-lg shadow-[#C5A059]/20 flex items-center justify-center">
-            <div className="w-full h-full bg-slate-950/40 rounded-[14px] flex items-center justify-center backdrop-blur-xs">
-              <svg className="w-7 h-7 text-[#F5E6C8]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
-              </svg>
-            </div>
+          <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+            <svg className="w-6 h-6 text-[#B48F48]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21V9l-7-4-7 4v12M22 21h-2M4 21H2m10-7h.01M16 11h.01M16 16h.01M8 11h.01M8 16h.01" />
+            </svg>
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">Hi-Tech Steel Manufacturing Hub</h1>
-              <span className="bg-[#FAF6EE]/15 text-[#F5E6C8] border border-[#C5A059]/30 text-[10px] font-black uppercase px-2 py-0.5 rounded-md tracking-widest font-mono">
-                500W / 550D TMT
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 font-sans">Hi-Tech Steel Manufacturing Hub</h1>
+              <span className="bg-amber-50 text-[#B48F48] border border-[#B48F48]/30 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full tracking-wider font-mono">
+                500W / 550D TMT Certified
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-1 flex items-center space-x-2 font-mono">
+            <p className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2 font-mono">
               <span>Integrated EAF/IF Smelting</span>
               <span>•</span>
               <span>2-Strand CCM Billet Caster</span>
@@ -571,15 +569,15 @@ export default function SteelOverviewDashboard() {
         {/* Live Status Bar & Actions */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Active Shift Ticker */}
-          <div className="bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
+          <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl flex items-center space-x-3">
             <div className="flex flex-col">
-              <span className="text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-widest">Active Shift</span>
-              <span className="text-xs font-black text-[#F5E6C8] font-mono">Shift A (06:00 - 14:00)</span>
+              <span className="text-[9px] text-slate-400 font-bold font-mono uppercase tracking-wider">Active Shift</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">Shift A (06:00 - 14:00)</span>
             </div>
-            <div className="h-6 w-px bg-slate-700"></div>
+            <div className="h-6 w-px bg-slate-200"></div>
             <div className="flex flex-col">
-              <span className="text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-widest">Master On Duty</span>
-              <span className="text-xs font-bold text-white font-mono">Kabir Ahmed</span>
+              <span className="text-[9px] text-slate-400 font-bold font-mono uppercase tracking-wider">Master On Duty</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">Kabir Ahmed</span>
             </div>
           </div>
 
@@ -589,22 +587,22 @@ export default function SteelOverviewDashboard() {
               setIsLiveSimulating(!isLiveSimulating);
               showToast(isLiveSimulating ? '⏸ Telemetry paused' : '▶ Telemetry resumed');
             }}
-            className={`px-3.5 py-2.5 rounded-2xl font-mono text-xs font-bold flex items-center space-x-2 transition-all border ${
+            className={`px-3.5 py-2 rounded-xl font-mono text-xs font-semibold flex items-center space-x-2 transition-all border cursor-pointer ${
               isLiveSimulating
-                ? 'bg-emerald-950/50 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <span className={`w-2.5 h-2.5 rounded-full ${isLiveSimulating ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`}></span>
+            <span className={`w-2 h-2 rounded-full ${isLiveSimulating ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`}></span>
             <span>{isLiveSimulating ? 'Live Telemetry Active' : 'Telemetry Paused'}</span>
           </button>
 
           {/* Quick Heat Entry Modal Trigger */}
           <button
             onClick={() => setIsQuickHeatModalOpen(true)}
-            className="bg-gradient-to-r from-[#B48F48] to-[#C5A059] hover:from-[#a07e3d] hover:to-[#b5924d] text-slate-950 font-black px-4 py-2.5 rounded-2xl text-xs flex items-center space-x-2 shadow-lg shadow-[#C5A059]/25 transition-all cursor-pointer"
+            className="bg-[#B48F48] hover:bg-[#9E7A37] text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-xs transition-all cursor-pointer"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span>Log Tapped Heat</span>
@@ -1470,13 +1468,13 @@ export default function SteelOverviewDashboard() {
           </div>
 
           {/* OEE Score Display */}
-          <div className="bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between">
+          <div className="bg-amber-50/70 border border-amber-200/90 text-slate-900 p-4 rounded-2xl flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-[#C5A059] font-black uppercase tracking-widest font-mono">Overall OEE</span>
-              <div className="text-2xl font-black font-mono text-white mt-0.5">{oeeScore}%</div>
-              <p className="text-[9px] text-slate-400 font-mono mt-0.5">Avail: {availabilityPct}% • Perf: {performancePct}%</p>
+              <span className="text-[10px] text-[#B48F48] font-bold uppercase tracking-wider font-mono">Overall Plant OEE</span>
+              <div className="text-2xl font-black font-mono text-slate-900 mt-0.5">{oeeScore}%</div>
+              <p className="text-[9px] text-slate-500 font-mono mt-0.5">Avail: {availabilityPct}% • Perf: {performancePct}% • Qual: {qualityRatePct}%</p>
             </div>
-            <div className="w-12 h-12 rounded-full border-4 border-[#C5A059] flex items-center justify-center font-mono font-black text-xs text-[#F5E6C8]">
+            <div className="w-12 h-12 rounded-full border-4 border-[#B48F48] bg-white flex items-center justify-center font-mono font-black text-xs text-[#B48F48] shadow-2xs">
               {oeeScore}%
             </div>
           </div>

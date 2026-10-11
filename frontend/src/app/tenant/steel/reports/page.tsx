@@ -73,7 +73,8 @@ export default function ReportsAndAnalyticsPage() {
   const [qualityData, setQualityData] = useState<any[]>([]);
 
   // Selected Filters State
-  const [selectedReportType, setSelectedReportType] = useState<string>('daily-production');
+  const [selectedReportType, setSelectedReportType] = useState<string>('customer-history');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('All');
   const [dateRange, setDateRange] = useState<string>('this-month');
   const [startDate, setStartDate] = useState<string>('2026-08-01');
   const [endDate, setEndDate] = useState<string>('2026-08-31');
@@ -115,6 +116,12 @@ export default function ReportsAndAnalyticsPage() {
     setQualityData(loadStore('steel_erp_quality', initialQualityData));
   }, []);
 
+  // Customer List extraction
+  const customerList = useMemo(() => {
+    const names = Array.from(new Set(dispatchData.map(d => d.customer_name).filter(Boolean)));
+    return names.sort();
+  }, [dispatchData]);
+
   // Quick Range Picker Handler
   const handleRangeChange = (range: string) => {
     setDateRange(range);
@@ -127,6 +134,9 @@ export default function ReportsAndAnalyticsPage() {
     } else if (range === 'this-month') {
       setStartDate('2026-08-01');
       setEndDate('2026-08-31');
+    } else if (range === 'all-time') {
+      setStartDate('2020-01-01');
+      setEndDate('2030-12-31');
     }
   };
 
@@ -147,6 +157,17 @@ export default function ReportsAndAnalyticsPage() {
     const downtime = downtimeData.filter(d => filterByDates(d.date));
     const expenses = expenseData.filter(d => filterByDates(d.date));
     const quality = qualityData.filter(d => filterByDates(d.testing_date));
+
+    // 0. Customer Statement & Historical Ledger (Single / All Customers)
+    if (activeReportType === 'customer-history') {
+      const filtered = dispatch.filter(d => {
+        if (selectedCustomer && selectedCustomer !== 'All') {
+          return d.customer_name === selectedCustomer;
+        }
+        return true;
+      });
+      return filtered.sort((a, b) => (a.date > b.date ? 1 : -1));
+    }
 
     // 1. Daily Production Sheet
     if (activeReportType === 'daily-production') {
@@ -411,7 +432,38 @@ export default function ReportsAndAnalyticsPage() {
     }
 
     return [];
-  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData, customSources, customColumns]);
+  }, [selectedReportType, startDate, endDate, scrapData, furnaceLogs, billetData, rollingData, dispatchData, downtimeData, expenseData, qualityData, customSources, customColumns, selectedCustomer]);
+
+  // Customer Specific Summary Stats (for single customer statement view)
+  const customerSummaryStats = useMemo(() => {
+    if (activeReportType !== 'customer-history') return null;
+    const records = reportData;
+    const totalOrders = records.length;
+    const totalQtyKg = records.reduce((sum, r) => sum + (Number(r.dispatch_qty_kg) || 0), 0);
+    const totalQtyMt = totalQtyKg / 1000;
+    const totalSales = records.reduce((sum, r) => sum + (Number(r.total_sales_value) || (Number(r.dispatch_qty_kg) * Number(r.rate_per_kg)) || 0), 0);
+    
+    let totalPaid = 0;
+    records.forEach(r => {
+      const val = Number(r.total_sales_value) || (Number(r.dispatch_qty_kg) * Number(r.rate_per_kg)) || 0;
+      if (r.payment_status === 'Paid') totalPaid += val;
+      else if (r.payment_status === 'Partial') totalPaid += val * 0.5;
+    });
+    const totalPending = Math.max(0, totalSales - totalPaid);
+    const avgRate = totalQtyKg > 0 ? totalSales / totalQtyKg : 0;
+    const contact = records[0]?.contact_info || 'N/A';
+
+    return {
+      totalOrders,
+      totalQtyKg,
+      totalQtyMt,
+      totalSales,
+      totalPaid,
+      totalPending,
+      avgRate,
+      contact
+    };
+  }, [activeReportType, reportData]);
 
   // Export to Excel
   const handleExportExcel = () => {
@@ -419,7 +471,25 @@ export default function ReportsAndAnalyticsPage() {
     let rows: any[] = [];
     let filename = `report_${activeReportType}.csv`;
 
-    if (activeReportType === 'daily-production') {
+    if (activeReportType === 'customer-history') {
+      const custLabel = selectedCustomer === 'All' ? 'All_Customers' : selectedCustomer.replace(/\s+/g, '_');
+      filename = `Customer_Statement_${custLabel}_${activeStartDate}_to_${activeEndDate}.csv`;
+      headers = ['Date', 'Customer Name', 'Contact Info', 'Order No', 'Challan No', 'Vehicle No', 'Rod Size', 'Dispatch Qty (KG)', 'Dispatch Qty (MT)', 'Rate/KG (৳)', 'Total Sales (৳)', 'Payment Status'];
+      rows = reportData.map((r: any) => [
+        r.date,
+        r.customer_name,
+        r.contact_info || 'N/A',
+        r.order_no,
+        r.challan_no,
+        r.vehicle_no,
+        r.rod_size,
+        r.dispatch_qty_kg,
+        ((r.dispatch_qty_kg || 0) / 1000).toFixed(2),
+        r.rate_per_kg,
+        r.total_sales_value || (r.dispatch_qty_kg * r.rate_per_kg),
+        r.payment_status
+      ]);
+    } else if (activeReportType === 'daily-production') {
       headers = ['Date', 'Scrap Received (MT)', 'Scrap Input (MT)', 'Heats Run', 'Runtime (Hours)', 'Billet Output (MT)', 'Scrap Loss (MT)', 'Billet Yield (%)', 'Rod Production (MT)', 'Rod Loss (MT)', 'Rod Yield (%)', 'Sales Despatched (MT)'];
       rows = reportData.map((r: any) => [r.date, r.scrap_rcv_mt.toFixed(2), r.scrap_input_mt.toFixed(2), r.heats_count, r.runtime_hours.toFixed(1), r.billet_output_mt.toFixed(2), r.scrap_loss_mt.toFixed(2), r.billet_yield_pct.toFixed(2), r.rod_output_mt.toFixed(2), r.rod_loss_mt.toFixed(2), r.rod_yield_pct.toFixed(2), r.dispatch_mt.toFixed(2)]);
     } else if (activeReportType === 'monthly-executive') {
@@ -507,9 +577,9 @@ export default function ReportsAndAnalyticsPage() {
         <p className="text-[10px] text-slate-600 font-mono tracking-widest mt-1">EXECUTIVE PRODUCTION MIS REPORT & COMPLIANCE LEDGER</p>
         <p className="text-[9px] text-slate-500 mt-0.5">Plot 14, Industrial Area, Chittagong, Bangladesh</p>
         <div className="flex justify-between text-[10px] font-mono mt-4 border-t border-slate-200 pt-3">
-          <span>REPORT: <strong className="uppercase">{activeReportType.replace(/-/g, ' ')}</strong></span>
+          <span>REPORT: <strong className="uppercase">{activeReportType === 'customer-history' ? `CUSTOMER HISTORICAL STATEMENT (${selectedCustomer})` : activeReportType.replace(/-/g, ' ')}</strong></span>
           <span>DATE RANGE: <strong>{activeStartDate} to {activeEndDate}</strong></span>
-          <span>GENERATED BY: <strong>{user?.name}</strong></span>
+          <span>GENERATED BY: <strong>{user?.name || 'Administrator'}</strong></span>
         </div>
       </div>
       {/* Enterprise Header Bar */}
@@ -521,7 +591,7 @@ export default function ReportsAndAnalyticsPage() {
             <span>Plant MIS & Operational Analytics</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 font-sans tracking-tight">Reports & Analytics Hub</h1>
-          <p className="text-sm text-slate-500 font-sans mt-0.5">Comprehensive metallurgical audit trails, production reconciliation, mass balance, and financial realization summaries.</p>
+          <p className="text-sm text-slate-500 font-sans mt-0.5">Comprehensive metallurgical audit trails, single customer statements, mass balance, and financial realization summaries.</p>
         </div>
         <div className="flex items-center space-x-3 w-full md:w-auto">
           <button 
@@ -546,8 +616,28 @@ export default function ReportsAndAnalyticsPage() {
       </div>
 
       {/* Filtering Control Bar (Hidden in print) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs print:hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-white border border-slate-200/90 p-4 rounded-2xl shadow-xs print:hidden">
         
+        {/* Customer Selector Dropdown */}
+        {(selectedReportType === 'customer-history' || selectedReportType === 'party-customer') && (
+          <div className="space-y-1.5 col-span-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[#B48F48] font-mono flex items-center justify-between">
+              <span>Customer / Party</span>
+              <span className="text-[10px] font-normal text-slate-400">({customerList.length})</span>
+            </label>
+            <select
+              value={selectedCustomer}
+              onChange={(e) => setSelectedCustomer(e.target.value)}
+              className="w-full bg-amber-500/5 border border-[#B48F48]/40 text-sm px-3.5 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A059]/30 focus:border-[#C5A059] font-sans font-semibold text-slate-900"
+            >
+              <option value="All">All Registered Customers</option>
+              {customerList.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Date Range Select */}
         <div className="space-y-1.5 col-span-1">
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Date Preset</label>
@@ -559,6 +649,7 @@ export default function ReportsAndAnalyticsPage() {
             <option value="this-month">This Month (Aug 2026)</option>
             <option value="this-week">This Week</option>
             <option value="today">Today</option>
+            <option value="all-time">All Time (Historical)</option>
             <option value="custom">Custom Range</option>
           </select>
         </div>
@@ -615,9 +706,10 @@ export default function ReportsAndAnalyticsPage() {
           
           <div className="space-y-1 bg-white border border-slate-200/90 p-2.5 rounded-2xl shadow-xs">
             {[
+              { id: 'customer-history', label: 'Single Customer Statement' },
+              { id: 'party-customer', label: 'Party-Wise Customer Ledger' },
               { id: 'daily-production', label: 'Daily Production Sheet' },
               { id: 'monthly-executive', label: 'Monthly Executive Summary' },
-              { id: 'party-customer', label: 'Party-Wise Customer Ledger' },
               { id: 'supplier-scrap', label: 'Supplier Scrap Summary' },
               { id: 'size-wise-rebar', label: 'Size-Wise Rebar Report' },
               { id: 'billet-casting', label: 'Billet Casting Heat Log' },
@@ -649,6 +741,166 @@ export default function ReportsAndAnalyticsPage() {
           
           {viewMode === 'table' ? (
             <div className="overflow-x-auto">
+              
+              {/* Single Customer Statement & Historical Ledger */}
+              {activeReportType === 'customer-history' && (
+                <div className="space-y-4 p-4 font-sans">
+                  {/* Customer KPI Summary Header Cards */}
+                  {customerSummaryStats && (
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Target Customer</p>
+                        <p className="text-sm font-bold text-slate-900 truncate" title={selectedCustomer}>{selectedCustomer}</p>
+                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">{customerSummaryStats.contact}</p>
+                      </div>
+                      <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Total Shipments</p>
+                        <p className="text-sm font-bold text-slate-900">{customerSummaryStats.totalOrders} <span className="text-xs font-normal text-slate-500">Orders</span></p>
+                        <p className="text-[10px] text-[#B48F48] font-bold font-mono mt-0.5">{customerSummaryStats.totalQtyMt.toFixed(2)} MT Total</p>
+                      </div>
+                      <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-xl">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Total Billed</p>
+                        <p className="text-sm font-bold text-slate-900">৳{customerSummaryStats.totalSales.toLocaleString()}</p>
+                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">Avg ৳{customerSummaryStats.avgRate.toFixed(1)}/KG</p>
+                      </div>
+                      <div className="bg-emerald-50/50 border border-emerald-200/60 p-3 rounded-xl">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-600">Settled / Paid</p>
+                        <p className="text-sm font-bold text-emerald-700">৳{customerSummaryStats.totalPaid.toLocaleString()}</p>
+                        <p className="text-[10px] text-emerald-600/75 font-mono mt-0.5">Cleared Realization</p>
+                      </div>
+                      <div className="bg-rose-50/50 border border-rose-200/60 p-3 rounded-xl">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-rose-600">Outstanding</p>
+                        <p className="text-sm font-bold text-rose-700">৳{customerSummaryStats.totalPending.toLocaleString()}</p>
+                        <p className="text-[10px] text-rose-600/75 font-mono mt-0.5">Receivable Balance</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Customer Quick Selector Pills */}
+                  <div className="flex items-center space-x-2 overflow-x-auto pb-1 print:hidden">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-mono shrink-0">Filter Party:</span>
+                    <button
+                      onClick={() => setSelectedCustomer('All')}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                        selectedCustomer === 'All'
+                          ? 'bg-[#B48F48] text-white shadow-xs font-semibold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      All Customers ({dispatchData.length})
+                    </button>
+                    {customerList.map(cust => {
+                      const count = dispatchData.filter(d => d.customer_name === cust).length;
+                      return (
+                        <button
+                          key={cust}
+                          onClick={() => setSelectedCustomer(cust)}
+                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer flex items-center space-x-1.5 ${
+                            selectedCustomer === cust
+                              ? 'bg-[#B48F48] text-white shadow-xs font-semibold'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          <span>{cust}</span>
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${selectedCustomer === cust ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Transaction Ledger Table */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+                    <table className="w-full text-left border-collapse font-mono">
+                      <thead>
+                        <tr className="bg-slate-50/90 border-b border-slate-200 text-[10px] uppercase font-mono text-slate-400">
+                          <th className={cellPadding}>Date</th>
+                          <th className={cellPadding}>Customer</th>
+                          <th className={cellPadding}>Order No</th>
+                          <th className={cellPadding}>Challan No</th>
+                          <th className={cellPadding}>Vehicle No</th>
+                          <th className={cellPadding}>Rod Size</th>
+                          <th className={`${cellPadding} text-right`}>Qty (KG)</th>
+                          <th className={`${cellPadding} text-right`}>Qty (MT)</th>
+                          <th className={`${cellPadding} text-right`}>Rate/KG</th>
+                          <th className={`${cellPadding} text-right`}>Total Value</th>
+                          <th className={`${cellPadding} text-center`}>Payment</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                        {reportData.length === 0 ? (
+                          <tr>
+                            <td colSpan={11} className="text-center py-8 text-slate-400">
+                              No historical dispatch records found for {selectedCustomer === 'All' ? 'any customer' : selectedCustomer} in the date range ({activeStartDate} to {activeEndDate}).
+                            </td>
+                          </tr>
+                        ) : (
+                          reportData.map((row: any, idx: number) => {
+                            const val = row.total_sales_value || (row.dispatch_qty_kg * row.rate_per_kg) || 0;
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50/60">
+                                <td className={`${cellPadding} font-bold text-slate-900`}>{row.date}</td>
+                                <td className={`${cellPadding} font-medium text-slate-800`}>
+                                  <div>{row.customer_name}</div>
+                                  <div className="text-[10px] text-slate-400">{row.contact_info}</div>
+                                </td>
+                                <td className={`${cellPadding} text-[#B48F48] font-bold`}>{row.order_no}</td>
+                                <td className={cellPadding}>{row.challan_no}</td>
+                                <td className={cellPadding}>{row.vehicle_no}</td>
+                                <td className={cellPadding}>
+                                  <span className="px-2 py-0.5 text-[10px] font-bold border rounded-md bg-amber-50 text-amber-800 border-amber-200">
+                                    {row.rod_size}
+                                  </span>
+                                </td>
+                                <td className={`${cellPadding} text-right`}>{row.dispatch_qty_kg.toLocaleString()}</td>
+                                <td className={`${cellPadding} text-right font-semibold`}>{((row.dispatch_qty_kg || 0) / 1000).toFixed(2)}</td>
+                                <td className={`${cellPadding} text-right`}>৳{row.rate_per_kg}</td>
+                                <td className={`${cellPadding} text-right font-bold text-slate-900`}>৳{val.toLocaleString()}</td>
+                                <td className={`${cellPadding} text-center`}>
+                                  <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${
+                                    row.payment_status === 'Paid'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      : row.payment_status === 'Partial'
+                                      ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                                  }`}>
+                                    {row.payment_status}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                      {reportData.length > 0 && customerSummaryStats && (
+                        <tfoot>
+                          <tr className="bg-slate-100/90 border-t-2 border-slate-300 text-xs font-bold text-slate-900">
+                            <td className={cellPadding} colSpan={6}>
+                              TOTAL SUMMARY ({reportData.length} Dispatches)
+                            </td>
+                            <td className={`${cellPadding} text-right font-mono`}>
+                              {customerSummaryStats.totalQtyKg.toLocaleString()} KG
+                            </td>
+                            <td className={`${cellPadding} text-right font-mono text-[#B48F48]`}>
+                              {customerSummaryStats.totalQtyMt.toFixed(2)} MT
+                            </td>
+                            <td className={`${cellPadding} text-right font-mono`}>
+                              ৳{customerSummaryStats.avgRate.toFixed(1)}
+                            </td>
+                            <td className={`${cellPadding} text-right font-mono text-slate-900`}>
+                              ৳{customerSummaryStats.totalSales.toLocaleString()}
+                            </td>
+                            <td className={`${cellPadding} text-center text-[10px] text-slate-600`}>
+                              Rec: ৳{customerSummaryStats.totalPaid.toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      )}
+                    </table>
+                  </div>
+                </div>
+              )}
               
               {/* Daily Production Table */}
               {activeReportType === 'daily-production' && (
@@ -1160,7 +1412,63 @@ export default function ReportsAndAnalyticsPage() {
                   Analysis Chart: {activeReportType.replace(/-/g, ' ')}
                 </h4>
                 
-                {activeReportType === 'plant-breakdown' ? (
+                {activeReportType === 'customer-history' ? (
+                  <div className="space-y-4 font-sans">
+                    <p className="text-[11px] text-slate-500 text-center font-mono">
+                      Historical Dispatches & Tonnage Realization for <strong className="text-slate-800">{selectedCustomer}</strong>
+                    </p>
+                    
+                    {reportData.length === 0 ? (
+                      <p className="text-xs text-center py-6 text-slate-400">No dispatch data in selected date range.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="space-y-2.5">
+                          <p className="text-[10px] font-mono uppercase text-slate-400 font-bold">Dispatch Size Breakdown (MT)</p>
+                          {(() => {
+                            const sizeMap: Record<string, number> = {};
+                            reportData.forEach(r => {
+                              const sz = r.rod_size || 'Other';
+                              sizeMap[sz] = (sizeMap[sz] || 0) + ((r.dispatch_qty_kg || 0) / 1000);
+                            });
+                            const maxMt = Math.max(...Object.values(sizeMap), 1);
+                            return Object.entries(sizeMap).map(([sz, mt]) => (
+                              <div key={sz} className="space-y-1">
+                                <div className="flex justify-between text-xs font-mono">
+                                  <span className="font-bold text-slate-700">{sz}</span>
+                                  <span className="text-[#B48F48] font-bold">{mt.toFixed(2)} MT</span>
+                                </div>
+                                <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-[#B48F48] to-[#D4AF37] rounded-full transition-all duration-500" 
+                                    style={{ width: `${(mt / maxMt) * 100}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200">
+                          <p className="text-[10px] font-mono uppercase text-slate-400 font-bold mb-2">Order Timeline Values</p>
+                          <div className="grid grid-cols-1 gap-2 max-h-36 overflow-y-auto pr-1">
+                            {reportData.map((r, i) => (
+                              <div key={i} className="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 text-xs font-mono">
+                                <div>
+                                  <span className="font-bold text-slate-800">{r.date}</span>
+                                  <span className="text-slate-400 text-[10px] ml-2">({r.order_no})</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-bold text-[#B48F48]">{((r.dispatch_qty_kg || 0) / 1000).toFixed(1)} MT</span>
+                                  <span className="text-slate-700 font-bold">৳{(r.total_sales_value || (r.dispatch_qty_kg * r.rate_per_kg)).toLocaleString()}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : activeReportType === 'plant-breakdown' ? (
                   <div className="space-y-4">
                     <p className="text-[10px] text-slate-450 text-center font-mono">Breakdown minutes breakdown per category</p>
                     <div className="space-y-3">
